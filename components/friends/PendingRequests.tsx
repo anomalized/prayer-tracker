@@ -38,14 +38,13 @@ export default function PendingRequests({ requests }: Props) {
       </div>
       <div className="divide-y divide-nude-50">
         {requests.map(req => {
-          const displayName = req?.name || "Friend";
-          const initial = displayName.charAt(0).toUpperCase();
+          const safeName = req?.name && req.name.length > 0 ? req.name : "Friend";
           return (
             <div key={req.friendshipId} className="flex items-center gap-3 px-4 py-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-nude-200 to-nude-300 flex items-center justify-center text-nude-700 font-display font-bold flex-shrink-0">
-                {initial}
+                {safeName.charAt(0).toUpperCase()}
               </div>
-              <p className="flex-1 font-body text-sm font-bold text-nude-800">{displayName}</p>
+              <p className="flex-1 font-body text-sm font-bold text-nude-800">{safeName}</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleAccept(req.friendshipId)}
