@@ -23,8 +23,11 @@ npm install
    - `Project URL`
    - `anon / public` key
    - `service_role` key (keep this secret!)
-5. Go to **SQL Editor** and paste the entire contents of `lib/schema.sql` — click **Run**
-6. Go to **Authentication → Settings** and make sure **"Enable Email Confirmations"** is turned OFF (so login is instant)
+5. Go to **SQL Editor** and paste the entire contents of `lib/schema.sql` — click **Run**   > **Note for existing projects:** a new boolean column `onboarding_complete` was added to `user_stats`.
+   > If you're upgrading from an older schema, execute:
+   > ```sql
+   > ALTER TABLE user_stats ADD COLUMN onboarding_complete BOOLEAN DEFAULT FALSE;
+   > ```6. Go to **Authentication → Settings** and make sure **"Enable Email Confirmations"** is turned OFF (so login is instant)
 
 ### 3. Configure Environment
 

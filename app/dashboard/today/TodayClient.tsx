@@ -7,6 +7,7 @@ import StreakBanner from "@/components/ui/StreakBanner";
 import Onboarding from "@/components/ui/Onboarding";
 import { useStreakCheck } from "@/hooks/useStreakCheck";
 import type { PrayerTime, PrayerLog } from "@/types";
+import { completeOnboarding } from "@/lib/actions/stats";
 
 interface Props {
   userName: string;
@@ -17,23 +18,24 @@ interface Props {
     current_streak: number;
     best_streak: number;
     last_active_date?: string | null;
+    // undefined or false means onboarding not finished yet
+    onboarding_complete?: boolean;
   } | null;
 }
 
 export default function TodayClient({ userName, prayerTimes, todayLogs, stats }: Props) {
   const [extraPoints, setExtraPoints] = useState(0);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(
+    stats?.onboarding_complete === false
+  );
 
   useStreakCheck();
 
-  // Show onboarding only on first ever visit
-  useEffect(() => {
-    const seen = localStorage.getItem("onboarding_complete");
-    if (!seen) setShowOnboarding(true);
-  }, []);
-
-  const handleOnboardingComplete = () => {
-    localStorage.setItem("onboarding_complete", "true");
+  // we rely on server-side flag boarding_complete to determine whether
+  // the user has ever seen the intro. it’s passed in via `stats` prop.
+  const handleOnboardingComplete = async () => {
+    // update the record so other devices / future sessions skip
+    await completeOnboarding();
     setShowOnboarding(false);
   };
 

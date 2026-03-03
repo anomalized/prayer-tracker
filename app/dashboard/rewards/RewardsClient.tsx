@@ -18,7 +18,7 @@ interface Badge {
 
 interface Props {
   badges: Badge[];
-  stats: { total_points: number; current_streak: number; best_streak: number } | null;
+  stats: { total_points: number; current_streak: number; best_streak: number; onboarding_complete?: boolean } | null;
 }
 
 export default function RewardsClient({ badges, stats }: Props) {

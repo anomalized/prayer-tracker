@@ -62,6 +62,7 @@ export async function markPrayer(
         current_streak: 1,
         best_streak: 1,
         last_active_date: today,
+        onboarding_complete: false,
       });
     } else {
       const newPoints = Math.max(0, (stats.total_points ?? 0) + pointsDiff);
@@ -127,5 +128,7 @@ export async function getUserStats() {
     .eq("user_id", user.id)
     .single();
 
-  return data ?? { total_points: 0, current_streak: 0, best_streak: 0 };
+  return (
+    data ?? { total_points: 0, current_streak: 0, best_streak: 0, onboarding_complete: false }
+  );
 }

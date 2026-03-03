@@ -39,6 +39,8 @@ export interface UserStats {
   current_streak: number;
   best_streak: number;
   last_active_date: string | null;
+  // tracks if the introductory onboarding has been finished
+  onboarding_complete?: boolean;
 }
 
 export type Rank = "Bronze" | "Silver" | "Gold" | "Diamond";

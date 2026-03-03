@@ -31,7 +31,8 @@ CREATE TABLE user_stats (
   total_points     INT DEFAULT 0,
   current_streak   INT DEFAULT 0,
   best_streak      INT DEFAULT 0,
-  last_active_date DATE
+  last_active_date DATE,
+  onboarding_complete BOOLEAN DEFAULT FALSE
 );
 
 -- ─── Badges ─────────────────────────────────────────────────

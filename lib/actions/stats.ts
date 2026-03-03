@@ -30,6 +30,7 @@ export async function checkAndUpdateStreak() {
       current_streak: 0,
       best_streak: 0,
       last_active_date: null,
+      onboarding_complete: false,
     });
     return;
   }
@@ -98,7 +99,25 @@ export async function getFullStats(userId?: string) {
     current_streak: 0,
     best_streak: 0,
     last_active_date: null,
+    onboarding_complete: false,
   };
+}
+
+/**
+ * Marks onboarding as complete for current user so it never shows again.
+ */
+export async function completeOnboarding() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("user_stats")
+    .update({ onboarding_complete: true })
+    .eq("user_id", user.id);
+
+  // we’ll revalidate the today page to pick up changes
+  revalidatePath("/dashboard/today");
 }
 
 /**
