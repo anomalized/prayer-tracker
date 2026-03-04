@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { removeFriend, sendNudge } from "@/lib/actions/friends";
+import { removeFriend } from "@/lib/actions/friends";
+import { sendNudge } from "@/lib/actions/notifications";
 import { getRank, RANK_COLORS } from "@/lib/utils";
 
 const PRAYER_ICONS: Record<string, string> = {
@@ -47,9 +48,13 @@ export default function FriendCard({ friend, myPoints, myStreak }: Props) {
   const handleNudge = () => {
     if (nudgeSent) return;
     startTransition(async () => {
-      await sendNudge(friend.id);
-      setNudgeSent(true);
-      setTimeout(() => setNudgeSent(false), 5000);
+      const result = await sendNudge(friend.id);
+      if ("error" in result && result.error) {
+        alert(result.error);
+      } else {
+        setNudgeSent(true);
+        setTimeout(() => setNudgeSent(false), 5000);
+      }
     });
   };
 
