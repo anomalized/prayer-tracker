@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+
+declare global {
+  interface Window {
+    OneSignalDeferred: any[];
+  }
+}
 import { saveNotificationToken } from "@/lib/actions/notifications";
 
 export function useOneSignal() {
