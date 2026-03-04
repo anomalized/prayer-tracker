@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { removeFriend } from "@/lib/actions/friends";
-import { sendNudge } from "@/lib/actions/notifications";
+import { sendNudge } from "@/lib/actions/nudge";
 import { getRank, RANK_COLORS } from "@/lib/utils";
 
 const PRAYER_ICONS: Record<string, string> = {
