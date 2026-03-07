@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { markPrayer, saveNote } from "@/lib/actions/prayers";
 import { checkAndAwardBadges } from "@/lib/actions/badges";
 import { isPrayerTimePassed } from "@/lib/prayerTimes";
@@ -20,6 +21,7 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
   const [showNote, setShowNote]   = useState(false);
   const [toast, setToast]         = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const timePassed = isPrayerTimePassed(prayer.time);
 
@@ -83,10 +85,11 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
           </div>
           {isDone && (
             <button
-              onClick={() => setShowNote(true)}
-              className="w-8 h-8 rounded-xl bg-white border border-nude-200 flex items-center justify-center text-sm hover:border-nude-300 transition-colors"
+              onClick={() => router.push(`/dashboard/today/reflection/${encodeURIComponent(prayer.name)}`)}
+              className={`w-8 h-8 rounded-xl border flex items-center justify-center text-sm transition-colors
+                ${currentNote ? "bg-nude-200 border-nude-300" : "bg-white border-nude-200 hover:border-nude-300"}`}
             >
-              📝
+              {currentNote ? "📝" : "✍️"}
             </button>
           )}
         </div>
