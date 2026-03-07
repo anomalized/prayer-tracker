@@ -133,19 +133,20 @@ export default function QiblaClient() {
       }
     };
 
+    const w = window as any;
     if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
       // iOS 13+ needs explicit permission
       (DeviceOrientationEvent as any).requestPermission()
         .then((res: string) => {
           if (res === "granted") {
             setPermGranted(true);
-            window.addEventListener("deviceorientation", handler, true);
+            w.addEventListener("deviceorientation", handler, true);
           }
         }).catch(() => {});
     } else {
-      window.addEventListener("deviceorientation", handler, true);
+      w.addEventListener("deviceorientation", handler, true);
     }
-    return () => window.removeEventListener("deviceorientation", handler, true);
+    return () => w.removeEventListener("deviceorientation", handler, true);
   }, [smoothHeading]);
 
   // Compute arrow = qibla direction relative to current heading
