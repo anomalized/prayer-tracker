@@ -5,9 +5,10 @@ import TodayHeader from "@/components/prayers/TodayHeader";
 import PrayerCard from "@/components/prayers/PrayerCard";
 import StreakBanner from "@/components/ui/StreakBanner";
 import Onboarding from "@/components/ui/Onboarding";
+import WeeklyReport from "@/components/ui/WeeklyReport";
 import { useStreakCheck } from "@/hooks/useStreakCheck";
+import { getWeeklyReport } from "@/lib/actions/weeklyReport";
 import type { PrayerTime, PrayerLog } from "@/types";
-import { completeOnboarding } from "@/lib/actions/stats";
 
 interface Props {
   userName: string;
@@ -18,24 +19,94 @@ interface Props {
     current_streak: number;
     best_streak: number;
     last_active_date?: string | null;
-    // undefined or false means onboarding not finished yet
-    onboarding_complete?: boolean;
   } | null;
 }
 
+function usePrayerNotifications(prayerTimes: PrayerTime[]) {
+  useEffect(() => {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    prayerTimes.forEach(prayer => {
+      const [hours, minutesPart] = prayer.time.split(":");
+      const [mins, ampm] = minutesPart.split(" ");
+      let h = parseInt(hours);
+      const m = parseInt(mins);
+      if (ampm === "PM" && h !== 12) h += 12;
+      if (ampm === "AM" && h === 12) h = 0;
+
+      const prayerDate = new Date();
+      prayerDate.setHours(h, m, 0, 0);
+
+      // Notify 10 min before
+      const notifyAt = new Date(prayerDate.getTime() - 10 * 60 * 1000);
+      const msUntil  = notifyAt.getTime() - Date.now();
+
+      if (msUntil > 0 && msUntil < 24 * 60 * 60 * 1000) {
+        const timer = setTimeout(() => {
+          new Notification(`🕌 ${prayer.name} in 10 minutes`, {
+            body: `${prayer.name} prayer time is approaching — ${prayer.time}`,
+            icon: "/icon-192.png",
+            badge: "/icon-192.png",
+            tag: `prayer-${prayer.name}`,
+          });
+        }, msUntil);
+        timers.push(timer);
+      }
+    });
+
+    return () => timers.forEach(clearTimeout);
+  }, [prayerTimes]);
+}
+
 export default function TodayClient({ userName, prayerTimes, todayLogs, stats }: Props) {
-  const [extraPoints, setExtraPoints] = useState(0);
-  const [showOnboarding, setShowOnboarding] = useState(
-    stats?.onboarding_complete === false
-  );
+  const [extraPoints, setExtraPoints]         = useState(0);
+  const [showOnboarding, setShowOnboarding]   = useState(false);
+  const [weeklyReport, setWeeklyReport]       = useState<any>(null);
+  const [reportDismissed, setReportDismissed] = useState(false);
+  const [notifAsked, setNotifAsked]           = useState(false);
 
   useStreakCheck();
+  usePrayerNotifications(prayerTimes);
 
-  // we rely on server-side flag boarding_complete to determine whether
-  // the user has ever seen the intro. it’s passed in via `stats` prop.
-  const handleOnboardingComplete = async () => {
-    // update the record so other devices / future sessions skip
-    await completeOnboarding();
+  // Show onboarding on first visit
+  useEffect(() => {
+    const seen = localStorage.getItem("onboarding_complete");
+    if (!seen) setShowOnboarding(true);
+  }, []);
+
+  // Ask for notification permission once
+  useEffect(() => {
+    if (notifAsked) return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "default") {
+      const timer = setTimeout(() => {
+        Notification.requestPermission();
+        setNotifAsked(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notifAsked]);
+
+  // Show weekly report on Sundays (once per week)
+  useEffect(() => {
+    const isSunday = new Date().getDay() === 0;
+    if (!isSunday) return;
+    const lastShown = localStorage.getItem("weekly_report_shown");
+    const thisWeek  = new Date().toISOString().slice(0, 10);
+    if (lastShown === thisWeek) return;
+
+    getWeeklyReport().then(report => {
+      if (report) {
+        setWeeklyReport(report);
+        localStorage.setItem("weekly_report_shown", thisWeek);
+      }
+    });
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem("onboarding_complete", "true");
     setShowOnboarding(false);
   };
 
@@ -47,8 +118,10 @@ export default function TodayClient({ userName, prayerTimes, todayLogs, stats }:
 
   return (
     <div className="min-h-screen bg-nude-50">
-      {showOnboarding && (
-        <Onboarding onComplete={handleOnboardingComplete} />
+      {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
+
+      {weeklyReport && !reportDismissed && (
+        <WeeklyReport report={weeklyReport} onDismiss={() => setReportDismissed(true)} />
       )}
 
       <TodayHeader

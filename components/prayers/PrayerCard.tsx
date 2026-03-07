@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { markPrayer, saveNote } from "@/lib/actions/prayers";
 import { checkAndAwardBadges } from "@/lib/actions/badges";
@@ -25,6 +25,13 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
 
   const timePassed = isPrayerTimePassed(prayer.time);
 
+  // Refresh data when user returns from reflection page
+  useEffect(() => {
+    const onFocus = () => router.refresh();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [router]);
+
   const handleMark = (newStatus: PrayerStatus) => {
     if (!timePassed) return;
     const prev = status;
@@ -42,6 +49,7 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
     startTransition(async () => {
       await markPrayer(prayer.name, newStatus, prev);
       await checkAndAwardBadges();
+      router.refresh(); // update stats header without full reload
     });
   };
 

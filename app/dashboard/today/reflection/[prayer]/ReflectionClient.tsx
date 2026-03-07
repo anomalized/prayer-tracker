@@ -86,6 +86,7 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
       });
       if (!result.error) {
         setSaved(true);
+        router.refresh(); // re-fetch server data so note shows on PrayerCard
         setTimeout(() => router.back(), 800);
       }
     });
