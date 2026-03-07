@@ -103,54 +103,50 @@ export default function QiblaClient() {
   }, []);
 
   const startCompass = useCallback(() => {
-  // 1. Absolute orientation (Android)
-  if ("ondeviceorientationabsolute" in window) {
-    const absHandler = (e: DeviceOrientationEvent) => {
-      if (e.alpha == null) return;
-      const h = smoothHeading((360 - e.alpha) % 360);
-      setHeading(h);
-      setCompassSource("android-abs");
-      setPermGranted(true);
-    };
-    window.addEventListener("deviceorientationabsolute", absHandler, true);
-    return () => window.removeEventListener("deviceorientationabsolute", absHandler, true);
-  }
-
-  // 2. Standard/iOS orientation
-  const handler = (e: DeviceOrientationEvent) => {
-    const webkitHeading = (e as any).webkitCompassHeading;
-    if (webkitHeading != null) {
-      setHeading(smoothHeading(webkitHeading));
-      setCompassSource("ios");
-      setPermGranted(true);
-    } else if (e.alpha != null) {
-      setHeading(smoothHeading((360 - e.alpha) % 360));
-      setCompassSource("android-rel");
-      setPermGranted(true);
+    // ── Try absolute orientation first (Android Chrome) ──────
+    if ("ondeviceorientationabsolute" in window) {
+      const absHandler = (e: DeviceOrientationEvent) => {
+        if (e.alpha == null) return;
+        const h = smoothHeading((360 - e.alpha) % 360);
+        setHeading(h);
+        setCompassSource("android-abs");
+        setPermGranted(true);
+      };
+      window.addEventListener("deviceorientationabsolute" as any, absHandler, true);
+      return () => window.removeEventListener("deviceorientationabsolute" as any, absHandler, true);
     }
-  };
 
-  const DOE = DeviceOrientationEvent as any;
+    // ── iOS webkitCompassHeading ─────────────────────────────
+    const handler = (e: DeviceOrientationEvent) => {
+      const webkitHeading = (e as any).webkitCompassHeading;
+      if (webkitHeading != null) {
+        setHeading(smoothHeading(webkitHeading));
+        setCompassSource("ios");
+        setPermGranted(true);
+        return;
+      }
+      // ── Android fallback (relative, less accurate) ───────
+      if (e.alpha != null) {
+        setHeading(smoothHeading((360 - e.alpha) % 360));
+        setCompassSource("android-rel");
+        setPermGranted(true);
+      }
+    };
 
-  // Check for iOS 13+ permission requirement
-  if (typeof DOE.requestPermission === "function") {
-    DOE.requestPermission()
-      .then((res: string) => {
-        if (res === "granted") {
-          setPermGranted(true);
-          window.addEventListener("deviceorientation", handler, true);
-        }
-      })
-      .catch(console.error);
-  } else {
-    // Standard non-iOS or older iOS
-    window.addEventListener("deviceorientation", handler, true);
-    // We set this to true here so the UI knows we've attempted to listen
-    setPermGranted(true);
-  }
-
-  return () => window.removeEventListener("deviceorientation", handler, true);
-}, [smoothHeading]);
+    if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
+      // iOS 13+ needs explicit permission
+      (DeviceOrientationEvent as any).requestPermission()
+        .then((res: string) => {
+          if (res === "granted") {
+            setPermGranted(true);
+            window.addEventListener("deviceorientation", handler, true);
+          }
+        }).catch(() => {});
+    } else {
+      window.addEventListener("deviceorientation", handler, true);
+    }
+    return () => window.removeEventListener("deviceorientation", handler, true);
+  }, [smoothHeading]);
 
   // Compute arrow = qibla direction relative to current heading
   useEffect(() => {
@@ -420,4 +416,4 @@ export default function QiblaClient() {
       )}
     </div>
   );
-} 
+}
