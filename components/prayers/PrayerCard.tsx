@@ -91,7 +91,7 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
             </div>
             <span className="text-xs text-nude-500 font-body">{prayer.time}</span>
           </div>
-          {isDone && (
+          {isDone && status !== "missed" && (
             <button
               onClick={() => router.push(`/dashboard/today/reflection/${encodeURIComponent(prayer.name)}`)}
               className={`w-8 h-8 rounded-xl border flex items-center justify-center text-sm transition-colors

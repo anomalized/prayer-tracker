@@ -9,8 +9,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // ─── Date helpers ────────────────────────────────────────────
-export function todayString(): string {
-  return format(new Date(), "yyyy-MM-dd");
+// offsetHours: UTC offset of the user's timezone (e.g. 5 for PKT)
+// On client, uses local time. On server, pass offset explicitly.
+export function todayString(offsetHours: number = 5): string {
+  const now = new Date();
+  // Shift UTC time by the given offset
+  const local = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);
+  const yyyy = local.getUTCFullYear();
+  const mm   = String(local.getUTCMonth() + 1).padStart(2, "0");
+  const dd   = String(local.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 export function formatDate(date: string): string {
