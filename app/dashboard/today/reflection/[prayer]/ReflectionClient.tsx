@@ -95,7 +95,7 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
   const completedCount = selectedDhikr.length + selectedDuas.length + (note.trim() ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-nude-50 pb-10">
+    <div className="min-h-screen bg-nude-50 pb-32">
       {/* Header */}
       <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 sticky top-0 z-10">
         <div className="flex items-center gap-3 mb-1">

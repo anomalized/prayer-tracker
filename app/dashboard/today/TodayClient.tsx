@@ -5,11 +5,63 @@ import TodayHeader from "@/components/prayers/TodayHeader";
 import PrayerCard from "@/components/prayers/PrayerCard";
 import StreakBanner from "@/components/ui/StreakBanner";
 import Onboarding from "@/components/ui/Onboarding";
-import WeeklyReport from "@/components/ui/WeeklyReport";
 import { useStreakCheck } from "@/hooks/useStreakCheck";
-import { getWeeklyReport } from "@/lib/actions/weeklyReport";
 import type { PrayerTime, PrayerLog } from "@/types";
 
+// ── Dua of the Day ─────────────────────────────────────────────
+const DUAS = [
+  {
+    arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+    transliteration: "Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan waqina 'adhab an-nar",
+    translation: "Our Lord, give us good in this world and good in the Hereafter, and protect us from the punishment of the Fire.",
+    source: "Surah Al-Baqarah 2:201",
+  },
+  {
+    arabic: "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي",
+    transliteration: "Rabbi ishrah li sadri wa yassir li amri",
+    translation: "My Lord, expand my chest and ease my task for me.",
+    source: "Surah Ta-Ha 20:25-26",
+  },
+  {
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ",
+    transliteration: "Allahumma inni as'alukal-'afiyata fid-dunya wal-akhirah",
+    translation: "O Allah, I ask You for wellbeing in this world and the Hereafter.",
+    source: "Ibn Majah",
+  },
+  {
+    arabic: "رَبِّ زِدْنِي عِلْمًا",
+    transliteration: "Rabbi zidni 'ilma",
+    translation: "My Lord, increase me in knowledge.",
+    source: "Surah Ta-Ha 20:114",
+  },
+  {
+    arabic: "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ",
+    transliteration: "Allahumma a'inni 'ala dhikrika wa shukrika wa husni 'ibadatik",
+    translation: "O Allah, help me remember You, thank You, and worship You in the best manner.",
+    source: "Abu Dawud",
+  },
+  {
+    arabic: "حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ",
+    transliteration: "Hasbiyallahu la ilaha illa huwa 'alayhi tawakkaltu wa huwa rabbul 'arshil 'azim",
+    translation: "Allah is sufficient for me. There is no god but Him. I have placed my trust in Him, and He is the Lord of the Magnificent Throne.",
+    source: "Surah At-Tawbah 9:129",
+  },
+  {
+    arabic: "اللَّهُمَّ اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ يَوْمَ يَقُومُ الْحِسَابُ",
+    transliteration: "Allahummaghfir li wa li walidayya wa lil-mu'minina yawma yaqumul hisab",
+    translation: "O Allah, forgive me, my parents, and the believers on the Day of Reckoning.",
+    source: "Surah Ibrahim 14:41",
+  },
+];
+
+function getDuaOfDay(): typeof DUAS[0] {
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  return DUAS[dayOfYear % DUAS.length];
+}
+
+// ── Props ──────────────────────────────────────────────────────
 interface Props {
   userName: string;
   prayerTimes: PrayerTime[];
@@ -22,87 +74,16 @@ interface Props {
   } | null;
 }
 
-function usePrayerNotifications(prayerTimes: PrayerTime[]) {
-  useEffect(() => {
-    if (!("Notification" in window) || Notification.permission !== "granted") return;
-
-    const timers: ReturnType<typeof setTimeout>[] = [];
-
-    prayerTimes.forEach(prayer => {
-      const [hours, minutesPart] = prayer.time.split(":");
-      const [mins, ampm] = minutesPart.split(" ");
-      let h = parseInt(hours);
-      const m = parseInt(mins);
-      if (ampm === "PM" && h !== 12) h += 12;
-      if (ampm === "AM" && h === 12) h = 0;
-
-      const prayerDate = new Date();
-      prayerDate.setHours(h, m, 0, 0);
-
-      // Notify 10 min before
-      const notifyAt = new Date(prayerDate.getTime() - 10 * 60 * 1000);
-      const msUntil  = notifyAt.getTime() - Date.now();
-
-      if (msUntil > 0 && msUntil < 24 * 60 * 60 * 1000) {
-        const timer = setTimeout(() => {
-          new Notification(`🕌 ${prayer.name} in 10 minutes`, {
-            body: `${prayer.name} prayer time is approaching — ${prayer.time}`,
-            icon: "/icon-192.png",
-            badge: "/icon-192.png",
-            tag: `prayer-${prayer.name}`,
-          });
-        }, msUntil);
-        timers.push(timer);
-      }
-    });
-
-    return () => timers.forEach(clearTimeout);
-  }, [prayerTimes]);
-}
-
 export default function TodayClient({ userName, prayerTimes, todayLogs, stats }: Props) {
-  const [extraPoints, setExtraPoints]         = useState(0);
-  const [showOnboarding, setShowOnboarding]   = useState(false);
-  const [weeklyReport, setWeeklyReport]       = useState<any>(null);
-  const [reportDismissed, setReportDismissed] = useState(false);
-  const [notifAsked, setNotifAsked]           = useState(false);
+  const [extraPoints, setExtraPoints] = useState(0);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [duaExpanded, setDuaExpanded] = useState(false);
 
   useStreakCheck();
-  usePrayerNotifications(prayerTimes);
 
-  // Show onboarding on first visit
   useEffect(() => {
     const seen = localStorage.getItem("onboarding_complete");
     if (!seen) setShowOnboarding(true);
-  }, []);
-
-  // Ask for notification permission once
-  useEffect(() => {
-    if (notifAsked) return;
-    if (!("Notification" in window)) return;
-    if (Notification.permission === "default") {
-      const timer = setTimeout(() => {
-        Notification.requestPermission();
-        setNotifAsked(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [notifAsked]);
-
-  // Show weekly report on Sundays (once per week)
-  useEffect(() => {
-    const isSunday = new Date().getDay() === 0;
-    if (!isSunday) return;
-    const lastShown = localStorage.getItem("weekly_report_shown");
-    const thisWeek  = new Date().toISOString().slice(0, 10);
-    if (lastShown === thisWeek) return;
-
-    getWeeklyReport().then(report => {
-      if (report) {
-        setWeeklyReport(report);
-        localStorage.setItem("weekly_report_shown", thisWeek);
-      }
-    });
   }, []);
 
   const handleOnboardingComplete = () => {
@@ -115,13 +96,12 @@ export default function TodayClient({ userName, prayerTimes, todayLogs, stats }:
   );
 
   const donePrayers = todayLogs.filter(l => l.status !== "missed").length;
+  const dua = getDuaOfDay();
 
   return (
     <div className="min-h-screen bg-nude-50">
-      {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
-
-      {weeklyReport && !reportDismissed && (
-        <WeeklyReport report={weeklyReport} onDismiss={() => setReportDismissed(true)} />
+      {showOnboarding && (
+        <Onboarding onComplete={handleOnboardingComplete} />
       )}
 
       <TodayHeader
@@ -137,7 +117,61 @@ export default function TodayClient({ userName, prayerTimes, todayLogs, stats }:
         lastActiveDate={stats?.last_active_date ?? null}
       />
 
-      <div className="px-4 py-2 space-y-3">
+      <div className="px-4 py-4 space-y-3">
+
+        {/* ── Dua of the Day ──────────────────────────────── */}
+        <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
+          <button
+            onClick={() => setDuaExpanded(v => !v)}
+            className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-nude-50 transition-colors"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-nude-200 to-nude-300 flex items-center justify-center text-lg flex-shrink-0">
+              🤲
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-body text-xs font-bold tracking-widest text-nude-400 uppercase">Dua of the Day</p>
+              <p className="font-body text-sm text-nude-600 truncate">{dua.translation}</p>
+            </div>
+            <span className={`text-nude-300 text-sm flex-shrink-0 transition-transform duration-200 ${duaExpanded ? "rotate-180" : ""}`}>
+              ▾
+            </span>
+          </button>
+
+          {duaExpanded && (
+            <div className="px-4 pb-4 border-t border-nude-100 pt-3 space-y-3">
+              {/* Arabic */}
+              <p
+                className="text-center text-xl leading-relaxed text-nude-700"
+                style={{ fontFamily: "serif", direction: "rtl", lineHeight: "2.2" }}
+              >
+                {dua.arabic}
+              </p>
+              {/* Transliteration */}
+              <p className="text-center font-body text-xs text-nude-500 italic">
+                {dua.transliteration}
+              </p>
+              {/* Translation */}
+              <div className="bg-nude-50 rounded-2xl px-4 py-3">
+                <p className="font-body text-sm text-nude-700 text-center leading-relaxed">
+                  "{dua.translation}"
+                </p>
+              </div>
+              {/* Source */}
+              <p className="text-center font-body text-xs text-nude-300">— {dua.source}</p>
+            </div>
+          )}
+        </div>
+
+        {/* ── Section label ────────────────────────────────── */}
+        <div className="flex items-center gap-3 px-1">
+          <p className="font-body text-xs font-bold tracking-widest text-nude-400 uppercase">
+            Today's Prayers
+          </p>
+          <div className="flex-1 h-px bg-nude-200" />
+          <p className="font-body text-xs text-nude-400">{donePrayers}/5 done</p>
+        </div>
+
+        {/* ── Prayer cards ─────────────────────────────────── */}
         {prayerTimes.map((prayer, i) => (
           <PrayerCard
             key={prayer.name}
@@ -148,6 +182,7 @@ export default function TodayClient({ userName, prayerTimes, todayLogs, stats }:
             onPointsEarned={(pts) => setExtraPoints(p => p + pts)}
           />
         ))}
+
         <p className="text-center text-xs text-nude-300 font-body pt-2 pb-6">
           May Allah accept your prayers 🌸
         </p>
