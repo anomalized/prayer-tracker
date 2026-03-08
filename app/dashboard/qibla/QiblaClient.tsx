@@ -337,98 +337,146 @@ export default function QiblaClient() {
                 {/* ── The Compass ───────────────────────────────── */}
                 <div className="relative flex items-center justify-center select-none">
 
-                  {/* Glow ring when aligned */}
+                  {/* Glow ring when aligned — fixed to screen */}
                   {aligned && (
-                    <div className="absolute inset-0 rounded-full border-4 border-green-400 animate-ping opacity-30"
-                      style={{ width: "288px", height: "288px", margin: "0 auto" }} />
+                    <div className="absolute w-72 h-72 rounded-full border-4 border-green-400 animate-ping opacity-30" />
                   )}
 
-                  {/* Outer decorative ring — fixed to screen */}
+                  {/*
+                   * ── OUTER RING — fixed to screen ──────────────────
+                   * Does NOT rotate. Acts as the bezel.
+                   * The screen-fixed triangle at top acts as the pointer.
+                   */}
                   <div className="relative w-72 h-72 rounded-full flex items-center justify-center"
                     style={{
-                      background: "conic-gradient(from 0deg, #f5e6e0, #e8c4b8, #d4a090, #e8c4b8, #f5e6e0)",
                       boxShadow: aligned
                         ? "0 0 40px rgba(74,222,128,0.3), 0 8px 32px rgba(0,0,0,0.15)"
-                        : "0 8px 32px rgba(0,0,0,0.15), inset 0 2px 4px rgba(255,255,255,0.5)",
+                        : "0 8px 32px rgba(0,0,0,0.15)",
+                      background: aligned
+                        ? "linear-gradient(135deg, #d4f0d8, #e8f5e9)"
+                        : "linear-gradient(135deg, #f5e6e0, #e8c4b8)",
                     }}>
 
+                    {/* Fixed top pointer — always at 12 o'clock, shows current heading */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20">
+                      <div className="w-0 h-0"
+                        style={{
+                          borderLeft: "7px solid transparent",
+                          borderRight: "7px solid transparent",
+                          borderTop: `14px solid ${aligned ? "#4ade80" : "#d4786a"}`,
+                        }} />
+                    </div>
+
                     {/*
-                     * ── ROTATING DIAL ──────────────────────────────
-                     * Rotates by -heading so that:
-                     *   - N on the dial always points to real-world North
-                     *   - As you turn your phone East, the dial rotates so
-                     *     N swings left (just like a physical compass)
+                     * ── ROTATING DIAL ──────────────────────────────────
+                     * rotate(-heading):
+                     *   heading=0  (facing North) → dial at 0°  → N at top   ✓
+                     *   heading=90 (facing East)  → dial at -90° → N swings left, E at top ✓
+                     *   heading=180 (facing South)→ dial at -180° → S at top  ✓
                      */}
                     <div
                       className="absolute inset-0 rounded-full"
                       style={{
                         transform: `rotate(${dialRotation}deg)`,
                         transition: "transform 0.1s ease-out",
+                        willChange: "transform",
                       }}
                     >
-                      {/* Cardinal labels — fixed INSIDE the dial, so they rotate with it */}
-                      <span className="absolute font-display text-sm font-bold text-red-500"
-                        style={{ top: "8px", left: "50%", transform: "translateX(-50%)" }}>N</span>
-                      <span className="absolute font-display text-xs font-bold text-nude-500"
-                        style={{ bottom: "8px", left: "50%", transform: "translateX(-50%)" }}>S</span>
-                      <span className="absolute font-display text-xs font-bold text-nude-500"
-                        style={{ right: "8px", top: "50%", transform: "translateY(-50%)" }}>E</span>
-                      <span className="absolute font-display text-xs font-bold text-nude-500"
-                        style={{ left: "8px", top: "50%", transform: "translateY(-50%)" }}>W</span>
-
-                      {/* Tick marks at every 30° */}
-                      {Array.from({ length: 12 }).map((_, i) => {
-                        const angle = i * 30;
+                      {/* ── Degree ring — tick marks every 10° ───────── */}
+                      {Array.from({ length: 36 }).map((_, i) => {
+                        const angle = i * 10;
                         const isMajor = angle % 90 === 0;
+                        const isMinor45 = angle % 45 === 0;
                         return (
-                          <div key={i} className="absolute inset-0 flex items-start justify-center"
+                          <div key={i}
+                            className="absolute inset-0 flex items-start justify-center"
                             style={{ transform: `rotate(${angle}deg)` }}>
-                            <div className={`rounded-full mt-4 ${isMajor ? "w-1 h-3 bg-nude-400" : "w-0.5 h-2 bg-nude-300"}`} />
+                            <div className={`rounded-full ${
+                              isMajor   ? "w-1.5 h-4 bg-nude-500 mt-2" :
+                              isMinor45 ? "w-1 h-3 bg-nude-400 mt-2.5" :
+                                          "w-0.5 h-2 bg-nude-300 mt-3"
+                            }`} />
                           </div>
                         );
                       })}
 
+                      {/* ── Cardinal labels — live INSIDE dial, rotate with it ── */}
+                      {/* N at top (0°) */}
+                      <span className="absolute font-display text-base font-black text-red-500 select-none"
+                        style={{ top: "22px", left: "50%", transform: "translateX(-50%)" }}>N</span>
+                      {/* S at bottom (180°) */}
+                      <span className="absolute font-display text-sm font-bold text-nude-600 select-none"
+                        style={{ bottom: "22px", left: "50%", transform: "translateX(-50%)" }}>S</span>
+                      {/* E at right (90°) */}
+                      <span className="absolute font-display text-sm font-bold text-nude-600 select-none"
+                        style={{ right: "22px", top: "50%", transform: "translateY(-50%)" }}>E</span>
+                      {/* W at left (270°) */}
+                      <span className="absolute font-display text-sm font-bold text-nude-600 select-none"
+                        style={{ left: "22px", top: "50%", transform: "translateY(-50%)" }}>W</span>
+
                       {/*
-                       * ── QIBLA ARROW ────────────────────────────────
-                       * Fixed at qiblaAngle inside the rotating dial.
-                       * Since the dial already rotates by -heading,
-                       * the net screen rotation of the arrow =
-                       *   qiblaAngle + dialRotation = qiblaAngle - heading
-                       * which is exactly the screen angle toward Qibla.
-                       * When heading === qiblaAngle, the arrow points up (North).
-                       * User's goal: rotate phone until arrow points to top.
+                       * ── QIBLA ARROW — inside the rotating dial ───────
+                       *
+                       * Math:
+                       *   dial is at rotate(-heading) on screen
+                       *   arrow is at rotate(qiblaAngle) inside dial
+                       *   net screen angle = qiblaAngle - heading
+                       *
+                       *   When heading = qiblaAngle → net = 0° → arrow at top ✓
+                       *   User rotates phone until arrow reaches top = facing Qibla ✓
+                       *
+                       * SVG is drawn pointing UP (12 o'clock) so no offset needed.
                        */}
                       <div
                         className="absolute inset-0 flex items-center justify-center"
-                        style={{ transform: `rotate(${qiblaRotation - 90}deg)` }}
+                        style={{ transform: `rotate(${qiblaRotation}deg)` }}
                       >
-                        <svg viewBox="0 0 56 140" className="w-12 h-28" fill="none"
-                          style={{ marginTop: "-56px" }}>
-                          {/* Tail glow */}
-                          <ellipse cx="28" cy="115" rx="10" ry="14" fill="#e8c4b8" opacity="0.5" />
-                          {/* Shaft */}
-                          <rect x="25" y="45" width="6" height="72" rx="3" fill="url(#qsg)" />
-                          {/* Head */}
-                          <path d="M28 4 L44 48 L28 38 L12 48 Z"
-                            fill={aligned ? "#4ade80" : "#d4786a"} />
-                          {/* Kaaba emoji tip */}
-                          <text x="28" y="32" textAnchor="middle" fontSize="12" fill="white">🕋</text>
-                          <defs>
-                            <linearGradient id="qsg" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor={aligned ? "#4ade80" : "#d4786a"} />
-                              <stop offset="100%" stopColor="#e8c4b8" />
-                            </linearGradient>
-                          </defs>
-                        </svg>
+                        {/* Arrow positioned so tip is near edge, tail near center */}
+                        <div className="absolute flex flex-col items-center"
+                          style={{ bottom: "50%", marginBottom: "4px" }}>
+                          {/* Kaaba icon at tip */}
+                          <span style={{ fontSize: "18px", lineHeight: 1 }}>🕋</span>
+                          {/* Arrow head */}
+                          <div className="w-0 h-0 my-0.5"
+                            style={{
+                              borderLeft: "7px solid transparent",
+                              borderRight: "7px solid transparent",
+                              borderBottom: `14px solid ${aligned ? "#4ade80" : "#d4786a"}`,
+                            }} />
+                          {/* Arrow shaft */}
+                          <div className="w-2 rounded-full"
+                            style={{
+                              height: "52px",
+                              background: aligned
+                                ? "linear-gradient(to bottom, #4ade80, #86efac)"
+                                : "linear-gradient(to bottom, #d4786a, #e8a090)",
+                            }} />
+                        </div>
+                        {/* Tail below center */}
+                        <div className="absolute flex flex-col items-center"
+                          style={{ top: "50%", marginTop: "4px" }}>
+                          <div className="w-1.5 rounded-full bg-nude-300"
+                            style={{ height: "28px" }} />
+                          <div className="w-3 h-3 rounded-full bg-nude-200 mt-0.5" />
+                        </div>
                       </div>
                     </div>
 
-                    {/* Inner white face — NOT rotating, contains center dot */}
-                    <div className="w-52 h-52 rounded-full flex items-center justify-center pointer-events-none"
-                      style={{ background: "radial-gradient(circle at 35% 35%, #fff, #f5ece8)" }}>
-                      {/* Center pivot dot */}
-                      <div className={`w-4 h-4 rounded-full z-10 shadow-sm transition-colors
-                        ${aligned ? "bg-green-400" : "bg-nude-400"}`} />
+                    {/* ── Inner face — NOT rotating ──────────────────── */}
+                    <div className="w-48 h-48 rounded-full flex items-center justify-center pointer-events-none z-10"
+                      style={{ background: "radial-gradient(circle at 35% 35%, #fff 0%, #f5ece8 100%)" }}>
+                      {/* Heading readout */}
+                      <div className="text-center">
+                        <p className="font-display text-2xl font-black"
+                          style={{ color: aligned ? "#16a34a" : "#d4786a" }}>
+                          {Math.round(heading)}°
+                        </p>
+                        <p className="font-body text-xs text-nude-400 mt-0.5">
+                          {["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(heading / 22.5) % 16]}
+                        </p>
+                        {/* Center pivot */}
+                        <div className={`w-3 h-3 rounded-full mx-auto mt-2 shadow-sm transition-colors ${aligned ? "bg-green-400" : "bg-nude-400"}`} />
+                      </div>
                     </div>
                   </div>
                 </div>
