@@ -30,30 +30,28 @@ type Mode   = "compass" | "ar";
 type Status = "idle" | "loading" | "ready" | "error";
 
 export default function QiblaClient() {
-  const router     = useRouter();
-  const videoRef   = useRef<HTMLVideoElement>(null);
-  const canvasRef  = useRef<HTMLCanvasElement>(null);
-  const arAnimRef  = useRef<number>(0);
-  const headingBuf = useRef<number[]>([]); // rolling buffer for smoothing
+  const router    = useRouter();
+  const videoRef  = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const arAnimRef = useRef<number>(0);
+  const prevHeadingRef = useRef<number>(0);
 
-  const [mode, setMode]         = useState<Mode>("compass");
-  const [status, setStatus]     = useState<Status>("idle");
+  const [mode, setMode]       = useState<Mode>("compass");
+  const [status, setStatus]   = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   const [location, setLocation]     = useState<{ lat: number; lng: number } | null>(null);
   const [qiblaAngle, setQiblaAngle] = useState<number | null>(null);
   const [distance, setDistance]     = useState<number | null>(null);
-
-  // heading = real-world direction device is facing (degrees from North)
-  const [heading, setHeading]     = useState(0);
-  // aligned = device is facing Qibla direction
-  const [aligned, setAligned]     = useState(false);
-  const [permGranted, setPermGranted] = useState(false);
-  const [arStream, setArStream]   = useState<MediaStream | null>(null);
+  const [heading, setHeading]       = useState(0);
+  const [aligned, setAligned]       = useState(false);
+  const [hasCompass, setHasCompass] = useState(false);
+  const [compassSource, setCompassSource] = useState<string>("none");
+  const [arStream, setArStream]     = useState<MediaStream | null>(null);
   const [calibrating, setCalibrating] = useState(false);
-  const [compassSource, setCompassSource] = useState<"ios" | "android-abs" | "android-rel" | "none">("none");
+  const [needsPermission, setNeedsPermission] = useState(false);
 
-  // ── Load cached location on mount ──────────────────────────
+  // ── Load cached location ─────────────────────────────────────
   useEffect(() => {
     const cached = localStorage.getItem("qibla_location");
     if (cached) {
@@ -62,19 +60,20 @@ export default function QiblaClient() {
         setLocation({ lat, lng });
         setQiblaAngle(calcQiblaAngle(lat, lng));
         setDistance(calcDistance(lat, lng));
+        setStatus("ready");
       } catch {}
     }
     requestLocation();
   }, []);
 
-  // ── GPS ─────────────────────────────────────────────────────
+  // ── GPS ──────────────────────────────────────────────────────
   const requestLocation = () => {
-    setStatus("loading");
     if (!navigator.geolocation) {
       setStatus("error");
-      setErrorMsg("Geolocation not supported on this device.");
+      setErrorMsg("Geolocation not supported.");
       return;
     }
+    if (status !== "ready") setStatus("loading");
     navigator.geolocation.getCurrentPosition(
       pos => {
         const { latitude: lat, longitude: lng } = pos.coords;
@@ -83,90 +82,93 @@ export default function QiblaClient() {
         setDistance(calcDistance(lat, lng));
         localStorage.setItem("qibla_location", JSON.stringify({ lat, lng }));
         setStatus("ready");
-        startCompass();
+        attachCompass();
       },
       () => {
-        if (location) { setStatus("ready"); startCompass(); }
-        else { setStatus("error"); setErrorMsg("Could not get location. Please enable GPS and try again."); }
+        if (location) { setStatus("ready"); attachCompass(); }
+        else { setStatus("error"); setErrorMsg("Could not get location. Enable GPS and try again."); }
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
-  // ── Smooth heading using a rolling median of last 5 samples ─
+  // ── Smooth heading (exponential low-pass filter) ─────────────
   const smoothHeading = useCallback((raw: number) => {
-    const buf = headingBuf.current;
-    buf.push(raw);
-    if (buf.length > 5) buf.shift();
-
-    // Circular mean to handle 0/360 wrap-around
-    let sinSum = 0, cosSum = 0;
-    for (const h of buf) {
-      sinSum += Math.sin(toRad(h));
-      cosSum += Math.cos(toRad(h));
-    }
-    const mean = (toDeg(Math.atan2(sinSum / buf.length, cosSum / buf.length)) + 360) % 360;
-    return mean;
+    const prev = prevHeadingRef.current;
+    let diff = raw - prev;
+    if (diff > 180)  diff -= 360;
+    if (diff < -180) diff += 360;
+    const smoothed = (prev + diff * 0.3 + 360) % 360;
+    prevHeadingRef.current = smoothed;
+    return smoothed;
   }, []);
 
-  // ── Compass sensor ──────────────────────────────────────────
-  const startCompass = useCallback(() => {
-    // Android Chrome: deviceorientationabsolute gives true North
+  // ── Attach compass sensor ────────────────────────────────────
+  const attachCompass = useCallback(() => {
+    // Android Chrome: absolute orientation event (best accuracy)
+    const win = window as any;
     if ("ondeviceorientationabsolute" in window) {
-      const absHandler = (e: DeviceOrientationEvent) => {
+      win.addEventListener("deviceorientationabsolute", (e: DeviceOrientationEvent) => {
         if (e.alpha == null) return;
         setHeading(smoothHeading((360 - e.alpha) % 360));
+        setHasCompass(true);
         setCompassSource("android-abs");
-        setPermGranted(true);
-      };
-      const w = window as any;
-      w.addEventListener("deviceorientationabsolute", absHandler, true);
-      return () => w.removeEventListener("deviceorientationabsolute", absHandler, true);
+      }, true);
+      return;
     }
 
+    // iOS / generic deviceorientation
     const handler = (e: DeviceOrientationEvent) => {
-      // iOS: webkitCompassHeading is already true North bearing
-      const webkitHeading = (e as any).webkitCompassHeading;
-      if (webkitHeading != null) {
-        setHeading(smoothHeading(webkitHeading));
+      const webkit = (e as any).webkitCompassHeading;
+      if (webkit != null) {
+        setHeading(smoothHeading(webkit));
+        setHasCompass(true);
         setCompassSource("ios");
-        setPermGranted(true);
-        return;
-      }
-      // Android fallback: alpha is rotation from arbitrary start — less accurate
-      if (e.alpha != null) {
+      } else if (e.alpha != null) {
         setHeading(smoothHeading((360 - e.alpha) % 360));
+        setHasCompass(true);
         setCompassSource("android-rel");
-        setPermGranted(true);
       }
     };
 
-    const w = window as any;
+    // iOS 13+ requires permission via user gesture
     if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
-      // iOS 13+ requires explicit user gesture to get permission
-      (DeviceOrientationEvent as any).requestPermission()
-        .then((res: string) => {
-          if (res === "granted") {
-            setPermGranted(true);
-            w.addEventListener("deviceorientation", handler, true);
-          }
-        }).catch(() => {});
-    } else {
-      w.addEventListener("deviceorientation", handler, true);
+      setNeedsPermission(true);
+      return;
     }
-    return () => w.removeEventListener("deviceorientation", handler, true);
+
+    win.addEventListener("deviceorientation", handler, true);
   }, [smoothHeading]);
 
-  // ── Alignment check ─────────────────────────────────────────
-  // Device is aligned with Qibla when heading ≈ qiblaAngle (within ±8°)
+  // ── iOS permission request (must be called from user gesture) ─
+  const requestCompassPermission = async () => {
+    try {
+      const result = await (DeviceOrientationEvent as any).requestPermission();
+      if (result === "granted") {
+        setNeedsPermission(false);
+        const win = window as any;
+        win.addEventListener("deviceorientation", (e: DeviceOrientationEvent) => {
+          const webkit = (e as any).webkitCompassHeading;
+          if (webkit != null) {
+            setHeading(smoothHeading(webkit));
+            setHasCompass(true);
+            setCompassSource("ios");
+          }
+        }, true);
+      }
+    } catch (err) {
+      setNeedsPermission(false);
+    }
+  };
+
+  // ── Alignment check ──────────────────────────────────────────
   useEffect(() => {
     if (qiblaAngle === null) return;
     const diff = Math.abs(((heading - qiblaAngle) + 360) % 360);
-    const normalised = diff > 180 ? 360 - diff : diff;
-    setAligned(normalised < 8);
+    setAligned(diff < 8 || diff > 352);
   }, [heading, qiblaAngle]);
 
-  // ── AR Mode ─────────────────────────────────────────────────
+  // ── AR Mode ──────────────────────────────────────────────────
   const startAR = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
@@ -183,381 +185,369 @@ export default function QiblaClient() {
     setMode("compass");
   };
 
-  // AR canvas overlay — arrow always points to Qibla relative to screen
   useEffect(() => {
     if (mode !== "ar" || !canvasRef.current) return;
     const canvas = canvasRef.current;
-    const ctx    = canvas.getContext("2d")!;
-
+    const ctx = canvas.getContext("2d")!;
     const draw = () => {
-      canvas.width  = window.innerWidth;
+      canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const cx  = canvas.width / 2;
-      const cy  = canvas.height / 2;
+      const cx = canvas.width / 2, cy = canvas.height / 2;
       const len = Math.min(canvas.width, canvas.height) * 0.32;
-
-      // In AR: arrow points to qiblaAngle relative to current heading
       const arAngle = qiblaAngle !== null ? (qiblaAngle - heading + 360) % 360 : 0;
       const rad = toRad(arAngle - 90);
-
       ctx.save();
       ctx.shadowColor = aligned ? "#86efac" : "#f0c8bc";
-      ctx.shadowBlur  = 30;
+      ctx.shadowBlur = 24;
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + Math.cos(rad)*len, cy + Math.sin(rad)*len);
       ctx.strokeStyle = aligned ? "#4ade80" : "#d4786a";
-      ctx.lineWidth   = 6;
-      ctx.lineCap     = "round";
-      ctx.stroke();
-      const tip   = { x: cx + Math.cos(rad)*len, y: cy + Math.sin(rad)*len };
-      const left  = { x: tip.x + Math.cos(rad+2.5)*28, y: tip.y + Math.sin(rad+2.5)*28 };
-      const right = { x: tip.x + Math.cos(rad-2.5)*28, y: tip.y + Math.sin(rad-2.5)*28 };
-      ctx.beginPath(); ctx.moveTo(tip.x,tip.y); ctx.lineTo(left.x,left.y); ctx.lineTo(right.x,right.y);
+      ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.stroke();
+      const tip = { x: cx + Math.cos(rad)*len, y: cy + Math.sin(rad)*len };
+      const l = { x: tip.x + Math.cos(rad+2.5)*24, y: tip.y + Math.sin(rad+2.5)*24 };
+      const r = { x: tip.x + Math.cos(rad-2.5)*24, y: tip.y + Math.sin(rad-2.5)*24 };
+      ctx.beginPath(); ctx.moveTo(tip.x,tip.y); ctx.lineTo(l.x,l.y); ctx.lineTo(r.x,r.y);
       ctx.closePath(); ctx.fillStyle = aligned ? "#4ade80" : "#d4786a"; ctx.fill();
-      ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI*2); ctx.fillStyle = "white"; ctx.fill();
       ctx.restore();
-      ctx.font = "bold 16px sans-serif"; ctx.fillStyle = "white"; ctx.textAlign = "center";
-      ctx.fillText(aligned ? "🕋 Facing Qibla!" : `Rotate ${Math.round(arAngle)}° to Qibla`, cx, cy - len - 20);
+      ctx.font = "bold 15px sans-serif"; ctx.fillStyle = "white"; ctx.textAlign = "center";
+      ctx.fillText(aligned ? "🕋 Facing Qibla!" : `Turn ${Math.round(arAngle)}° to Qibla`, cx, cy - len - 16);
       arAnimRef.current = requestAnimationFrame(draw);
     };
     draw();
     return () => cancelAnimationFrame(arAnimRef.current);
   }, [mode, heading, qiblaAngle, aligned]);
 
-  // ── Derived display values ───────────────────────────────────
-  const formattedDistance = distance
+  // ── Display helpers ──────────────────────────────────────────
+  const dist = distance
     ? distance > 1000 ? `${(distance/1000).toFixed(1)}k km` : `${Math.round(distance)} km`
     : null;
 
-  // How many degrees to rotate to face Qibla (shortest path)
-  const degreesToQibla = qiblaAngle !== null
-    ? (() => {
-        const diff = ((qiblaAngle - heading) + 360) % 360;
-        return diff > 180 ? diff - 360 : diff;
-      })()
+  // Degrees to rotate from current heading to reach Qibla (signed, shortest path)
+  const degsToQibla = qiblaAngle !== null
+    ? (() => { const d = ((qiblaAngle - heading) + 360) % 360; return d > 180 ? d - 360 : d; })()
     : 0;
 
-  const accuracyLabel: Record<string, string> = {
-    ios: "iOS Compass ✓",
-    "android-abs": "High Accuracy ✓",
-    "android-rel": "Calibrate needed",
-    none: "Waiting...",
-  };
+  const cardinalFull = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+  const headingLabel = cardinalFull[Math.round(heading / 22.5) % 16];
 
-  // ── Compass geometry ─────────────────────────────────────────
-  // The whole dial rotates by -heading so N always points to real North
-  // The Qibla arrow is fixed at qiblaAngle from North inside that dial
-  const dialRotation   = -heading;
-  const qiblaRotation  = qiblaAngle ?? 0;
+  // ── SVG compass parameters ───────────────────────────────────
+  // The entire compass SVG rotates by -heading
+  // The Qibla arrow group inside it is placed at qiblaAngle from North
+  const CX = 160, CY = 160, R_OUTER = 148, R_INNER = 100;
+  const dialRotDeg  = -heading;
+  const qiblaDeg    = qiblaAngle ?? 0;
 
   return (
-    <div className="min-h-screen bg-nude-50 flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-nude-50 flex flex-col">
 
-      {/* ── AR Mode overlay ──────────────────────────────────── */}
+      {/* AR overlay */}
       {mode === "ar" && (
         <div className="fixed inset-0 z-50 bg-black">
           <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" autoPlay playsInline muted />
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
           <div className="absolute top-0 left-0 right-0 px-5 pt-12 pb-4 flex items-center justify-between">
-            <button onClick={stopAR} className="w-10 h-10 rounded-2xl bg-black/40 backdrop-blur flex items-center justify-center text-white">✕</button>
-            <div className="bg-black/40 backdrop-blur rounded-2xl px-4 py-2"><p className="text-white text-sm font-bold">AR Qibla</p></div>
+            <button onClick={stopAR} className="w-10 h-10 rounded-2xl bg-black/50 flex items-center justify-center text-white text-lg">✕</button>
+            <div className="bg-black/50 rounded-2xl px-4 py-2"><p className="text-white text-sm font-bold">AR Qibla</p></div>
             <div className="w-10" />
           </div>
           <div className="absolute bottom-10 left-0 right-0 flex justify-center">
-            <div className="bg-black/50 backdrop-blur rounded-3xl px-6 py-3 flex items-center gap-4">
+            <div className="bg-black/60 rounded-3xl px-6 py-3 flex items-center gap-3">
               {aligned && <span className="text-green-400 text-lg animate-pulse">●</span>}
-              <p className="text-white text-sm font-bold">{aligned ? "Facing Qibla 🕋" : `Rotate ${Math.round(Math.abs(degreesToQibla))}° to Qibla`}</p>
-              {formattedDistance && <p className="text-white/60 text-xs">{formattedDistance} away</p>}
+              <p className="text-white text-sm font-bold">
+                {aligned ? "Facing Qibla 🕋" : `Turn ${Math.round(Math.abs(degsToQibla))}° ${degsToQibla > 0 ? "right" : "left"}`}
+              </p>
+              {dist && <p className="text-white/50 text-xs">{dist} away</p>}
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Compass Mode ─────────────────────────────────────── */}
+      {/* Compass mode */}
       {mode === "compass" && (
         <>
           {/* Header */}
-          <div className="px-5 pt-12 pb-6 relative overflow-hidden"
-            style={{ background: "linear-gradient(160deg, #c8705a 0%, #d4786a 50%, #e8a090 100%)" }}>
+          <div className="px-5 pt-12 pb-5 relative overflow-hidden"
+            style={{ background: "linear-gradient(160deg,#c8705a,#d4786a 60%,#e8a090)" }}>
             <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
             <div className="flex items-center gap-3 mb-4 relative z-10">
               <button onClick={() => router.back()}
-                className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-white font-bold backdrop-blur">←</button>
+                className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-white font-bold">←</button>
               <div>
                 <p className="font-body text-xs text-white/70 tracking-widest uppercase">Direction</p>
                 <h1 className="font-display text-2xl font-bold text-white">Qibla Finder</h1>
               </div>
             </div>
             <div className="flex gap-2 flex-wrap relative z-10">
-              {formattedDistance && (
-                <div className="bg-white/20 backdrop-blur rounded-2xl px-3 py-1.5 flex items-center gap-1.5">
+              {dist && (
+                <div className="bg-white/20 rounded-2xl px-3 py-1.5 flex items-center gap-1.5">
                   <span className="text-xs">🕋</span>
-                  <p className="text-white text-xs font-bold">{formattedDistance} to Mecca</p>
+                  <p className="text-white text-xs font-bold">{dist} to Mecca</p>
                 </div>
               )}
               {location && (
-                <div className="bg-white/20 backdrop-blur rounded-2xl px-3 py-1.5 flex items-center gap-1.5">
+                <div className="bg-white/20 rounded-2xl px-3 py-1.5 flex items-center gap-1.5">
                   <span className="text-xs">📍</span>
                   <p className="text-white text-xs font-bold">{location.lat.toFixed(2)}°, {location.lng.toFixed(2)}°</p>
-                </div>
-              )}
-              {compassSource !== "none" && (
-                <div className="bg-white/20 backdrop-blur rounded-2xl px-3 py-1.5">
-                  <p className="text-white text-xs font-bold">🧭 {accuracyLabel[compassSource]}</p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col items-center justify-center px-6 py-6 gap-5">
+          <div className="flex-1 flex flex-col items-center px-5 py-5 gap-4">
 
             {status === "loading" && (
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-16 h-16 rounded-full border-4 border-nude-200 border-t-nude-500 animate-spin" />
-                <p className="font-body text-nude-500">Getting your location...</p>
+              <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                <div className="w-14 h-14 rounded-full border-4 border-nude-200 border-t-nude-500 animate-spin" />
+                <p className="font-body text-nude-500 text-sm">Getting your location...</p>
               </div>
             )}
 
             {status === "error" && (
-              <div className="bg-white border border-nude-200 rounded-3xl p-6 text-center w-full shadow-sm">
-                <p className="text-3xl mb-2">📍</p>
-                <p className="font-display text-base font-bold text-nude-700 mb-1">Location Required</p>
-                <p className="font-body text-xs text-nude-400 mb-4">{errorMsg}</p>
-                <button onClick={requestLocation}
-                  className="px-6 py-3 bg-gradient-to-r from-nude-400 to-nude-500 text-white text-sm font-bold font-body rounded-2xl">
-                  Try Again
-                </button>
+              <div className="flex-1 flex flex-col items-center justify-center w-full">
+                <div className="bg-white border border-nude-200 rounded-3xl p-6 text-center w-full shadow-sm">
+                  <p className="text-3xl mb-2">📍</p>
+                  <p className="font-display text-base font-bold text-nude-700 mb-1">Location Required</p>
+                  <p className="font-body text-xs text-nude-400 mb-4">{errorMsg}</p>
+                  <button onClick={requestLocation}
+                    className="px-6 py-3 bg-gradient-to-r from-nude-400 to-nude-500 text-white text-sm font-bold rounded-2xl">
+                    Try Again
+                  </button>
+                </div>
               </div>
             )}
 
-            {(status === "ready" || location) && (
+            {(status === "ready") && (
               <>
-                {/* ── The Compass ───────────────────────────────── */}
-                <div className="relative flex items-center justify-center select-none">
-
-                  {/* Glow ring when aligned — fixed to screen */}
+                {/* ═══════════════════════════════════════════════
+                    COMPASS — pure SVG, no CSS arrow tricks
+                    - Entire SVG rotates by -heading
+                    - Qibla arrow group rotates by qiblaAngle inside SVG
+                    Net screen rotation of arrow = qiblaAngle - heading
+                    When facing Qibla: heading=qiblaAngle → arrow at top
+                ═══════════════════════════════════════════════ */}
+                <div className="relative flex items-center justify-center w-full">
+                  {/* Alignment glow */}
                   {aligned && (
-                    <div className="absolute w-72 h-72 rounded-full border-4 border-green-400 animate-ping opacity-30" />
+                    <div className="absolute w-72 h-72 rounded-full border-4 border-green-400 animate-ping opacity-25 pointer-events-none" />
                   )}
 
-                  {/*
-                   * ── OUTER RING — fixed to screen ──────────────────
-                   * Does NOT rotate. Acts as the bezel.
-                   * The screen-fixed triangle at top acts as the pointer.
-                   */}
-                  <div className="relative w-72 h-72 rounded-full flex items-center justify-center"
+                  <svg
+                    width="320" height="320"
+                    viewBox="0 0 320 320"
                     style={{
-                      boxShadow: aligned
-                        ? "0 0 40px rgba(74,222,128,0.3), 0 8px 32px rgba(0,0,0,0.15)"
-                        : "0 8px 32px rgba(0,0,0,0.15)",
-                      background: aligned
-                        ? "linear-gradient(135deg, #d4f0d8, #e8f5e9)"
-                        : "linear-gradient(135deg, #f5e6e0, #e8c4b8)",
-                    }}>
+                      transform: `rotate(${dialRotDeg}deg)`,
+                      transition: "transform 0.1s ease-out",
+                      willChange: "transform",
+                      overflow: "visible",
+                    }}
+                  >
+                    {/* ── Outer ring background ────────────────── */}
+                    <circle cx={CX} cy={CY} r={R_OUTER}
+                      fill={aligned ? "#d4f0d8" : "#f0e0d8"}
+                      stroke={aligned ? "#86efac" : "#e8c4b8"}
+                      strokeWidth="2" />
 
-                    {/* Fixed top pointer — always at 12 o'clock, shows current heading */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20">
-                      <div className="w-0 h-0"
-                        style={{
-                          borderLeft: "7px solid transparent",
-                          borderRight: "7px solid transparent",
-                          borderTop: `14px solid ${aligned ? "#4ade80" : "#d4786a"}`,
-                        }} />
-                    </div>
+                    {/* ── Tick marks ───────────────────────────── */}
+                    {Array.from({ length: 72 }).map((_, i) => {
+                      const angle  = i * 5;
+                      const rad    = toRad(angle - 90);
+                      const isMaj  = angle % 90 === 0;
+                      const isMed  = angle % 45 === 0 && !isMaj;
+                      const r1     = isMaj ? R_OUTER - 2  : isMed ? R_OUTER - 2  : R_OUTER - 2;
+                      const r2     = isMaj ? R_OUTER - 14 : isMed ? R_OUTER - 10 : R_OUTER - 7;
+                      const sw     = isMaj ? 2.5 : isMed ? 1.5 : 0.8;
+                      const col    = isMaj ? "#b07060" : "#d4a090";
+                      return (
+                        <line key={i}
+                          x1={CX + r1 * Math.cos(rad)} y1={CY + r1 * Math.sin(rad)}
+                          x2={CX + r2 * Math.cos(rad)} y2={CY + r2 * Math.sin(rad)}
+                          stroke={col} strokeWidth={sw} strokeLinecap="round" />
+                      );
+                    })}
 
-                    {/*
-                     * ── ROTATING DIAL ──────────────────────────────────
-                     * rotate(-heading):
-                     *   heading=0  (facing North) → dial at 0°  → N at top   ✓
-                     *   heading=90 (facing East)  → dial at -90° → N swings left, E at top ✓
-                     *   heading=180 (facing South)→ dial at -180° → S at top  ✓
-                     */}
-                    <div
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        transform: `rotate(${dialRotation}deg)`,
-                        transition: "transform 0.1s ease-out",
-                        willChange: "transform",
-                      }}
-                    >
-                      {/* ── Degree ring — tick marks every 10° ───────── */}
-                      {Array.from({ length: 36 }).map((_, i) => {
-                        const angle = i * 10;
-                        const isMajor = angle % 90 === 0;
-                        const isMinor45 = angle % 45 === 0;
-                        return (
-                          <div key={i}
-                            className="absolute inset-0 flex items-start justify-center"
-                            style={{ transform: `rotate(${angle}deg)` }}>
-                            <div className={`rounded-full ${
-                              isMajor   ? "w-1.5 h-4 bg-nude-500 mt-2" :
-                              isMinor45 ? "w-1 h-3 bg-nude-400 mt-2.5" :
-                                          "w-0.5 h-2 bg-nude-300 mt-3"
-                            }`} />
-                          </div>
-                        );
-                      })}
+                    {/* ── Cardinal labels ──────────────────────── */}
+                    {[
+                      { label: "N", angle: 0,   color: "#c8503a", size: 18, weight: "bold" },
+                      { label: "E", angle: 90,  color: "#a07060", size: 14, weight: "normal" },
+                      { label: "S", angle: 180, color: "#a07060", size: 14, weight: "normal" },
+                      { label: "W", angle: 270, color: "#a07060", size: 14, weight: "normal" },
+                    ].map(({ label, angle, color, size, weight }) => {
+                      const rad = toRad(angle - 90);
+                      const r   = R_OUTER - 22;
+                      return (
+                        <text key={label}
+                          x={CX + r * Math.cos(rad)}
+                          y={CY + r * Math.sin(rad)}
+                          textAnchor="middle" dominantBaseline="central"
+                          fontSize={size} fontWeight={weight}
+                          fontFamily="serif"
+                          fill={color}>
+                          {label}
+                        </text>
+                      );
+                    })}
 
-                      {/* ── Cardinal labels — live INSIDE dial, rotate with it ── */}
-                      {/* N at top (0°) */}
-                      <span className="absolute font-display text-base font-black text-red-500 select-none"
-                        style={{ top: "22px", left: "50%", transform: "translateX(-50%)" }}>N</span>
-                      {/* S at bottom (180°) */}
-                      <span className="absolute font-display text-sm font-bold text-nude-600 select-none"
-                        style={{ bottom: "22px", left: "50%", transform: "translateX(-50%)" }}>S</span>
-                      {/* E at right (90°) */}
-                      <span className="absolute font-display text-sm font-bold text-nude-600 select-none"
-                        style={{ right: "22px", top: "50%", transform: "translateY(-50%)" }}>E</span>
-                      {/* W at left (270°) */}
-                      <span className="absolute font-display text-sm font-bold text-nude-600 select-none"
-                        style={{ left: "22px", top: "50%", transform: "translateY(-50%)" }}>W</span>
+                    {/* ── NE / NW / SE / SW ────────────────────── */}
+                    {[
+                      { label: "NE", angle: 45  },
+                      { label: "SE", angle: 135 },
+                      { label: "SW", angle: 225 },
+                      { label: "NW", angle: 315 },
+                    ].map(({ label, angle }) => {
+                      const rad = toRad(angle - 90);
+                      const r   = R_OUTER - 22;
+                      return (
+                        <text key={label}
+                          x={CX + r * Math.cos(rad)}
+                          y={CY + r * Math.sin(rad)}
+                          textAnchor="middle" dominantBaseline="central"
+                          fontSize={9} fill="#c8a098">
+                          {label}
+                        </text>
+                      );
+                    })}
 
-                      {/*
-                       * ── QIBLA ARROW — inside the rotating dial ───────
-                       *
-                       * Math:
-                       *   dial is at rotate(-heading) on screen
-                       *   arrow is at rotate(qiblaAngle) inside dial
-                       *   net screen angle = qiblaAngle - heading
-                       *
-                       *   When heading = qiblaAngle → net = 0° → arrow at top ✓
-                       *   User rotates phone until arrow reaches top = facing Qibla ✓
-                       *
-                       * SVG is drawn pointing UP (12 o'clock) so no offset needed.
-                       */}
-                      <div
-                        className="absolute inset-0 flex items-center justify-center"
-                        style={{ transform: `rotate(${qiblaRotation}deg)` }}
-                      >
-                        {/* Arrow positioned so tip is near edge, tail near center */}
-                        <div className="absolute flex flex-col items-center"
-                          style={{ bottom: "50%", marginBottom: "4px" }}>
-                          {/* Kaaba icon at tip */}
-                          <span style={{ fontSize: "18px", lineHeight: 1 }}>🕋</span>
-                          {/* Arrow head */}
-                          <div className="w-0 h-0 my-0.5"
-                            style={{
-                              borderLeft: "7px solid transparent",
-                              borderRight: "7px solid transparent",
-                              borderBottom: `14px solid ${aligned ? "#4ade80" : "#d4786a"}`,
-                            }} />
-                          {/* Arrow shaft */}
-                          <div className="w-2 rounded-full"
-                            style={{
-                              height: "52px",
-                              background: aligned
-                                ? "linear-gradient(to bottom, #4ade80, #86efac)"
-                                : "linear-gradient(to bottom, #d4786a, #e8a090)",
-                            }} />
-                        </div>
-                        {/* Tail below center */}
-                        <div className="absolute flex flex-col items-center"
-                          style={{ top: "50%", marginTop: "4px" }}>
-                          <div className="w-1.5 rounded-full bg-nude-300"
-                            style={{ height: "28px" }} />
-                          <div className="w-3 h-3 rounded-full bg-nude-200 mt-0.5" />
-                        </div>
-                      </div>
-                    </div>
+                    {/* ── Inner face ───────────────────────────── */}
+                    <circle cx={CX} cy={CY} r={R_INNER}
+                      fill="white" fillOpacity="0.95"
+                      stroke="#e8d0c8" strokeWidth="1" />
 
-                    {/* ── Inner face — NOT rotating ──────────────────── */}
-                    <div className="w-48 h-48 rounded-full flex items-center justify-center pointer-events-none z-10"
-                      style={{ background: "radial-gradient(circle at 35% 35%, #fff 0%, #f5ece8 100%)" }}>
-                      {/* Heading readout */}
-                      <div className="text-center">
-                        <p className="font-display text-2xl font-black"
-                          style={{ color: aligned ? "#16a34a" : "#d4786a" }}>
-                          {Math.round(heading)}°
-                        </p>
-                        <p className="font-body text-xs text-nude-400 mt-0.5">
-                          {["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(heading / 22.5) % 16]}
-                        </p>
-                        {/* Center pivot */}
-                        <div className={`w-3 h-3 rounded-full mx-auto mt-2 shadow-sm transition-colors ${aligned ? "bg-green-400" : "bg-nude-400"}`} />
-                      </div>
-                    </div>
+                    {/* ── Qibla arrow group ────────────────────────
+                        rotate(qiblaAngle) inside the SVG.
+                        SVG is already rotated by -heading externally.
+                        Net angle on screen = qiblaAngle - heading.
+                    ─────────────────────────────────────────────── */}
+                    <g transform={`rotate(${qiblaDeg}, ${CX}, ${CY})`}>
+                      {/* Arrow shaft */}
+                      <line
+                        x1={CX} y1={CY + 30}
+                        x2={CX} y2={CY - R_INNER + 18}
+                        stroke={aligned ? "#4ade80" : "#d4786a"}
+                        strokeWidth="4" strokeLinecap="round" />
+                      {/* Arrow head pointing UP (toward N = top of SVG) */}
+                      <polygon
+                        points={`${CX},${CY - R_INNER + 4} ${CX - 10},${CY - R_INNER + 22} ${CX + 10},${CY - R_INNER + 22}`}
+                        fill={aligned ? "#4ade80" : "#d4786a"} />
+                      {/* Tail */}
+                      <circle cx={CX} cy={CY + 34} r="5"
+                        fill={aligned ? "#86efac" : "#e8a090"} />
+                      {/* Kaaba label on arrow */}
+                      <text x={CX} y={CY - R_INNER + 40}
+                        textAnchor="middle" dominantBaseline="central"
+                        fontSize="16">🕋</text>
+                    </g>
+
+                    {/* ── Center pivot ─────────────────────────── */}
+                    <circle cx={CX} cy={CY} r="8"
+                      fill={aligned ? "#4ade80" : "#d4786a"} />
+                    <circle cx={CX} cy={CY} r="4" fill="white" />
+                  </svg>
+
+                  {/* Heading readout — on top of SVG, not rotating */}
+                  <div className="absolute pointer-events-none flex flex-col items-center justify-center"
+                    style={{ width: "90px", height: "90px" }}>
+                    <p className="font-display text-2xl font-black leading-none"
+                      style={{ color: aligned ? "#16a34a" : "#d4786a" }}>
+                      {Math.round(heading)}°
+                    </p>
+                    <p className="font-body text-xs text-nude-400 mt-0.5">{headingLabel}</p>
                   </div>
                 </div>
 
-                {/* ── Instruction hint ──────────────────────────── */}
-                <div className="bg-nude-100 rounded-2xl px-4 py-2 flex items-center gap-2">
-                  <span className="text-base">📱</span>
+                {/* Instruction */}
+                <div className="w-full bg-nude-100 rounded-2xl px-4 py-2.5 flex items-center gap-2">
+                  <span>📱</span>
                   <p className="font-body text-xs text-nude-600">
-                    Rotate your phone until the 🕋 arrow points <strong>up</strong>
+                    Rotate your phone until the <strong>🕋 arrow points up</strong>
                   </p>
                 </div>
 
-                {/* ── Status badge ──────────────────────────────── */}
-                <div className={`w-full px-5 py-3.5 rounded-2xl flex items-center gap-3 transition-all
+                {/* Status */}
+                <div className={`w-full px-4 py-3.5 rounded-2xl flex items-center gap-3 transition-all
                   ${aligned ? "bg-green-50 border border-green-200" : "bg-white border border-nude-200 shadow-sm"}`}>
                   {aligned ? (
                     <>
-                      <span className="text-2xl animate-bounce">✅</span>
+                      <span className="text-2xl">✅</span>
                       <div>
                         <p className="font-display text-base font-bold text-green-700">Facing Qibla!</p>
-                        <p className="font-body text-xs text-green-500">You are aligned with the Kaaba 🕋</p>
+                        <p className="font-body text-xs text-green-600">Aligned with the Kaaba 🕋</p>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="w-10 h-10 rounded-xl bg-nude-100 flex items-center justify-center flex-shrink-0">
-                        <span className="text-lg">🧭</span>
-                      </div>
+                      <span className="text-2xl">🧭</span>
                       <div>
-                        <p className="font-display text-base font-bold text-nude-700">
-                          {Math.abs(degreesToQibla) < 45
-                            ? `Almost there — ${Math.round(Math.abs(degreesToQibla))}° to go`
-                            : `Rotate ${Math.round(Math.abs(degreesToQibla))}° ${degreesToQibla > 0 ? "clockwise" : "counter-clockwise"}`}
-                        </p>
-                        <p className="font-body text-xs text-nude-400">
-                          Qibla is {qiblaAngle ? Math.round(qiblaAngle) : "—"}° from North
-                        </p>
+                        {hasCompass ? (
+                          <>
+                            <p className="font-display text-sm font-bold text-nude-700">
+                              Turn {Math.round(Math.abs(degsToQibla))}°{" "}
+                              {degsToQibla > 0 ? "clockwise →" : "← counter-clockwise"}
+                            </p>
+                            <p className="font-body text-xs text-nude-400">
+                              Qibla is {qiblaAngle ? Math.round(qiblaAngle) : "—"}° from North
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="font-display text-sm font-bold text-nude-700">
+                              Compass not active
+                            </p>
+                            <p className="font-body text-xs text-nude-400">
+                              Enable compass below to get live direction
+                            </p>
+                          </>
+                        )}
                       </div>
                     </>
                   )}
                 </div>
 
-                {/* iOS permission prompt */}
-                {!permGranted && (
-                  <button onClick={() => startCompass()}
-                    className="w-full py-3 bg-nude-100 border border-nude-300 rounded-2xl text-nude-700 text-sm font-bold font-body">
-                    🧭 Tap to Enable Compass
+                {/* iOS permission — only shows on iOS 13+ */}
+                {needsPermission && (
+                  <button
+                    onClick={requestCompassPermission}
+                    className="w-full py-3.5 rounded-2xl text-sm font-bold font-body flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                    style={{ background: "linear-gradient(to right,#d4786a,#c8705a)", color: "white" }}>
+                    🧭 Allow Compass Access
                   </button>
                 )}
 
                 {/* Android calibration warning */}
                 {compassSource === "android-rel" && (
                   <div className="w-full bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
-                    <p className="font-body text-xs font-bold text-amber-700">⚠️ Compass needs calibration</p>
-                    <p className="font-body text-xs text-amber-600 mt-0.5">Wave your phone in a figure-8 shape a few times for accuracy</p>
+                    <p className="font-body text-xs font-bold text-amber-700">⚠️ Calibrate for better accuracy</p>
+                    <p className="font-body text-xs text-amber-600 mt-0.5">Wave phone in a figure-8 shape</p>
                   </div>
                 )}
 
+                {/* Buttons */}
                 <div className="w-full grid grid-cols-2 gap-3">
                   <button onClick={startAR}
                     className="py-3 rounded-2xl bg-gradient-to-r from-nude-400 to-nude-500 text-white text-sm font-bold font-body flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform">
-                    <span>📷</span> AR Mode
+                    📷 AR Mode
                   </button>
                   <button onClick={() => { setCalibrating(true); setTimeout(() => setCalibrating(false), 1500); }}
-                    className={`py-3 rounded-2xl text-sm font-bold font-body flex items-center justify-center gap-2 active:scale-95 transition-all border
+                    className={`py-3 rounded-2xl text-sm font-bold font-body border flex items-center justify-center gap-2 active:scale-95 transition-all
                       ${calibrating ? "bg-nude-200 text-nude-600 border-nude-300" : "bg-white text-nude-600 border-nude-200"}`}>
                     {calibrating ? "✓ Done!" : "🔄 Calibrate"}
                   </button>
                 </div>
 
-                <p className="text-center text-xs text-nude-300 font-body">
-                  Works offline · Last location cached automatically
+                <p className="text-center text-xs text-nude-300 font-body pb-2">
+                  Works offline · Location cached automatically
                 </p>
               </>
             )}
 
             {status === "idle" && (
-              <button onClick={requestLocation}
-                className="px-8 py-4 bg-gradient-to-r from-nude-400 to-nude-500 text-white font-bold font-body rounded-2xl shadow-md active:scale-95 transition-transform">
-                📍 Find Qibla Direction
-              </button>
+              <div className="flex-1 flex items-center justify-center">
+                <button onClick={requestLocation}
+                  className="px-8 py-4 bg-gradient-to-r from-nude-400 to-nude-500 text-white font-bold font-body rounded-2xl shadow-md active:scale-95 transition-transform">
+                  📍 Find Qibla Direction
+                </button>
+              </div>
             )}
           </div>
         </>
