@@ -34,7 +34,7 @@ export default function QiblaClient() {
   const videoRef   = useRef<HTMLVideoElement>(null);
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const arAnimRef  = useRef<number>(0);
-  const headingRef = useRef<number>(0); // smoothed heading
+  const headingBuf = useRef<number[]>([]); // rolling buffer for smoothing
 
   const [mode, setMode]         = useState<Mode>("compass");
   const [status, setStatus]     = useState<Status>("idle");
@@ -43,15 +43,17 @@ export default function QiblaClient() {
   const [location, setLocation]     = useState<{ lat: number; lng: number } | null>(null);
   const [qiblaAngle, setQiblaAngle] = useState<number | null>(null);
   const [distance, setDistance]     = useState<number | null>(null);
-  const [heading, setHeading]       = useState(0);
-  const [arrowAngle, setArrowAngle] = useState(0);
-  const [aligned, setAligned]       = useState(false);
+
+  // heading = real-world direction device is facing (degrees from North)
+  const [heading, setHeading]     = useState(0);
+  // aligned = device is facing Qibla direction
+  const [aligned, setAligned]     = useState(false);
   const [permGranted, setPermGranted] = useState(false);
-  const [arStream, setArStream]     = useState<MediaStream | null>(null);
+  const [arStream, setArStream]   = useState<MediaStream | null>(null);
   const [calibrating, setCalibrating] = useState(false);
   const [compassSource, setCompassSource] = useState<"ios" | "android-abs" | "android-rel" | "none">("none");
 
-  // Load cached location
+  // ── Load cached location on mount ──────────────────────────
   useEffect(() => {
     const cached = localStorage.getItem("qibla_location");
     if (cached) {
@@ -65,6 +67,7 @@ export default function QiblaClient() {
     requestLocation();
   }, []);
 
+  // ── GPS ─────────────────────────────────────────────────────
   const requestLocation = () => {
     setStatus("loading");
     if (!navigator.geolocation) {
@@ -90,34 +93,39 @@ export default function QiblaClient() {
     );
   };
 
-  // Smooth heading to avoid jitter
+  // ── Smooth heading using a rolling median of last 5 samples ─
   const smoothHeading = useCallback((raw: number) => {
-    const prev = headingRef.current;
-    // Handle wrap-around (e.g. 359 → 1)
-    let diff = raw - prev;
-    if (diff > 180)  diff -= 360;
-    if (diff < -180) diff += 360;
-    const smoothed = (prev + diff * 0.25 + 360) % 360;
-    headingRef.current = smoothed;
-    return smoothed;
+    const buf = headingBuf.current;
+    buf.push(raw);
+    if (buf.length > 5) buf.shift();
+
+    // Circular mean to handle 0/360 wrap-around
+    let sinSum = 0, cosSum = 0;
+    for (const h of buf) {
+      sinSum += Math.sin(toRad(h));
+      cosSum += Math.cos(toRad(h));
+    }
+    const mean = (toDeg(Math.atan2(sinSum / buf.length, cosSum / buf.length)) + 360) % 360;
+    return mean;
   }, []);
 
+  // ── Compass sensor ──────────────────────────────────────────
   const startCompass = useCallback(() => {
-    // ── Try absolute orientation first (Android Chrome) ──────
+    // Android Chrome: deviceorientationabsolute gives true North
     if ("ondeviceorientationabsolute" in window) {
       const absHandler = (e: DeviceOrientationEvent) => {
         if (e.alpha == null) return;
-        const h = smoothHeading((360 - e.alpha) % 360);
-        setHeading(h);
+        setHeading(smoothHeading((360 - e.alpha) % 360));
         setCompassSource("android-abs");
         setPermGranted(true);
       };
-      window.addEventListener("deviceorientationabsolute" as any, absHandler, true);
-      return () => window.removeEventListener("deviceorientationabsolute" as any, absHandler, true);
+      const w = window as any;
+      w.addEventListener("deviceorientationabsolute", absHandler, true);
+      return () => w.removeEventListener("deviceorientationabsolute", absHandler, true);
     }
 
-    // ── iOS webkitCompassHeading ─────────────────────────────
     const handler = (e: DeviceOrientationEvent) => {
+      // iOS: webkitCompassHeading is already true North bearing
       const webkitHeading = (e as any).webkitCompassHeading;
       if (webkitHeading != null) {
         setHeading(smoothHeading(webkitHeading));
@@ -125,7 +133,7 @@ export default function QiblaClient() {
         setPermGranted(true);
         return;
       }
-      // ── Android fallback (relative, less accurate) ───────
+      // Android fallback: alpha is rotation from arbitrary start — less accurate
       if (e.alpha != null) {
         setHeading(smoothHeading((360 - e.alpha) % 360));
         setCompassSource("android-rel");
@@ -135,7 +143,7 @@ export default function QiblaClient() {
 
     const w = window as any;
     if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
-      // iOS 13+ needs explicit permission
+      // iOS 13+ requires explicit user gesture to get permission
       (DeviceOrientationEvent as any).requestPermission()
         .then((res: string) => {
           if (res === "granted") {
@@ -149,15 +157,16 @@ export default function QiblaClient() {
     return () => w.removeEventListener("deviceorientation", handler, true);
   }, [smoothHeading]);
 
-  // Compute arrow = qibla direction relative to current heading
+  // ── Alignment check ─────────────────────────────────────────
+  // Device is aligned with Qibla when heading ≈ qiblaAngle (within ±8°)
   useEffect(() => {
     if (qiblaAngle === null) return;
-    const angle = (qiblaAngle - heading + 360) % 360;
-    setArrowAngle(angle);
-    setAligned(angle < 8 || angle > 352);
+    const diff = Math.abs(((heading - qiblaAngle) + 360) % 360);
+    const normalised = diff > 180 ? 360 - diff : diff;
+    setAligned(normalised < 8);
   }, [heading, qiblaAngle]);
 
-  // AR camera
+  // ── AR Mode ─────────────────────────────────────────────────
   const startAR = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
@@ -174,19 +183,24 @@ export default function QiblaClient() {
     setMode("compass");
   };
 
-  // AR canvas draw
+  // AR canvas overlay — arrow always points to Qibla relative to screen
   useEffect(() => {
     if (mode !== "ar" || !canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx    = canvas.getContext("2d")!;
-    const draw   = () => {
+
+    const draw = () => {
       canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const cx  = canvas.width / 2;
       const cy  = canvas.height / 2;
       const len = Math.min(canvas.width, canvas.height) * 0.32;
-      const rad = toRad(arrowAngle - 90);
+
+      // In AR: arrow points to qiblaAngle relative to current heading
+      const arAngle = qiblaAngle !== null ? (qiblaAngle - heading + 360) % 360 : 0;
+      const rad = toRad(arAngle - 90);
+
       ctx.save();
       ctx.shadowColor = aligned ? "#86efac" : "#f0c8bc";
       ctx.shadowBlur  = 30;
@@ -205,30 +219,43 @@ export default function QiblaClient() {
       ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI*2); ctx.fillStyle = "white"; ctx.fill();
       ctx.restore();
       ctx.font = "bold 16px sans-serif"; ctx.fillStyle = "white"; ctx.textAlign = "center";
-      ctx.fillText(aligned ? "🕋 Facing Qibla!" : `Rotate ${Math.round(arrowAngle)}° to Qibla`, cx, cy - len - 20);
+      ctx.fillText(aligned ? "🕋 Facing Qibla!" : `Rotate ${Math.round(arAngle)}° to Qibla`, cx, cy - len - 20);
       arAnimRef.current = requestAnimationFrame(draw);
     };
     draw();
     return () => cancelAnimationFrame(arAnimRef.current);
-  }, [mode, arrowAngle, aligned]);
+  }, [mode, heading, qiblaAngle, aligned]);
 
+  // ── Derived display values ───────────────────────────────────
   const formattedDistance = distance
     ? distance > 1000 ? `${(distance/1000).toFixed(1)}k km` : `${Math.round(distance)} km`
     : null;
 
-  const cardinal = (a: number) => ["N","NE","E","SE","S","SW","W","NW"][Math.round(a/45) % 8];
+  // How many degrees to rotate to face Qibla (shortest path)
+  const degreesToQibla = qiblaAngle !== null
+    ? (() => {
+        const diff = ((qiblaAngle - heading) + 360) % 360;
+        return diff > 180 ? diff - 360 : diff;
+      })()
+    : 0;
 
   const accuracyLabel: Record<string, string> = {
     ios: "iOS Compass ✓",
     "android-abs": "High Accuracy ✓",
-    "android-rel": "Calibrate for accuracy",
-    none: "Waiting for compass...",
+    "android-rel": "Calibrate needed",
+    none: "Waiting...",
   };
+
+  // ── Compass geometry ─────────────────────────────────────────
+  // The whole dial rotates by -heading so N always points to real North
+  // The Qibla arrow is fixed at qiblaAngle from North inside that dial
+  const dialRotation   = -heading;
+  const qiblaRotation  = qiblaAngle ?? 0;
 
   return (
     <div className="min-h-screen bg-nude-50 flex flex-col overflow-hidden">
 
-      {/* AR Mode */}
+      {/* ── AR Mode overlay ──────────────────────────────────── */}
       {mode === "ar" && (
         <div className="fixed inset-0 z-50 bg-black">
           <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" autoPlay playsInline muted />
@@ -241,16 +268,17 @@ export default function QiblaClient() {
           <div className="absolute bottom-10 left-0 right-0 flex justify-center">
             <div className="bg-black/50 backdrop-blur rounded-3xl px-6 py-3 flex items-center gap-4">
               {aligned && <span className="text-green-400 text-lg animate-pulse">●</span>}
-              <p className="text-white text-sm font-bold">{aligned ? "Facing Qibla 🕋" : `Rotate ${Math.round(arrowAngle)}° to Qibla`}</p>
+              <p className="text-white text-sm font-bold">{aligned ? "Facing Qibla 🕋" : `Rotate ${Math.round(Math.abs(degreesToQibla))}° to Qibla`}</p>
               {formattedDistance && <p className="text-white/60 text-xs">{formattedDistance} away</p>}
             </div>
           </div>
         </div>
       )}
 
-      {/* Compass Mode */}
+      {/* ── Compass Mode ─────────────────────────────────────── */}
       {mode === "compass" && (
         <>
+          {/* Header */}
           <div className="px-5 pt-12 pb-6 relative overflow-hidden"
             style={{ background: "linear-gradient(160deg, #c8705a 0%, #d4786a 50%, #e8a090 100%)" }}>
             <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
@@ -284,6 +312,7 @@ export default function QiblaClient() {
           </div>
 
           <div className="flex-1 flex flex-col items-center justify-center px-6 py-6 gap-5">
+
             {status === "loading" && (
               <div className="flex flex-col items-center gap-4">
                 <div className="w-16 h-16 rounded-full border-4 border-nude-200 border-t-nude-500 animate-spin" />
@@ -305,9 +334,16 @@ export default function QiblaClient() {
 
             {(status === "ready" || location) && (
               <>
-                {/* Big compass */}
-                <div className="relative flex items-center justify-center">
-                  {aligned && <div className="absolute inset-0 rounded-full border-4 border-green-400 animate-ping opacity-30" />}
+                {/* ── The Compass ───────────────────────────────── */}
+                <div className="relative flex items-center justify-center select-none">
+
+                  {/* Glow ring when aligned */}
+                  {aligned && (
+                    <div className="absolute inset-0 rounded-full border-4 border-green-400 animate-ping opacity-30"
+                      style={{ width: "288px", height: "288px", margin: "0 auto" }} />
+                  )}
+
+                  {/* Outer decorative ring — fixed to screen */}
                   <div className="relative w-72 h-72 rounded-full flex items-center justify-center"
                     style={{
                       background: "conic-gradient(from 0deg, #f5e6e0, #e8c4b8, #d4a090, #e8c4b8, #f5e6e0)",
@@ -315,60 +351,123 @@ export default function QiblaClient() {
                         ? "0 0 40px rgba(74,222,128,0.3), 0 8px 32px rgba(0,0,0,0.15)"
                         : "0 8px 32px rgba(0,0,0,0.15), inset 0 2px 4px rgba(255,255,255,0.5)",
                     }}>
-                    {/* Cardinal labels rotate with heading */}
-                    {[{label:"N",angle:0},{label:"E",angle:90},{label:"S",angle:180},{label:"W",angle:270}].map(({label,angle}) => {
-                      const rad = toRad(angle - heading);
-                      const r = 116;
-                      return (
-                        <span key={label} className={`absolute font-display text-xs font-bold ${label==="N" ? "text-nude-700" : "text-nude-500"}`}
-                          style={{ left:`calc(50% + ${Math.sin(rad)*r}px - 8px)`, top:`calc(50% - ${Math.cos(rad)*r}px - 8px)`, transition:"left 0.08s, top 0.08s" }}>
-                          {label}
-                        </span>
-                      );
-                    })}
 
-                    <div className="w-56 h-56 rounded-full flex items-center justify-center relative"
-                      style={{ background: "radial-gradient(circle at 35% 35%, #fff, #f5ece8)" }}>
-                      {/* Arrow rotates */}
-                      <div className="absolute inset-0 flex items-center justify-center"
-                        style={{ transform:`rotate(${arrowAngle}deg)`, transition:"transform 0.12s ease-out" }}>
-                        <svg viewBox="0 0 80 160" className="w-16 h-32" fill="none">
-                          <ellipse cx="40" cy="130" rx="12" ry="16" fill="#e8c4b8" opacity="0.5" />
-                          <rect x="36" y="50" width="8" height="80" rx="4" fill="url(#sg)" />
-                          <path d="M40 8 L60 55 L40 45 L20 55 Z" fill={aligned ? "#4ade80" : "#d4786a"} />
-                          <text x="40" y="36" textAnchor="middle" fontSize="14" fill="white">🕋</text>
+                    {/*
+                     * ── ROTATING DIAL ──────────────────────────────
+                     * Rotates by -heading so that:
+                     *   - N on the dial always points to real-world North
+                     *   - As you turn your phone East, the dial rotates so
+                     *     N swings left (just like a physical compass)
+                     */}
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        transform: `rotate(${dialRotation}deg)`,
+                        transition: "transform 0.1s ease-out",
+                      }}
+                    >
+                      {/* Cardinal labels — fixed INSIDE the dial, so they rotate with it */}
+                      <span className="absolute font-display text-sm font-bold text-red-500"
+                        style={{ top: "8px", left: "50%", transform: "translateX(-50%)" }}>N</span>
+                      <span className="absolute font-display text-xs font-bold text-nude-500"
+                        style={{ bottom: "8px", left: "50%", transform: "translateX(-50%)" }}>S</span>
+                      <span className="absolute font-display text-xs font-bold text-nude-500"
+                        style={{ right: "8px", top: "50%", transform: "translateY(-50%)" }}>E</span>
+                      <span className="absolute font-display text-xs font-bold text-nude-500"
+                        style={{ left: "8px", top: "50%", transform: "translateY(-50%)" }}>W</span>
+
+                      {/* Tick marks at every 30° */}
+                      {Array.from({ length: 12 }).map((_, i) => {
+                        const angle = i * 30;
+                        const isMajor = angle % 90 === 0;
+                        return (
+                          <div key={i} className="absolute inset-0 flex items-start justify-center"
+                            style={{ transform: `rotate(${angle}deg)` }}>
+                            <div className={`rounded-full mt-4 ${isMajor ? "w-1 h-3 bg-nude-400" : "w-0.5 h-2 bg-nude-300"}`} />
+                          </div>
+                        );
+                      })}
+
+                      {/*
+                       * ── QIBLA ARROW ────────────────────────────────
+                       * Fixed at qiblaAngle inside the rotating dial.
+                       * Since the dial already rotates by -heading,
+                       * the net screen rotation of the arrow =
+                       *   qiblaAngle + dialRotation = qiblaAngle - heading
+                       * which is exactly the screen angle toward Qibla.
+                       * When heading === qiblaAngle, the arrow points up (North).
+                       * User's goal: rotate phone until arrow points to top.
+                       */}
+                      <div
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{ transform: `rotate(${qiblaRotation}deg)` }}
+                      >
+                        <svg viewBox="0 0 56 140" className="w-12 h-28" fill="none"
+                          style={{ marginTop: "-56px" }}>
+                          {/* Tail glow */}
+                          <ellipse cx="28" cy="115" rx="10" ry="14" fill="#e8c4b8" opacity="0.5" />
+                          {/* Shaft */}
+                          <rect x="25" y="45" width="6" height="72" rx="3" fill="url(#qsg)" />
+                          {/* Head */}
+                          <path d="M28 4 L44 48 L28 38 L12 48 Z"
+                            fill={aligned ? "#4ade80" : "#d4786a"} />
+                          {/* Kaaba emoji tip */}
+                          <text x="28" y="32" textAnchor="middle" fontSize="12" fill="white">🕋</text>
                           <defs>
-                            <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+                            <linearGradient id="qsg" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="0%" stopColor={aligned ? "#4ade80" : "#d4786a"} />
                               <stop offset="100%" stopColor="#e8c4b8" />
                             </linearGradient>
                           </defs>
                         </svg>
                       </div>
-                      <div className="w-4 h-4 rounded-full bg-nude-400 z-10 shadow-sm" />
+                    </div>
+
+                    {/* Inner white face — NOT rotating, contains center dot */}
+                    <div className="w-52 h-52 rounded-full flex items-center justify-center pointer-events-none"
+                      style={{ background: "radial-gradient(circle at 35% 35%, #fff, #f5ece8)" }}>
+                      {/* Center pivot dot */}
+                      <div className={`w-4 h-4 rounded-full z-10 shadow-sm transition-colors
+                        ${aligned ? "bg-green-400" : "bg-nude-400"}`} />
                     </div>
                   </div>
                 </div>
 
-                {/* Status */}
-                <div className={`w-full px-5 py-3 rounded-2xl flex items-center gap-3 transition-all
+                {/* ── Instruction hint ──────────────────────────── */}
+                <div className="bg-nude-100 rounded-2xl px-4 py-2 flex items-center gap-2">
+                  <span className="text-base">📱</span>
+                  <p className="font-body text-xs text-nude-600">
+                    Rotate your phone until the 🕋 arrow points <strong>up</strong>
+                  </p>
+                </div>
+
+                {/* ── Status badge ──────────────────────────────── */}
+                <div className={`w-full px-5 py-3.5 rounded-2xl flex items-center gap-3 transition-all
                   ${aligned ? "bg-green-50 border border-green-200" : "bg-white border border-nude-200 shadow-sm"}`}>
                   {aligned ? (
-                    <><span className="text-xl animate-bounce">✅</span>
-                    <div>
-                      <p className="font-display text-base font-bold text-green-700">Facing Qibla!</p>
-                      <p className="font-body text-xs text-green-500">You are aligned with the Kaaba 🕋</p>
-                    </div></>
+                    <>
+                      <span className="text-2xl animate-bounce">✅</span>
+                      <div>
+                        <p className="font-display text-base font-bold text-green-700">Facing Qibla!</p>
+                        <p className="font-body text-xs text-green-500">You are aligned with the Kaaba 🕋</p>
+                      </div>
+                    </>
                   ) : (
-                    <><div className="w-10 h-10 rounded-xl bg-nude-100 flex items-center justify-center"><span className="text-lg">🧭</span></div>
-                    <div>
-                      <p className="font-display text-base font-bold text-nude-700">
-                        Rotate {Math.round(arrowAngle)}° {cardinal(arrowAngle)}
-                      </p>
-                      <p className="font-body text-xs text-nude-400">
-                        Qibla is {qiblaAngle ? Math.round(qiblaAngle) : "—"}° from North
-                      </p>
-                    </div></>
+                    <>
+                      <div className="w-10 h-10 rounded-xl bg-nude-100 flex items-center justify-center flex-shrink-0">
+                        <span className="text-lg">🧭</span>
+                      </div>
+                      <div>
+                        <p className="font-display text-base font-bold text-nude-700">
+                          {Math.abs(degreesToQibla) < 45
+                            ? `Almost there — ${Math.round(Math.abs(degreesToQibla))}° to go`
+                            : `Rotate ${Math.round(Math.abs(degreesToQibla))}° ${degreesToQibla > 0 ? "clockwise" : "counter-clockwise"}`}
+                        </p>
+                        <p className="font-body text-xs text-nude-400">
+                          Qibla is {qiblaAngle ? Math.round(qiblaAngle) : "—"}° from North
+                        </p>
+                      </div>
+                    </>
                   )}
                 </div>
 
@@ -380,7 +479,7 @@ export default function QiblaClient() {
                   </button>
                 )}
 
-                {/* Calibration warning for Android relative */}
+                {/* Android calibration warning */}
                 {compassSource === "android-rel" && (
                   <div className="w-full bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
                     <p className="font-body text-xs font-bold text-amber-700">⚠️ Compass needs calibration</p>
