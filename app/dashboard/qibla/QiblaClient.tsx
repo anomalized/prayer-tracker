@@ -400,7 +400,7 @@ export default function QiblaClient() {
                        */}
                       <div
                         className="absolute inset-0 flex items-center justify-center"
-                        style={{ transform: `rotate(${qiblaRotation}deg)` }}
+                        style={{ transform: `rotate(${qiblaRotation - 90}deg)` }}
                       >
                         <svg viewBox="0 0 56 140" className="w-12 h-28" fill="none"
                           style={{ marginTop: "-56px" }}>
