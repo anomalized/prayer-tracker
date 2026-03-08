@@ -47,19 +47,20 @@ export default function QiblaClient() {
         setGpsReady(true);
       } catch {}
     }
-    navigator.geolocation?.getCurrentPosition(
+    // watchPosition keeps Qibla angle accurate if user is moving (car, train, etc.)
+    const watchId = navigator.geolocation?.watchPosition(
       ({ coords: { latitude: lat, longitude: lng } }) => {
         setLoc({ lat, lng }); setQibla(getQibla(lat, lng)); setDist(getDist(lat, lng));
         localStorage.setItem("qibla_loc", JSON.stringify({ lat, lng }));
-        setGpsReady(true);
-        initSensor();
+        setGpsReady(prev => { if (!prev) initSensor(); return true; });
       },
       () => {
         if (gpsReady) initSensor();
         else setGpsErr("Enable location access to find your Qibla direction.");
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true }
     );
+    return () => { if (watchId != null) navigator.geolocation?.clearWatch(watchId); };
   }, []);
 
   // ── Sensor ───────────────────────────────────────────────────
@@ -78,19 +79,20 @@ export default function QiblaClient() {
     // compass = webkitCompassHeading  (iOS — true North already)
     //         || Math.abs(alpha - 360) (Android — converts to bearing)
     const handler = (e: DeviceOrientationEvent) => {
-      const raw: number =
-        (e as any).webkitCompassHeading != null
-          ? (e as any).webkitCompassHeading
-          : Math.abs((e.alpha ?? 0) - 360);
-
-      // Low-pass smoothing — prevents needle jitter
+      let heading = 0;
+      if ((e as any).webkitCompassHeading != null) {
+        heading = (e as any).webkitCompassHeading; // iOS — already true North
+      } else {
+        heading = (360 - (e.alpha ?? 0)) % 360;    // Android absolute
+      }
+      // Low-pass smoothing (0.2 factor) — kills sensor noise without lag
       const prev = prevRef.current;
-      let diff = raw - prev;
+      let diff = heading - prev;
       if (diff >  180) diff -= 360;
       if (diff < -180) diff += 360;
-      const s = (prev + diff * 0.2 + 360) % 360;
-      prevRef.current = s;
-      setCompass(s);
+      const smoothed = (prev + diff * 0.2 + 360) % 360;
+      prevRef.current = smoothed;
+      setCompass(smoothed);
       setLive(true);
     };
 
@@ -241,11 +243,8 @@ export default function QiblaClient() {
 
                 {/* THE NEEDLE — rotates smoothly */}
                 <div
-                  style={{
-                    transform: `rotate(${arrowAngle}deg)`,
-                    transition: live ? "transform 0.1s linear" : "none",
-                    willChange: "transform",
-                  }}
+                  className="transition-transform duration-100 ease-linear will-change-transform"
+                  style={{ transform: `rotate(${arrowAngle}deg)` }}
                 >
                   <svg width="88" height="200" viewBox="0 0 88 200" fill="none">
                     {/* Kaaba at tip */}
