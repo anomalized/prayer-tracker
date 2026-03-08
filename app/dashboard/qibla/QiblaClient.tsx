@@ -23,8 +23,10 @@ function getDist(lat: number, lng: number) {
 }
 
 export default function QiblaClient() {
-  const router = useRouter();
-  const prevRef = useRef(0);
+  const router      = useRouter();
+  const prevRef     = useRef(0);
+  const alignedRef  = useRef(false); // tracks previous aligned state for haptic pulse
+  const qiblaRef    = useRef<number | null>(null); // mirror of qibla state for use inside handler
 
   const [qibla,    setQibla]    = useState<number | null>(null);
   const [dist,     setDist]     = useState<number | null>(null);
@@ -34,8 +36,9 @@ export default function QiblaClient() {
   const [showBtn,  setShowBtn]  = useState(false);   // iOS needs tap
   const [gpsReady, setGpsReady] = useState(false);
   const [gpsErr,   setGpsErr]   = useState("");
-  const [confirmed, setConfirmed] = useState(false); // user tapped "confirm"
-  const [calibMsg, setCalibMsg] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const [calibMsg,  setCalibMsg]  = useState(false);
+  const [isFlat,    setIsFlat]    = useState(true);  // phone tilt detection
 
   // ── GPS ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -44,13 +47,16 @@ export default function QiblaClient() {
       try {
         const { lat, lng } = JSON.parse(cached);
         setLoc({ lat, lng }); setQibla(getQibla(lat, lng)); setDist(getDist(lat, lng));
+        qiblaRef.current = getQibla(lat, lng);
         setGpsReady(true);
       } catch {}
     }
     // watchPosition keeps Qibla angle accurate if user is moving (car, train, etc.)
     const watchId = navigator.geolocation?.watchPosition(
       ({ coords: { latitude: lat, longitude: lng } }) => {
-        setLoc({ lat, lng }); setQibla(getQibla(lat, lng)); setDist(getDist(lat, lng));
+        const q = getQibla(lat, lng);
+        setLoc({ lat, lng }); setQibla(q); setDist(getDist(lat, lng));
+        qiblaRef.current = q;
         localStorage.setItem("qibla_loc", JSON.stringify({ lat, lng }));
         setGpsReady(prev => { if (!prev) initSensor(); return true; });
       },
@@ -94,6 +100,23 @@ export default function QiblaClient() {
       prevRef.current = smoothed;
       setCompass(smoothed);
       setLive(true);
+
+      // ── Tilt detection: warn if phone is angled more than 20° ──
+      const flat = Math.abs(e.beta  ?? 0) < 20 &&
+                   Math.abs(e.gamma ?? 0) < 20;
+      setIsFlat(flat);
+
+      // ── Haptic pulse on alignment (Android only) ───────────────
+      if (qiblaRef.current !== null) {
+        const angle = (qiblaRef.current - smoothed + 360) % 360;
+        const nowAligned = angle < 4 || angle > 356;
+        if (nowAligned && !alignedRef.current) {
+          if (typeof window !== "undefined" && navigator.vibrate) {
+            navigator.vibrate(40); // short physical pulse on first alignment
+          }
+        }
+        alignedRef.current = nowAligned;
+      }
     };
 
     const win = window as any;
@@ -243,8 +266,11 @@ export default function QiblaClient() {
 
                 {/* THE NEEDLE — rotates smoothly */}
                 <div
-                  className="transition-transform duration-100 ease-linear will-change-transform"
-                  style={{ transform: `rotate(${arrowAngle}deg)` }}
+                  className="transition-all duration-300 ease-out will-change-transform"
+                  style={{
+                    transform: `rotate(${arrowAngle}deg) scale(${aligned ? 1.1 : 1})`,
+                    filter: aligned ? "drop-shadow(0 0 12px rgba(34,197,94,0.5))" : "none",
+                  }}
                 >
                   <svg width="88" height="200" viewBox="0 0 88 200" fill="none">
                     {/* Kaaba at tip */}
@@ -283,6 +309,16 @@ export default function QiblaClient() {
                 style={{ background: "linear-gradient(to right, #c8705a, #d4786a)" }}>
                 🧭 Allow Compass Access
               </button>
+            )}
+
+            {/* Tilt warning — shown when phone is angled more than 20° */}
+            {live && !isFlat && (
+              <div className="w-full bg-amber-50 border border-amber-200 rounded-2xl px-4 py-2.5 flex items-center gap-2">
+                <span className="text-base">📐</span>
+                <p className="font-body text-xs font-bold text-amber-700">
+                  Hold phone flat for accurate reading
+                </p>
+              </div>
             )}
 
             {/* Status */}
