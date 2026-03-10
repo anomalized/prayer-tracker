@@ -197,8 +197,7 @@ export default function QiblaClient() {
       <div className="px-5 pt-12 pb-5 relative overflow-hidden text-white"
         style={{ background: "linear-gradient(160deg,#c8705a,#d4786a 55%,#e8a090)" }}>
         <div className="flex flex-col gap-1">
-          <p className="text-[10px] opacity-70 tracking-widest uppercase font-bold">Qibla Direction</p>
-          <h1 className="text-2xl font-bold tracking-tight">Mecca Finder</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Qibla Direction</h1>
         </div>
         <div className="flex gap-2 mt-4 overflow-x-auto">
           {distLabel && (
