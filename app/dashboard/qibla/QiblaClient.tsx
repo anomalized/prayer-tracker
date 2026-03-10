@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import MenuButton from "@/components/ui/MenuButton";
 
 const MECCA = { lat: 21.4225, lng: 39.8262 };
 const toRad = (d: number) => (d * Math.PI) / 180;
@@ -197,8 +198,10 @@ export default function QiblaClient() {
       <div className="px-5 pt-12 pb-5 relative overflow-hidden text-white"
         style={{ background: "linear-gradient(160deg,#c8705a,#d4786a 55%,#e8a090)" }}>
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight">Qibla Direction</h1>
+          <p className="text-[10px] opacity-70 tracking-widest uppercase font-bold">Qibla Direction</p>
+          <h1 className="text-2xl font-bold tracking-tight">Mecca Finder</h1>
         </div>
+        <MenuButton className="absolute top-12 right-5 z-10" dark={true} />
         <div className="flex gap-2 mt-4 overflow-x-auto">
           {distLabel && (
             <div className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap">

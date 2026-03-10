@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile, updatePassword, signOut, deleteAccount } from "@/lib/actions/settings";
+import MenuButton from "@/components/ui/MenuButton";
 
 interface Props {
   userId: string;
@@ -74,16 +75,11 @@ export default function SettingsClient({ userId, fullName, email, city }: Props)
   };
 
   return (
-    <div className="min-h-screen bg-nude-50">
+    <div className="min-h-screen" style={{ background: "#fdf6f3" }}>
       {/* Header */}
       <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-nude-300 opacity-20" />
-        <button
-          onClick={() => router.back()}
-          className="font-body text-sm text-nude-600 mb-4 flex items-center gap-1"
-        >
-          ← Back
-        </button>
+        <MenuButton className="absolute top-12 right-5 z-10" dark={false} />
         <h1 className="font-display text-3xl font-bold text-nude-800">Settings ⚙️</h1>
         <p className="font-body text-sm text-nude-500 mt-1">{email}</p>
       </div>

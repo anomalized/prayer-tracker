@@ -1,25 +1,24 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/ui/BottomNav";
-import OneSignalProvider from "@/components/ui/OneSignalProvider";
+import NavProvider from "@/components/ui/NavProvider";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
 
-  if (!user) {
-    redirect("/auth/login");
-  }
+  // Fetch name for drawer header
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
 
   return (
-    <div className="min-h-screen bg-nude-50 pb-24">
-      <OneSignalProvider />
-      {children}
-      <BottomNav />
-    </div>
+    <NavProvider userName={profile?.full_name ?? ""} userEmail={user.email ?? ""}>
+      <div className="min-h-screen" style={{ background: "#fdf6f3" }}>
+        {children}
+      </div>
+    </NavProvider>
   );
 }

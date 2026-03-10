@@ -1,10 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import StatsSummary from "@/components/stats/StatsSummary";
 import Heatmap from "@/components/stats/Heatmap";
 import PrayerBreakdown from "@/components/stats/PrayerBreakdown";
 import WeeklyTrend from "@/components/stats/WeeklyTrend";
 import RankBadge from "@/components/ui/RankBadge";
+import MenuButton from "@/components/ui/MenuButton";
 
 interface Props {
   stats: {
@@ -26,15 +29,23 @@ interface Props {
 }
 
 export default function StatsClient({ stats, breakdown, heatmap, weekly, monthStats }: Props) {
+  const router = useRouter();
+  useEffect(() => {
+    const onFocus = () => router.refresh();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [router]);
+
   const points = stats?.total_points ?? 0;
   const currentStreak = stats?.current_streak ?? 0;
   const bestStreak = stats?.best_streak ?? 0;
 
   return (
-    <div className="min-h-screen bg-nude-50">
+    <div className="min-h-screen" style={{ background: "#fdf6f3" }}>
       {/* Header */}
       <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-nude-300 opacity-20" />
+        <MenuButton className="absolute top-12 right-5 z-10" dark={false} />
         <p className="font-body text-xs tracking-widest text-nude-500 uppercase mb-1">Your Journey</p>
         <h1 className="font-display text-3xl font-bold text-nude-800 mb-4">Stats 📊</h1>
 

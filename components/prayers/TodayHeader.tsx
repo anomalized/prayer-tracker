@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getRank, RANK_COLORS, getRankProgress } from "@/lib/utils";
+import MenuButton from "@/components/ui/MenuButton";
 
 interface Props {
   userName: string;
@@ -11,12 +12,47 @@ interface Props {
   extraPoints: number; // live points earned this session
 }
 
+
+// Hijri date conversion (Umm al-Qura approximation)
+function toHijri(date: Date): string {
+  const MONTHS = [
+    "Muharram","Safar","Rabi al-Awwal","Rabi al-Thani",
+    "Jumada al-Awwal","Jumada al-Thani","Rajab","Sha'ban",
+    "Ramadan","Shawwal","Dhu al-Qi'dah","Dhu al-Hijjah"
+  ];
+  try {
+    // Use Intl API if available (modern browsers)
+    const parts = new Intl.DateTimeFormat("en-TN-u-ca-islamic-umalqura", {
+      day: "numeric", month: "long", year: "numeric"
+    }).formatToParts(date);
+    const d = parts.find(p => p.type === "day")?.value;
+    const m = parts.find(p => p.type === "month")?.value;
+    const y = parts.find(p => p.type === "year")?.value;
+    return `${d} ${m} ${y} AH`;
+  } catch {
+    // Fallback approximation
+    const JD = Math.floor((date.getTime() / 86400000) + 2440587.5);
+    const l = JD - 1948440 + 10632;
+    const n = Math.floor((l - 1) / 10631);
+    const ll = l - 10631 * n + 354;
+    const j = Math.floor((10985 - ll) / 5316) * Math.floor((50 * ll) / 17719)
+      + Math.floor(ll / 5670) * Math.floor((43 * ll) / 15238);
+    const lll = ll - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50)
+      - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+    const month = Math.floor((24 * lll) / 709);
+    const day = lll - Math.floor((709 * month) / 24);
+    const year = 30 * n + j - 30;
+    return `${day} ${MONTHS[month - 1]} ${year} AH`;
+  }
+}
+
 export default function TodayHeader({ userName, donePrayers, totalPoints, currentStreak, extraPoints }: Props) {
   const livePoints = totalPoints + extraPoints;
   const rank = getRank(livePoints);
   const progress = getRankProgress(livePoints);
   const rankColor = RANK_COLORS[rank];
 
+  const hijriDate = toHijri(new Date());
   const greetings = ["Peace be upon you", "Assalamu Alaikum", "Welcome back"];
   const greeting = greetings[0];
 
@@ -26,10 +62,18 @@ export default function TodayHeader({ userName, donePrayers, totalPoints, curren
       <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-nude-300 opacity-20" />
       <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-nude-300 opacity-15" />
 
+      {/* Menu button */}
+      <MenuButton className="absolute top-12 right-5 z-10" dark={false} />
+
       {/* Greeting */}
-      <p className="font-body text-xs tracking-widest text-nude-500 uppercase mb-1">
-        {new Date().toLocaleDateString("en-US", { weekday:"long", day:"numeric", month:"long" })}
-      </p>
+      <div className="mb-1">
+        <p className="font-body text-xs tracking-widest text-nude-500 uppercase">
+          {new Date().toLocaleDateString("en-US", { weekday:"long", day:"numeric", month:"long" })}
+        </p>
+        <p className="font-body text-xs text-nude-400 mt-0.5">
+          🌙 {hijriDate}
+        </p>
+      </div>
       <h1 className="font-display text-3xl font-bold text-nude-800 mb-1">
         {greeting},
       </h1>

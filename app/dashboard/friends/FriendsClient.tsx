@@ -5,6 +5,7 @@ import AddFriendForm from "@/components/friends/AddFriendForm";
 import PendingRequests from "@/components/friends/PendingRequests";
 import { sendNudge } from "@/lib/actions/nudge";
 import { removeFriend } from "@/lib/actions/friends";
+import MenuButton from "@/components/ui/MenuButton";
 
 const PRAYER_NAMES = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -204,6 +205,7 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
       <div className="px-5 pt-12 pb-6 relative overflow-hidden"
         style={{ background: "linear-gradient(160deg, #f5e6df 0%, #f0d8ce 60%, #ecddd6 100%)" }}>
         <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-40" style={{ background: "#e8c4b8" }} />
+        <MenuButton className="absolute top-12 right-5 z-10" dark={false} />
         <p className="font-body text-xs tracking-widest text-nude-400 uppercase mb-1 relative z-10">Leaderboard</p>
         <h1 className="font-display text-3xl font-bold text-nude-700 mb-3 relative z-10">Friends 🏆</h1>
         <div className="flex gap-2 flex-wrap relative z-10">

@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import BadgeCard from "@/components/rewards/BadgeCard";
 import BadgeCelebration from "@/components/rewards/BadgeCelebration";
+import MenuButton from "@/components/ui/MenuButton";
 import RankBadge from "@/components/ui/RankBadge";
 import { checkAndAwardBadges } from "@/lib/actions/badges";
 import { getRank, RANK_COLORS, RANK_THRESHOLDS } from "@/lib/utils";
@@ -18,7 +19,7 @@ interface Badge {
 
 interface Props {
   badges: Badge[];
-  stats: { total_points: number; current_streak: number; best_streak: number; onboarding_complete?: boolean } | null;
+  stats: { total_points: number; current_streak: number; best_streak: number } | null;
 }
 
 export default function RewardsClient({ badges, stats }: Props) {
@@ -57,6 +58,7 @@ export default function RewardsClient({ badges, stats }: Props) {
       {/* Header */}
       <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-nude-300 opacity-20" />
+        <MenuButton className="absolute top-12 right-5 z-10" dark={false} />
         <p className="font-body text-xs tracking-widest text-nude-500 uppercase mb-1">Your Achievements</p>
         <h1 className="font-display text-3xl font-bold text-nude-800 mb-4">Rewards ✨</h1>
 
