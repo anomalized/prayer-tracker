@@ -9,6 +9,14 @@ const PRAYER_META: Record<string, { arabic: string; icon: string }> = {
 };
 
 export async function getPrayerTimes(city: string = "Islamabad"): Promise<PrayerTime[]> {
+  const fallback: PrayerTime[] = [
+    { name: "Fajr",    arabic: "الفجر",  icon: "🌙", time: "5:10 AM"  },
+    { name: "Dhuhr",   arabic: "الظهر",  icon: "☀️", time: "12:30 PM" },
+    { name: "Asr",     arabic: "العصر",  icon: "🌤️", time: "3:45 PM"  },
+    { name: "Maghrib", arabic: "المغرب", icon: "🌇", time: "6:20 PM"  },
+    { name: "Isha",    arabic: "العشاء", icon: "🌌", time: "7:50 PM"  },
+  ];
+
   try {
     const today = new Date();
     const day   = today.getDate();
@@ -20,11 +28,17 @@ export async function getPrayerTimes(city: string = "Islamabad"): Promise<Prayer
       { next: { revalidate: 3600 } }
     );
 
-    if (!res.ok) throw new Error("Failed to fetch prayer times");
+    if (!res.ok) return fallback;
 
     const data = await res.json();
-    const timings = data.data.timings;
 
+    // Aladhan returns { code: 400, status: "Bad Request" } for invalid cities
+    // Guard against missing data at every level
+    if (!data || data.code !== 200 || !data.data || !data.data.timings) {
+      return fallback;
+    }
+
+    const timings = data.data.timings;
     const prayers: PrayerName[] = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
     return prayers.map((name) => ({
       name,
@@ -33,14 +47,7 @@ export async function getPrayerTimes(city: string = "Islamabad"): Promise<Prayer
       time:   formatTime(timings[name]),
     }));
   } catch {
-    // Fallback times if API fails
-    return [
-      { name: "Fajr",    arabic: "الفجر",  icon: "🌙", time: "5:10 AM"  },
-      { name: "Dhuhr",   arabic: "الظهر",  icon: "☀️", time: "12:30 PM" },
-      { name: "Asr",     arabic: "العصر",  icon: "🌤️", time: "3:45 PM"  },
-      { name: "Maghrib", arabic: "المغرب", icon: "🌇", time: "6:20 PM"  },
-      { name: "Isha",    arabic: "العشاء", icon: "🌌", time: "7:50 PM"  },
-    ];
+    return fallback;
   }
 }
 

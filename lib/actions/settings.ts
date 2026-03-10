@@ -9,6 +9,22 @@ export async function updateProfile(fullName: string, city: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  // Validate city against Aladhan API before saving
+  if (city.trim()) {
+    try {
+      const today = new Date();
+      const res = await fetch(
+        `https://api.aladhan.com/v1/timingsByCity/${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}?city=${encodeURIComponent(city.trim())}&country=&method=2`
+      );
+      const data = await res.json();
+      if (!data || data.code !== 200 || !data.data?.timings) {
+        return { error: `"${city}" wasn't recognised as a valid city. Try a major city like "Lahore" or "London".` };
+      }
+    } catch {
+      // Network error — allow save anyway, don't block the user
+    }
+  }
+
   const { error } = await supabase
     .from("profiles")
     .update({ full_name: fullName, city })
