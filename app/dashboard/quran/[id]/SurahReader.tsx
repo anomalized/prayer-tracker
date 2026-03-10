@@ -6,22 +6,150 @@ import { SURAHS } from "@/lib/quran";
 import MenuButton from "@/components/ui/MenuButton";
 
 interface Ayah {
-  number: number;       // global ayah number
+  number: number;
   numberInSurah: number;
   arabic: string;
   translation: string;
-  transliteration?: string;
 }
 
 interface Props { surahNumber: number; }
 
 const ARABIC_FONT = "'Scheherazade New', 'KFGQPC Uthmanic Script HAFS', 'Traditional Arabic', serif";
 
-// ── Arabic numeral converter ──────────────────────────────────
 function toArabicNum(n: number): string {
   return n.toString().replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[+d]);
 }
 
+// ── Per-ayah AI explanation component ────────────────────────
+function AyahExplanation({
+  ayah, surahName, surahNumber, darkMode,
+}: {
+  ayah: Ayah; surahName: string; surahNumber: number; darkMode: boolean;
+}) {
+  const [open,       setOpen]       = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [text,       setText]       = useState("");
+  const [done,       setDone]       = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const explain = useCallback(async () => {
+    if (done) { setOpen(o => !o); return; }
+    setOpen(true);
+    if (loading || text) return;
+    setLoading(true);
+    abortRef.current = new AbortController();
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        signal: abortRef.current.signal,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 400,
+          stream: true,
+          system: `You are a knowledgeable and respectful Islamic scholar assistant. 
+When explaining a Quranic ayah, give:
+1. A SHORT plain-English meaning (1-2 sentences, simple words)
+2. The KEY spiritual lesson or message (1-2 sentences)
+3. If relevant, brief context about when/why it was revealed (1 sentence max)
+Keep the total explanation under 120 words. Use warm, accessible language. 
+Never start with "This ayah" — vary your opening. Don't use bullet points, just natural flowing paragraphs.`,
+          messages: [{
+            role: "user",
+            content: `Surah ${surahNumber} (${surahName}), Ayah ${ayah.numberInSurah}:\nArabic: ${ayah.arabic}\nTranslation: ${ayah.translation}\n\nExplain this ayah in simple, clear English.`
+          }]
+        }),
+      });
+
+      if (!response.ok || !response.body) { setLoading(false); return; }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done: streamDone, value } = await reader.read();
+        if (streamDone) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(data);
+            const delta = parsed.delta?.text ?? parsed.delta?.type === "text_delta" ? parsed.delta?.text : "";
+            if (delta) setText(prev => prev + delta);
+          } catch {}
+        }
+      }
+      setDone(true);
+    } catch (e: any) {
+      if (e?.name !== "AbortError") setText("Could not load explanation. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [done, loading, text, ayah, surahName, surahNumber]);
+
+  useEffect(() => () => abortRef.current?.abort(), []);
+
+  const borderColor = darkMode ? "#5a3d1a" : "#f0d4c0";
+  const bg          = darkMode ? "#2a1e10" : "#fffaf7";
+  const textColor   = darkMode ? "#f0d8b0" : "#5a3520";
+  const labelColor  = darkMode ? "#c4906040" : "#c4906080";
+
+  return (
+    <div>
+      {/* Trigger button */}
+      <button
+        onClick={explain}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${
+          open
+            ? darkMode ? "bg-amber-700/60 text-amber-100" : "bg-nude-200 text-nude-700"
+            : darkMode ? "bg-white/8 text-amber-400/80 border border-white/10 hover:bg-white/15"
+                       : "bg-nude-50 text-nude-500 border border-nude-200 hover:bg-nude-100"
+        }`}
+      >
+        {loading ? (
+          <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <span className="text-[11px]">✦</span>
+        )}
+        {loading ? "Explaining…" : open && done ? "Hide" : "AI Explain"}
+      </button>
+
+      {/* Explanation panel */}
+      {open && (
+        <div className="mt-3 rounded-2xl px-4 py-3.5 transition-all"
+          style={{ background: bg, border: `1px solid ${borderColor}` }}>
+          <p className="text-[10px] font-bold uppercase tracking-widest mb-2"
+            style={{ color: labelColor }}>
+            ✦ AI Explanation
+          </p>
+          {loading && !text && (
+            <div className="flex gap-1.5 items-center py-1">
+              {[0,1,2].map(i => (
+                <div key={i} className="w-1.5 h-1.5 rounded-full animate-bounce"
+                  style={{ background: darkMode ? "#c4906080" : "#c49060a0", animationDelay: `${i * 0.15}s` }} />
+              ))}
+            </div>
+          )}
+          <p className="text-sm font-body leading-relaxed" style={{ color: textColor }}>
+            {text}
+            {loading && text && (
+              <span className="inline-block w-1 h-3.5 ml-0.5 rounded-sm animate-pulse"
+                style={{ background: darkMode ? "#c49060" : "#c87050", verticalAlign: "middle" }} />
+            )}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main reader ───────────────────────────────────────────────
 export default function SurahReader({ surahNumber }: Props) {
   const router = useRouter();
   const surah  = SURAHS.find(s => s.number === surahNumber);
@@ -29,25 +157,21 @@ export default function SurahReader({ surahNumber }: Props) {
   const [ayahs,       setAyahs]       = useState<Ayah[]>([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState("");
-  const [showTranslit,setShowTranslit]= useState(false);
   const [showTrans,   setShowTrans]   = useState(true);
   const [darkMode,    setDarkMode]    = useState(false);
   const [fontSize,    setFontSize]    = useState<"sm"|"md"|"lg"|"xl">("md");
   const [bookmarks,   setBookmarks]   = useState<number[]>([]);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [audioLoading,setAudioLoading]= useState(false);
-  const audioRef  = useRef<HTMLAudioElement | null>(null);
-  const ayahRefs  = useRef<Record<number, HTMLDivElement | null>>({});
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const arabicSize = { sm: "text-xl", md: "text-2xl", lg: "text-3xl", xl: "text-4xl" }[fontSize];
   const lineHeight = { sm: "leading-loose", md: "leading-loose", lg: "leading-[2.2]", xl: "leading-[2.4]" }[fontSize];
 
-  // ── Load ayahs from API ───────────────────────────────────────
+  // ── Load ayahs ────────────────────────────────────────────────
   useEffect(() => {
     if (!surah) return;
     setLoading(true); setError("");
-
-    // Fetch Arabic + English translation in parallel
     Promise.all([
       fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}`).then(r => r.json()),
       fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/en.asad`).then(r => r.json()),
@@ -55,31 +179,23 @@ export default function SurahReader({ surahNumber }: Props) {
       if (arabicData.code !== 200 || transData.code !== 200) {
         setError("Failed to load surah. Please check your connection."); return;
       }
-      const arabicAyahs = arabicData.data.ayahs as any[];
-      const transAyahs  = transData.data.ayahs  as any[];
-      const combined: Ayah[] = arabicAyahs.map((a, i) => ({
+      const combined: Ayah[] = (arabicData.data.ayahs as any[]).map((a, i) => ({
         number:        a.number,
         numberInSurah: a.numberInSurah,
         arabic:        a.text,
-        translation:   transAyahs[i]?.text ?? "",
+        translation:   (transData.data.ayahs as any[])[i]?.text ?? "",
       }));
       setAyahs(combined);
-
-      // Save last read
       localStorage.setItem("quran_last_read", String(surahNumber));
-
-      // Restore scroll to last position
       const saved = localStorage.getItem(`quran_pos_${surahNumber}`);
       if (saved) setTimeout(() => window.scrollTo(0, parseInt(saved)), 100);
     }).catch(() => setError("Network error. Please try again."))
       .finally(() => setLoading(false));
   }, [surahNumber, surah]);
 
-  // ── Save scroll position ──────────────────────────────────────
+  // ── Save scroll ───────────────────────────────────────────────
   useEffect(() => {
-    const onScroll = () => {
-      localStorage.setItem(`quran_pos_${surahNumber}`, String(window.scrollY));
-    };
+    const onScroll = () => localStorage.setItem(`quran_pos_${surahNumber}`, String(window.scrollY));
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [surahNumber]);
@@ -90,41 +206,31 @@ export default function SurahReader({ surahNumber }: Props) {
     if (saved) setBookmarks(JSON.parse(saved));
   }, [surahNumber]);
 
-  const toggleBookmark = useCallback((ayahNum: number) => {
+  const toggleBookmark = useCallback((n: number) => {
     setBookmarks(prev => {
-      const next = prev.includes(ayahNum)
-        ? prev.filter(n => n !== ayahNum)
-        : [...prev, ayahNum];
+      const next = prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n];
       localStorage.setItem(`quran_bookmarks_${surahNumber}`, JSON.stringify(next));
       return next;
     });
   }, [surahNumber]);
 
-  // ── Audio playback ────────────────────────────────────────────
-  const playAyah = useCallback(async (ayahNumber: number) => {
-    if (playingAyah === ayahNumber) {
-      audioRef.current?.pause();
-      setPlayingAyah(null); return;
-    }
-    setAudioLoading(true); setPlayingAyah(ayahNumber);
+  // ── Audio ─────────────────────────────────────────────────────
+  const playAyah = useCallback(async (n: number) => {
+    if (playingAyah === n) { audioRef.current?.pause(); setPlayingAyah(null); return; }
+    setAudioLoading(true); setPlayingAyah(n);
     try {
-      const paddedSurah = String(surahNumber).padStart(3, "0");
-      const paddedAyah  = String(ayahNumber).padStart(3, "0");
-      // Mishary Rashid Al-Afasy recitation
-      const url = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${
-        SURAHS.slice(0, surahNumber - 1).reduce((sum, s) => sum + s.ayahs, 0) + ayahNumber
-      }.mp3`;
+      const globalNum = SURAHS.slice(0, surahNumber - 1).reduce((s, x) => s + x.ayahs, 0) + n;
+      const url = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${globalNum}.mp3`;
       if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
       const audio = new Audio(url);
       audioRef.current = audio;
-      audio.onended = () => setPlayingAyah(null);
-      audio.onerror = () => { setPlayingAyah(null); setAudioLoading(false); };
+      audio.onended  = () => setPlayingAyah(null);
+      audio.onerror  = () => { setPlayingAyah(null); setAudioLoading(false); };
       audio.oncanplay = () => setAudioLoading(false);
       await audio.play();
     } catch { setPlayingAyah(null); setAudioLoading(false); }
   }, [surahNumber, playingAyah]);
 
-  // Stop audio on unmount
   useEffect(() => () => { audioRef.current?.pause(); }, []);
 
   const prev = SURAHS.find(s => s.number === surahNumber - 1);
@@ -140,33 +246,29 @@ export default function SurahReader({ surahNumber }: Props) {
     </div>
   );
 
-  const bg   = darkMode ? "#1a1208" : "#fdf6f3";
-  const card = darkMode ? "#2a1e10" : "#ffffff";
-  const textPrimary   = darkMode ? "#f5e6df" : "#3d2b1f";
-  const textSecondary = darkMode ? "#c4a882" : "#9a7060";
-  const borderColor   = darkMode ? "#3d2b1f" : "#f0e0d8";
+  const bg          = darkMode ? "#1a1208" : "#fdf6f3";
+  const card        = darkMode ? "#2a1e10" : "#ffffff";
+  const borderColor = darkMode ? "#3d2b1f" : "#f0e0d8";
 
   return (
     <div className="min-h-screen pb-16 transition-colors duration-300" style={{ background: bg }}>
 
-      {/* ── Sticky Header ────────────────────────────────────── */}
+      {/* ── Sticky Header ─────────────────────────────────── */}
       <div className="sticky top-0 z-30 px-4 pt-10 pb-3 transition-colors duration-300"
         style={{ background: darkMode
           ? "linear-gradient(160deg,#2a1e10,#1a1208)"
           : "linear-gradient(160deg,#f5e6df,#ecddd6)" }}>
 
         <div className="flex items-center gap-3 mb-3">
-          {/* Back */}
           <button onClick={() => router.back()}
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors flex-shrink-0 ${
-              darkMode ? "bg-white/10 text-amber-200 hover:bg-white/20" : "bg-white/60 text-nude-600 border border-nude-200 hover:bg-white"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
+              darkMode ? "bg-white/10 text-amber-200" : "bg-white/60 text-nude-600 border border-nude-200"
             }`}>
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
 
-          {/* Title */}
           <div className="flex-1 min-w-0">
             <p className={`font-body text-[10px] font-bold tracking-widest uppercase ${darkMode ? "text-amber-400/70" : "text-nude-400"}`}>
               Surah {surahNumber} · {surah.type}
@@ -176,7 +278,6 @@ export default function SurahReader({ surahNumber }: Props) {
             </p>
           </div>
 
-          {/* Arabic name */}
           <p className={`text-xl font-medium flex-shrink-0 ${darkMode ? "text-amber-200" : "text-nude-600"}`}
             style={{ fontFamily: ARABIC_FONT }}>
             {surah.name}
@@ -185,18 +286,19 @@ export default function SurahReader({ surahNumber }: Props) {
           <MenuButton dark={darkMode} />
         </div>
 
-        {/* Controls row */}
+        {/* Controls */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {/* Font size */}
           <div className={`flex rounded-xl overflow-hidden border ${darkMode ? "border-white/10" : "border-nude-200"}`}>
-            {(["sm","md","lg","xl"] as const).map(s => (
+            {(["sm","md","lg","xl"] as const).map((s, i) => (
               <button key={s} onClick={() => setFontSize(s)}
-                className={`px-2.5 py-1.5 text-xs font-bold transition-colors ${
+                className={`px-2.5 py-1.5 font-bold transition-colors ${
                   fontSize === s
                     ? darkMode ? "bg-amber-700 text-white" : "bg-nude-200 text-nude-700"
-                    : darkMode ? "bg-transparent text-amber-400/60 hover:bg-white/5" : "bg-white text-nude-400 hover:bg-nude-50"
-                }`}>
-                {s === "sm" ? "A" : s === "md" ? "A" : s === "lg" ? "A" : "A"}
+                    : darkMode ? "bg-transparent text-amber-400/60" : "bg-white text-nude-400"
+                }`}
+                style={{ fontSize: [10,12,14,16][i] }}>
+                A
               </button>
             ))}
           </div>
@@ -207,27 +309,21 @@ export default function SurahReader({ surahNumber }: Props) {
               showTrans
                 ? darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-nude-200 text-nude-700 border-nude-300"
                 : darkMode ? "bg-transparent text-amber-400/60 border-white/10" : "bg-white text-nude-400 border-nude-200"
-            }`}>EN</button>
-
-          {/* Transliteration toggle */}
-          <button onClick={() => setShowTranslit(v => !v)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              showTranslit
-                ? darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-nude-200 text-nude-700 border-nude-300"
-                : darkMode ? "bg-transparent text-amber-400/60 border-white/10" : "bg-white text-nude-400 border-nude-200"
-            }`}>Roman</button>
+            }`}>
+            Translation
+          </button>
 
           {/* Dark mode */}
           <button onClick={() => setDarkMode(v => !v)}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ml-auto flex-shrink-0 ${
-              darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-white text-nude-400 border-nude-200 hover:bg-nude-50"
+              darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-white text-nude-400 border-nude-200"
             }`}>
             {darkMode ? "☀️" : "🌙"}
           </button>
         </div>
       </div>
 
-      {/* ── Loading ───────────────────────────────────────────── */}
+      {/* ── Loading ───────────────────────────────────────── */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className={`w-10 h-10 border-4 rounded-full animate-spin ${
@@ -239,9 +335,10 @@ export default function SurahReader({ surahNumber }: Props) {
         </div>
       )}
 
-      {/* ── Error ─────────────────────────────────────────────── */}
+      {/* ── Error ─────────────────────────────────────────── */}
       {error && (
-        <div className="mx-4 mt-6 p-5 rounded-3xl text-center" style={{ background: card, border: `1px solid ${borderColor}` }}>
+        <div className="mx-4 mt-6 p-5 rounded-3xl text-center"
+          style={{ background: card, border: `1px solid ${borderColor}` }}>
           <p className="text-3xl mb-2">⚠️</p>
           <p className={`text-sm font-bold font-body mb-3 ${darkMode ? "text-amber-200" : "text-nude-700"}`}>{error}</p>
           <button onClick={() => window.location.reload()}
@@ -252,14 +349,14 @@ export default function SurahReader({ surahNumber }: Props) {
         </div>
       )}
 
-      {/* ── Surah header card ─────────────────────────────────── */}
+      {/* ── Surah header card ─────────────────────────────── */}
       {!loading && !error && ayahs.length > 0 && (
-        <div className="mx-4 mt-4 mb-2 rounded-3xl p-6 text-center transition-colors"
+        <div className="mx-4 mt-4 mb-2 rounded-3xl p-6 text-center"
           style={{ background: darkMode
             ? "linear-gradient(135deg,#2a1e10,#1e1508)"
             : "linear-gradient(135deg,#fdf0ea,#f5e2d8)",
             border: `1px solid ${borderColor}` }}>
-          <p className={`text-4xl mb-2 font-medium`}
+          <p className="text-4xl mb-2 font-medium"
             style={{ fontFamily: ARABIC_FONT, color: darkMode ? "#f5e6df" : "#5a3520" }}>
             {surah.name}
           </p>
@@ -269,8 +366,6 @@ export default function SurahReader({ surahNumber }: Props) {
           <p className={`font-body text-xs mt-1 ${darkMode ? "text-amber-400/60" : "text-nude-400"}`}>
             {surah.englishMeaning} · {surah.ayahs} Ayahs · {surah.type}
           </p>
-
-          {/* Bismillah — all surahs except At-Tawbah (9) */}
           {surahNumber !== 9 && (
             <div className={`mt-4 pt-4 border-t ${darkMode ? "border-white/10" : "border-nude-200"}`}>
               <p className={`text-2xl leading-loose ${darkMode ? "text-amber-100" : "text-nude-700"}`}
@@ -285,32 +380,28 @@ export default function SurahReader({ surahNumber }: Props) {
         </div>
       )}
 
-      {/* ── Ayahs ─────────────────────────────────────────────── */}
+      {/* ── Ayahs ─────────────────────────────────────────── */}
       {!loading && !error && (
-        <div className="px-4 space-y-1 pb-8">
+        <div className="px-4 pb-8 mt-2 space-y-2">
           {ayahs.map((ayah) => {
             const isBookmarked = bookmarks.includes(ayah.numberInSurah);
             const isPlaying    = playingAyah === ayah.numberInSurah;
 
             return (
-              <div
-                key={ayah.numberInSurah}
-                ref={el => { ayahRefs.current[ayah.numberInSurah] = el; }}
-                className="rounded-3xl px-5 py-5 transition-all duration-200"
+              <div key={ayah.numberInSurah}
+                className="rounded-3xl px-5 py-5 transition-colors duration-200"
                 style={{
                   background: isBookmarked
-                    ? darkMode ? "#3a2a14" : "#fef8f5"
+                    ? darkMode ? "#3a2a14" : "#fffaf6"
                     : card,
                   border: `1px solid ${isBookmarked
                     ? darkMode ? "#5a3d1a" : "#f0c8a8"
                     : borderColor}`,
-                  marginBottom: "8px",
-                }}
-              >
-                {/* Ayah header */}
+                }}>
+
+                {/* Row: ayah number + actions */}
                 <div className="flex items-center justify-between mb-4">
-                  {/* Ayah number bubble */}
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold"
                     style={{
                       background: darkMode ? "#3d2b1f" : "#f5e6df",
                       color: darkMode ? "#c4a882" : "#9a7060",
@@ -319,43 +410,40 @@ export default function SurahReader({ surahNumber }: Props) {
                     {ayah.numberInSurah}
                   </div>
 
-                  {/* Action buttons */}
                   <div className="flex items-center gap-1.5">
                     {/* Play */}
                     <button onClick={() => playAyah(ayah.numberInSurah)}
+                      title="Play recitation"
                       className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs transition-all ${
                         isPlaying
                           ? "bg-amber-500 text-white"
-                          : darkMode ? "bg-white/8 text-amber-400/70 hover:bg-white/15" : "bg-nude-50 text-nude-400 hover:bg-nude-100 border border-nude-200"
+                          : darkMode ? "bg-white/8 text-amber-400/70 border border-white/10 hover:bg-white/15"
+                                     : "bg-nude-50 text-nude-400 border border-nude-200 hover:bg-nude-100"
                       }`}>
-                      {audioLoading && isPlaying ? (
-                        <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      ) : isPlaying ? "⏸" : "▶"}
+                      {audioLoading && isPlaying
+                        ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        : isPlaying ? "⏸" : "▶"}
                     </button>
 
                     {/* Bookmark */}
                     <button onClick={() => toggleBookmark(ayah.numberInSurah)}
+                      title={isBookmarked ? "Remove bookmark" : "Bookmark ayah"}
                       className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs transition-all ${
                         isBookmarked
                           ? "bg-amber-500 text-white"
-                          : darkMode ? "bg-white/8 text-amber-400/70 hover:bg-white/15" : "bg-nude-50 text-nude-400 hover:bg-nude-100 border border-nude-200"
+                          : darkMode ? "bg-white/8 text-amber-400/70 border border-white/10 hover:bg-white/15"
+                                     : "bg-nude-50 text-nude-400 border border-nude-200 hover:bg-nude-100"
                       }`}>
                       {isBookmarked ? "🔖" : "🏷"}
                     </button>
                   </div>
                 </div>
 
-                {/* Arabic text */}
-                <p
-                  className={`text-right mb-4 ${arabicSize} ${lineHeight}`}
+                {/* Arabic */}
+                <p className={`text-right mb-5 ${arabicSize} ${lineHeight}`}
                   dir="rtl"
-                  style={{
-                    fontFamily: ARABIC_FONT,
-                    color: darkMode ? "#f0e0c8" : "#2a1a0e",
-                  }}
-                >
-                  {ayah.arabic}
-                  {" "}
+                  style={{ fontFamily: ARABIC_FONT, color: darkMode ? "#f0e0c8" : "#2a1a0e" }}>
+                  {ayah.arabic}{" "}
                   <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs align-middle"
                     style={{
                       background: darkMode ? "#3d2b1f" : "#f5e6df",
@@ -366,31 +454,32 @@ export default function SurahReader({ surahNumber }: Props) {
                   </span>
                 </p>
 
-                {/* Transliteration */}
-                {showTranslit && ayah.transliteration && (
-                  <p className={`text-xs font-body italic leading-relaxed mb-3 pb-3 border-b ${
-                    darkMode ? "text-amber-300/50 border-white/8" : "text-nude-400 border-nude-100"
-                  }`}>
-                    {ayah.transliteration}
-                  </p>
-                )}
-
                 {/* Translation */}
                 {showTrans && (
-                  <p className={`text-sm font-body leading-relaxed ${darkMode ? "text-amber-100/80" : "text-nude-600"}`}>
-                    <span className={`font-bold mr-1 ${darkMode ? "text-amber-500/70" : "text-nude-300"}`}>
+                  <p className={`text-sm font-body leading-relaxed mb-4 pb-4 border-b ${
+                    darkMode ? "text-amber-100/70 border-white/8" : "text-nude-500 border-nude-100"
+                  }`}>
+                    <span className={`font-bold mr-1 text-xs ${darkMode ? "text-amber-500/50" : "text-nude-300"}`}>
                       {ayah.numberInSurah}.
                     </span>
                     {ayah.translation}
                   </p>
                 )}
+
+                {/* AI explanation */}
+                <AyahExplanation
+                  ayah={ayah}
+                  surahName={surah.englishName}
+                  surahNumber={surahNumber}
+                  darkMode={darkMode}
+                />
               </div>
             );
           })}
         </div>
       )}
 
-      {/* ── Prev / Next Surah ─────────────────────────────────── */}
+      {/* ── Prev / Next ────────────────────────────────────── */}
       {!loading && !error && (
         <div className="px-4 pb-10 flex gap-3">
           {prev ? (
