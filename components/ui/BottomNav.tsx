@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/today",   label: "Today",   icon: "🕌" },
   { href: "/dashboard/stats",   label: "Stats",   icon: "📊" },
   { href: "/dashboard/friends", label: "Friends", icon: "👯‍♀️" },
-  { href: "/dashboard/rewards", label: "Rewards", icon: "✨" },
+  { href: "/dashboard/duas",    label: "Duas",    icon: "🤲" },
   { href: "/dashboard/qibla",   label: "Qibla",   icon: "🧭" },
   { href: "/settings",          label: "Settings", icon: "⚙️" },
 ];
