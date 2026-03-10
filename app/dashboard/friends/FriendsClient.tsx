@@ -91,7 +91,7 @@ function LeaderboardRow({ entry, rank, myPoints, showActions }: {
   };
 
   return (
-    <div className={`relative flex items-center gap-3 px-4 py-3 transition-colors
+    <div className={`relative flex items-center gap-3 px-5 py-4 transition-colors
       ${entry.isMe ? "bg-nude-100 border-l-4 border-nude-400"
         : isMedal  ? "bg-gradient-to-r from-amber-50/50 to-transparent"
         : "hover:bg-nude-50/60"}`}
@@ -198,45 +198,49 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
   const pointsToTop = leader?.isMe ? 0 : (leader?.points ?? 0) - myPoints;
 
   return (
-    <div className="min-h-screen bg-nude-50 pb-28">
-      <div className="px-5 pt-12 pb-5 relative overflow-hidden"
-        style={{ background: "linear-gradient(160deg, #c8705a 0%, #d4786a 60%, #e8a090 100%)" }}>
-        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-white/10" />
-        <p className="font-body text-xs tracking-widest text-white/70 uppercase mb-1 relative z-10">Leaderboard</p>
-        <h1 className="font-display text-3xl font-bold text-white mb-3 relative z-10">Friends 🏆</h1>
+    <div className="min-h-screen pb-28" style={{ background: "#fdf6f3" }}>
+
+      {/* Header — light peach matching Qibla and other pages */}
+      <div className="px-5 pt-12 pb-6 relative overflow-hidden"
+        style={{ background: "linear-gradient(160deg, #f5e6df 0%, #f0d8ce 60%, #ecddd6 100%)" }}>
+        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-40" style={{ background: "#e8c4b8" }} />
+        <p className="font-body text-xs tracking-widest text-nude-400 uppercase mb-1 relative z-10">Leaderboard</p>
+        <h1 className="font-display text-3xl font-bold text-nude-700 mb-3 relative z-10">Friends 🏆</h1>
         <div className="flex gap-2 flex-wrap relative z-10">
-          <div className="bg-white/20 backdrop-blur rounded-2xl px-3 py-1.5">
-            <p className="text-white text-xs font-bold">{myRank === 1 ? "👑 You're #1!" : `#${myRank} of ${allEntries.length}`}</p>
+          <div className="bg-white/60 backdrop-blur rounded-2xl px-3 py-1.5 border border-nude-200">
+            <p className="text-nude-600 text-xs font-bold">{myRank === 1 ? "👑 You're #1!" : `#${myRank} of ${allEntries.length}`}</p>
           </div>
           {pointsToTop > 0 && (
-            <div className="bg-white/20 backdrop-blur rounded-2xl px-3 py-1.5">
-              <p className="text-white text-xs font-bold">⚡ {pointsToTop} pts to #1</p>
+            <div className="bg-white/60 backdrop-blur rounded-2xl px-3 py-1.5 border border-nude-200">
+              <p className="text-nude-600 text-xs font-bold">⚡ {pointsToTop} pts to #1</p>
             </div>
           )}
           {myStreak > 0 && (
-            <div className="bg-white/20 backdrop-blur rounded-2xl px-3 py-1.5">
-              <p className="text-white text-xs font-bold">🔥 {myStreak} day streak</p>
+            <div className="bg-white/60 backdrop-blur rounded-2xl px-3 py-1.5 border border-nude-200">
+              <p className="text-nude-600 text-xs font-bold">🔥 {myStreak} day streak</p>
             </div>
           )}
         </div>
       </div>
 
-      <div className="px-4 py-4 space-y-3">
+      <div className="px-4 py-5 space-y-4">
         {pending.length > 0 && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
             <PendingRequests requests={pending} />
           </div>
         )}
 
+        {/* Leaderboard table */}
         <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
-          <div className="flex items-center px-4 py-2 bg-nude-50 border-b border-nude-100">
-            <div className="w-7 flex-shrink-0" /><div className="w-9 flex-shrink-0 mr-3" />
-            <p className="flex-1 font-body text-xs font-bold tracking-widest text-nude-400 uppercase">Player · Today · Streak</p>
-            <p className="font-body text-xs font-bold tracking-widest text-nude-400 uppercase mr-16">Pts</p>
+          <div className="flex items-center px-5 py-3 bg-nude-50/80 border-b border-nude-100">
+            <div className="w-8 flex-shrink-0" />
+            <div className="w-10 flex-shrink-0 mr-3" />
+            <p className="flex-1 font-body text-[10px] font-bold tracking-widest text-nude-400 uppercase">Player · Today · Streak</p>
+            <p className="font-body text-[10px] font-bold tracking-widest text-nude-400 uppercase mr-14">Pts</p>
           </div>
           <div className="divide-y divide-nude-50">
             {allEntries.length === 0 ? (
-              <div className="py-14 text-center">
+              <div className="py-16 text-center">
                 <p className="text-4xl mb-2">🌸</p>
                 <p className="font-display text-base font-bold text-nude-600">No friends yet</p>
                 <p className="font-body text-sm text-nude-400 mt-1">Add friends below to start competing!</p>
@@ -246,18 +250,19 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
             ))}
           </div>
           {allEntries.length > 1 && (
-            <div className="px-4 py-2 bg-nude-50 border-t border-nude-100 flex justify-between">
+            <div className="px-5 py-3 bg-nude-50/80 border-t border-nude-100 flex justify-between">
               <p className="font-body text-xs text-nude-400">🌸 = nudge · ··· = options</p>
               <p className="font-body text-xs text-nude-300">●●●●● = today's prayers</p>
             </div>
           )}
         </div>
 
+        {/* Add friend */}
         <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
           <button onClick={() => setShowAdd(v => !v)}
-            className="w-full flex items-center justify-between px-4 py-4 hover:bg-nude-50 transition-colors">
+            className="w-full flex items-center justify-between px-5 py-4 hover:bg-nude-50 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-nude-100 flex items-center justify-center text-lg">➕</div>
+              <div className="w-10 h-10 rounded-xl bg-nude-100 flex items-center justify-center text-lg">➕</div>
               <div className="text-left">
                 <p className="font-body text-sm font-bold text-nude-700">Add a friend</p>
                 <p className="font-body text-xs text-nude-400">Invite by email address</p>
@@ -266,7 +271,7 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
             <span className={`text-nude-400 transition-transform duration-200 ${showAdd ? "rotate-180" : ""}`}>▾</span>
           </button>
           {showAdd && (
-            <div className="px-4 pb-4 border-t border-nude-100 pt-3">
+            <div className="px-5 pb-5 border-t border-nude-100 pt-4">
               <AddFriendForm />
             </div>
           )}
