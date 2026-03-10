@@ -40,31 +40,25 @@ function AyahExplanation({
     abortRef.current = new AbortController();
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/explain-ayah", {
         method: "POST",
         signal: abortRef.current.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 400,
-          stream: true,
-          system: `You are a knowledgeable and respectful Islamic scholar assistant. 
-When explaining a Quranic ayah, give:
-1. A SHORT plain-English meaning (1-2 sentences, simple words)
-2. The KEY spiritual lesson or message (1-2 sentences)
-3. If relevant, brief context about when/why it was revealed (1 sentence max)
-Keep the total explanation under 120 words. Use warm, accessible language. 
-Never start with "This ayah" — vary your opening. Don't use bullet points, just natural flowing paragraphs.`,
-          messages: [{
-            role: "user",
-            content: `Surah ${surahNumber} (${surahName}), Ayah ${ayah.numberInSurah}:\nArabic: ${ayah.arabic}\nTranslation: ${ayah.translation}\n\nExplain this ayah in simple, clear English.`
-          }]
+          arabic:      ayah.arabic,
+          translation: ayah.translation,
+          surahName,
+          surahNumber,
+          ayahNumber:  ayah.numberInSurah,
         }),
       });
 
-      if (!response.ok || !response.body) { setLoading(false); return; }
+      if (!response.ok || !response.body) {
+        setText("Could not load explanation. Please try again.");
+        setLoading(false); return;
+      }
 
-      const reader = response.body.getReader();
+      const reader  = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
 
@@ -80,8 +74,10 @@ Never start with "This ayah" — vary your opening. Don't use bullet points, jus
           if (data === "[DONE]") continue;
           try {
             const parsed = JSON.parse(data);
-            const delta = parsed.delta?.text ?? parsed.delta?.type === "text_delta" ? parsed.delta?.text : "";
-            if (delta) setText(prev => prev + delta);
+            // Anthropic streaming: content_block_delta with text_delta
+            if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
+              setText(prev => prev + (parsed.delta.text ?? ""));
+            }
           } catch {}
         }
       }
@@ -174,17 +170,27 @@ export default function SurahReader({ surahNumber }: Props) {
     setLoading(true); setError("");
     Promise.all([
       fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}`).then(r => r.json()),
-      fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/en.asad`).then(r => r.json()),
+      fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/en.sahih`).then(r => r.json()),
     ]).then(([arabicData, transData]) => {
       if (arabicData.code !== 200 || transData.code !== 200) {
         setError("Failed to load surah. Please check your connection."); return;
       }
-      const combined: Ayah[] = (arabicData.data.ayahs as any[]).map((a, i) => ({
-        number:        a.number,
-        numberInSurah: a.numberInSurah,
-        arabic:        a.text,
-        translation:   (transData.data.ayahs as any[])[i]?.text ?? "",
-      }));
+      // The API prepends Bismillah to ayah 1 Arabic text for all surahs except Al-Fatihah (1) and At-Tawbah (9)
+      // We display Bismillah separately in the header card, so strip it from ayah 1 to avoid duplication
+      const BISMILLAH = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
+      const combined: Ayah[] = (arabicData.data.ayahs as any[]).map((a, i) => {
+        let arabic = a.text as string;
+        // Strip Bismillah prefix from first ayah (except Al-Fatihah where it IS ayah 1)
+        if (i === 0 && surahNumber !== 1 && surahNumber !== 9) {
+          arabic = arabic.replace(/^بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, "").trim();
+        }
+        return {
+          number:        a.number,
+          numberInSurah: a.numberInSurah,
+          arabic,
+          translation:   (transData.data.ayahs as any[])[i]?.text ?? "",
+        };
+      });
       setAyahs(combined);
       localStorage.setItem("quran_last_read", String(surahNumber));
       const saved = localStorage.getItem(`quran_pos_${surahNumber}`);
@@ -422,19 +428,24 @@ export default function SurahReader({ surahNumber }: Props) {
                       }`}>
                       {audioLoading && isPlaying
                         ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        : isPlaying ? "⏸" : "▶"}
+                        : isPlaying
+                          ? <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="1" y="1" width="3" height="8" rx="1"/><rect x="6" y="1" width="3" height="8" rx="1"/></svg>
+                          : <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 1.5l7 3.5-7 3.5V1.5z"/></svg>
+                      }
                     </button>
 
                     {/* Bookmark */}
                     <button onClick={() => toggleBookmark(ayah.numberInSurah)}
                       title={isBookmarked ? "Remove bookmark" : "Bookmark ayah"}
-                      className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs transition-all ${
+                      className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
                         isBookmarked
                           ? "bg-amber-500 text-white"
                           : darkMode ? "bg-white/8 text-amber-400/70 border border-white/10 hover:bg-white/15"
                                      : "bg-nude-50 text-nude-400 border border-nude-200 hover:bg-nude-100"
                       }`}>
-                      {isBookmarked ? "🔖" : "🏷"}
+                      <svg width="12" height="14" viewBox="0 0 12 14" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 1h10v12l-5-3-5 3V1z"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
