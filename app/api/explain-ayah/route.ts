@@ -16,36 +16,43 @@ export async function POST(req: NextRequest) {
   try {
     const { arabic, translation, surahName, surahNumber, ayahNumber } = await req.json();
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "ANTHROPIC_API_KEY not set in environment" }, { status: 500, headers: CORS });
+      return NextResponse.json({ error: "GEMINI_API_KEY not set in environment" }, { status: 500, headers: CORS });
     }
 
-    const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 350,
-        system: `You are a knowledgeable and respectful Islamic scholar. Explain the given Quranic ayah in 3-4 sentences of plain, warm English. Cover: what it means, its spiritual lesson, and brief context if relevant. No bullet points. Do not start with "This ayah".`,
-        messages: [{
-          role: "user",
-          content: `Surah ${surahNumber} (${surahName}), Ayah ${ayahNumber}:\nTranslation: "${translation}"\n\nExplain this ayah simply and clearly.`
-        }]
-      }),
-    });
+    const prompt = `You are a knowledgeable and respectful Islamic scholar. Explain this Quranic ayah in 3-4 sentences of plain, warm English. Cover what it means, its spiritual lesson, and brief context if relevant. No bullet points. Do not start with "This ayah".
 
-    if (!anthropicRes.ok) {
-      const errText = await anthropicRes.text();
-      return NextResponse.json({ error: `Anthropic error ${anthropicRes.status}: ${errText}` }, { status: anthropicRes.status, headers: CORS });
+Surah ${surahNumber} (${surahName}), Ayah ${ayahNumber}:
+Translation: "${translation}"
+
+Explain this ayah simply and clearly.`;
+
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            maxOutputTokens: 350,
+            temperature: 0.7,
+          },
+        }),
+      }
+    );
+
+    if (!geminiRes.ok) {
+      const errText = await geminiRes.text();
+      return NextResponse.json(
+        { error: `Gemini error ${geminiRes.status}: ${errText}` },
+        { status: geminiRes.status, headers: CORS }
+      );
     }
 
-    const data = await anthropicRes.json();
-    const text = data.content?.[0]?.text ?? "Unable to generate explanation.";
+    const data = await geminiRes.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "Unable to generate explanation.";
     return NextResponse.json({ text }, { headers: CORS });
 
   } catch (e: any) {
