@@ -47,14 +47,25 @@ function AyahExplanation({
           ayahNumber:  ayah.numberInSurah,
         }),
       });
-      const data = await res.json();
-      if (data.error) {
-        setText("Could not load explanation. Please try again.");
-      } else {
-        setText(data.text ?? "No explanation available.");
+      const rawText = await res.text();
+      console.log("API status:", res.status);
+      console.log("API response:", rawText);
+      if (!res.ok) {
+        setText(`Error ${res.status}: ${rawText}`);
+        return;
       }
-    } catch {
-      setText("Network error. Please try again.");
+      try {
+        const data = JSON.parse(rawText);
+        if (data.error) {
+          setText(`API Error: ${data.error}`);
+        } else {
+          setText(data.text ?? "No explanation available.");
+        }
+      } catch {
+        setText(`Parse error. Raw: ${rawText.slice(0, 200)}`);
+      }
+    } catch (e: any) {
+      setText(`Network error: ${e.message}`);
     } finally {
       setLoading(false);
     }
