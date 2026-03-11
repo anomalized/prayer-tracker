@@ -25,12 +25,15 @@ export async function POST(req: NextRequest) {
     // flavor from the listModels output if you ever need to change it.
     const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
-    const prompt = `You are a knowledgeable and respectful Islamic scholar. Explain this Quranic ayah in 3-4 sentences of plain, warm English. Cover what it means, its spiritual lesson, and brief context if relevant. No bullet points. Do not start with "This ayah".
+    // new requirement: return a proper, valid and authentic Urdu translation
+    const prompt = `You are a fluent Arabic–Urdu translator with deep respect for Qurʾānic language. Instead of providing an explanation, give a correct, eloquent Urdu rendering of the ayah that a native Urdu speaker would recognize as authentic and beautiful.
+
+Do not include commentary, tafsir, or additional sentences – only the translation itself. Keep the tone reverent and poetic, matching the peach/floral aesthetic of the app.
 
 Surah ${surahNumber} (${surahName}), Ayah ${ayahNumber}:
 Translation: "${translation}"
 
-Explain this ayah simply and clearly.`;
+Provide the Urdu text alone.`;
 
     const geminiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -40,7 +43,7 @@ Explain this ayah simply and clearly.`;
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            maxOutputTokens: 350,
+            maxOutputTokens: 450,
             temperature: 0.7,
           },
         }),
