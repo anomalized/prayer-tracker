@@ -26,23 +26,18 @@ function AyahExplanation({
 }: {
   ayah: Ayah; surahName: string; surahNumber: number; darkMode: boolean;
 }) {
-  const [open,       setOpen]       = useState(false);
-  const [loading,    setLoading]    = useState(false);
-  const [text,       setText]       = useState("");
-  const [done,       setDone]       = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
+  const [open,    setOpen]    = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [text,    setText]    = useState("");
 
   const explain = useCallback(async () => {
-    if (done) { setOpen(o => !o); return; }
+    // Toggle if already loaded
+    if (text) { setOpen(o => !o); return; }
     setOpen(true);
-    if (loading || text) return;
     setLoading(true);
-    abortRef.current = new AbortController();
-
     try {
-      const response = await fetch("/api/explain-ayah", {
+      const res = await fetch("/api/explain-ayah", {
         method: "POST",
-        signal: abortRef.current.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           arabic:      ayah.arabic,
@@ -52,93 +47,62 @@ function AyahExplanation({
           ayahNumber:  ayah.numberInSurah,
         }),
       });
-
-      if (!response.ok || !response.body) {
+      const data = await res.json();
+      if (data.error) {
         setText("Could not load explanation. Please try again.");
-        setLoading(false); return;
+      } else {
+        setText(data.text ?? "No explanation available.");
       }
-
-      const reader  = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done: streamDone, value } = await reader.read();
-        if (streamDone) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") continue;
-          try {
-            const parsed = JSON.parse(data);
-            // Anthropic streaming: content_block_delta with text_delta
-            if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
-              setText(prev => prev + (parsed.delta.text ?? ""));
-            }
-          } catch {}
-        }
-      }
-      setDone(true);
-    } catch (e: any) {
-      if (e?.name !== "AbortError") setText("Could not load explanation. Please try again.");
+    } catch {
+      setText("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [done, loading, text, ayah, surahName, surahNumber]);
-
-  useEffect(() => () => abortRef.current?.abort(), []);
+  }, [text, loading, ayah, surahName, surahNumber]);
 
   const borderColor = darkMode ? "#5a3d1a" : "#f0d4c0";
   const bg          = darkMode ? "#2a1e10" : "#fffaf7";
   const textColor   = darkMode ? "#f0d8b0" : "#5a3520";
-  const labelColor  = darkMode ? "#c4906040" : "#c4906080";
+  const labelColor  = darkMode ? "#c4906060" : "#c4906090";
 
   return (
     <div>
-      {/* Trigger button */}
       <button
         onClick={explain}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${
-          open
+        disabled={loading}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 disabled:opacity-60 ${
+          open && text
             ? darkMode ? "bg-amber-700/60 text-amber-100" : "bg-nude-200 text-nude-700"
             : darkMode ? "bg-white/8 text-amber-400/80 border border-white/10 hover:bg-white/15"
                        : "bg-nude-50 text-nude-500 border border-nude-200 hover:bg-nude-100"
         }`}
       >
-        {loading ? (
-          <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <span className="text-[11px]">✦</span>
-        )}
-        {loading ? "Explaining…" : open && done ? "Hide" : "AI Explain"}
+        {loading
+          ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          : <span className="text-[11px]">✦</span>
+        }
+        {loading ? "Loading…" : open && text ? "Hide" : "AI Explain"}
       </button>
 
-      {/* Explanation panel */}
       {open && (
-        <div className="mt-3 rounded-2xl px-4 py-3.5 transition-all"
+        <div className="mt-3 rounded-2xl px-4 py-3.5"
           style={{ background: bg, border: `1px solid ${borderColor}` }}>
           <p className="text-[10px] font-bold uppercase tracking-widest mb-2"
             style={{ color: labelColor }}>
             ✦ AI Explanation
           </p>
-          {loading && !text && (
-            <div className="flex gap-1.5 items-center py-1">
+          {loading ? (
+            <div className="flex gap-1.5 items-center py-2">
               {[0,1,2].map(i => (
                 <div key={i} className="w-1.5 h-1.5 rounded-full animate-bounce"
-                  style={{ background: darkMode ? "#c4906080" : "#c49060a0", animationDelay: `${i * 0.15}s` }} />
+                  style={{ background: darkMode ? "#c4906060" : "#c49060a0", animationDelay: `${i*0.15}s` }} />
               ))}
             </div>
+          ) : (
+            <p className="text-sm font-body leading-relaxed" style={{ color: textColor }}>
+              {text}
+            </p>
           )}
-          <p className="text-sm font-body leading-relaxed" style={{ color: textColor }}>
-            {text}
-            {loading && text && (
-              <span className="inline-block w-1 h-3.5 ml-0.5 rounded-sm animate-pulse"
-                style={{ background: darkMode ? "#c49060" : "#c87050", verticalAlign: "middle" }} />
-            )}
-          </p>
         </div>
       )}
     </div>
@@ -180,7 +144,11 @@ export default function SurahReader({ surahNumber }: Props) {
         // Strip Bismillah from ayah 1 — we show it separately in the header
         // Except Al-Fatihah (1) where it IS ayah 1, and At-Tawbah (9) which has none
         if (i === 0 && surahNumber !== 1 && surahNumber !== 9) {
-          arabic = arabic.replace(/^بِسْمِ\s+.+?الرَّحِيمِ\s*/, "").trim();
+          // Strip everything up to and including الرَّحِيمِ (end of Bismillah)
+          // Using indexOf to find the end of Bismillah — avoids Unicode regex issues
+          const marker = "الرَّحِيمِ";
+          const idx = arabic.indexOf(marker);
+          if (idx !== -1) arabic = arabic.slice(idx + marker.length).trim();
         }
         return {
           number:        a.number,
