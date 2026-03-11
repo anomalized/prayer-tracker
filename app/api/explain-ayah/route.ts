@@ -1,6 +1,16 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "API key not configured" }), { status: 500 });
+      return NextResponse.json({ error: "ANTHROPIC_API_KEY not set in environment" }, { status: 500, headers: CORS });
     }
 
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
@@ -31,16 +41,14 @@ export async function POST(req: NextRequest) {
 
     if (!anthropicRes.ok) {
       const errText = await anthropicRes.text();
-      return new Response(JSON.stringify({ error: errText }), { status: anthropicRes.status });
+      return NextResponse.json({ error: `Anthropic error ${anthropicRes.status}: ${errText}` }, { status: anthropicRes.status, headers: CORS });
     }
 
     const data = await anthropicRes.json();
     const text = data.content?.[0]?.text ?? "Unable to generate explanation.";
-    return new Response(JSON.stringify({ text }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ text }, { headers: CORS });
 
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+    return NextResponse.json({ error: e.message ?? "Unknown error" }, { status: 500, headers: CORS });
   }
 }

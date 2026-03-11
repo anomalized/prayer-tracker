@@ -48,21 +48,15 @@ function AyahExplanation({
         }),
       });
       const rawText = await res.text();
-      console.log("API status:", res.status);
-      console.log("API response:", rawText);
       if (!res.ok) {
-        setText(`Error ${res.status}: ${rawText}`);
+        setText(`Error ${res.status}: ${rawText.slice(0, 300)}`);
         return;
       }
       try {
         const data = JSON.parse(rawText);
-        if (data.error) {
-          setText(`API Error: ${data.error}`);
-        } else {
-          setText(data.text ?? "No explanation available.");
-        }
+        setText(data.error ? `API Error: ${data.error}` : (data.text ?? "No explanation available."));
       } catch {
-        setText(`Parse error. Raw: ${rawText.slice(0, 200)}`);
+        setText(`Parse error: ${rawText.slice(0, 200)}`);
       }
     } catch (e: any) {
       setText(`Network error: ${e.message}`);
