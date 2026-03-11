@@ -21,6 +21,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "GEMINI_API_KEY not set in environment" }, { status: 500, headers: CORS });
     }
 
+    // model can be overridden for experimentation; pick a current-supported
+    // flavor from the listModels output if you ever need to change it.
+    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+
     const prompt = `You are a knowledgeable and respectful Islamic scholar. Explain this Quranic ayah in 3-4 sentences of plain, warm English. Cover what it means, its spiritual lesson, and brief context if relevant. No bullet points. Do not start with "This ayah".
 
 Surah ${surahNumber} (${surahName}), Ayah ${ayahNumber}:
@@ -29,7 +33,7 @@ Translation: "${translation}"
 Explain this ayah simply and clearly.`;
 
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
