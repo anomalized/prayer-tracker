@@ -116,11 +116,4 @@ prayer-tracker/
 
 ---
 
-## 🔐 Security
 
-- All data is protected by Supabase **Row Level Security (RLS)**
-- Users can only read/write their own data
-- Friends can read (but never edit) each other's prayer logs
-- Sessions use secure JWT tokens managed by Supabase
-- All traffic encrypted via HTTPS on Vercel
-- Passwords are hashed by Supabase Auth — never stored in plain text
