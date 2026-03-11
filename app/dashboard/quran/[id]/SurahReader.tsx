@@ -175,20 +175,22 @@ export default function SurahReader({ surahNumber }: Props) {
       if (arabicData.code !== 200 || transData.code !== 200) {
         setError("Failed to load surah. Please check your connection."); return;
       }
-      // The API prepends Bismillah to ayah 1 Arabic text for all surahs except Al-Fatihah (1) and At-Tawbah (9)
-      // We display Bismillah separately in the header card, so strip it from ayah 1 to avoid duplication
-      const BISMILLAH = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
       const combined: Ayah[] = (arabicData.data.ayahs as any[]).map((a, i) => {
         let arabic = a.text as string;
-        // Strip Bismillah prefix from first ayah (except Al-Fatihah where it IS ayah 1)
+        // Strip Bismillah from ayah 1 — we show it separately in the header
+        // Except Al-Fatihah (1) where it IS ayah 1, and At-Tawbah (9) which has none
         if (i === 0 && surahNumber !== 1 && surahNumber !== 9) {
-          arabic = arabic.replace(/^بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, "").trim();
+          arabic = arabic.replace(/^بِسْمِ\s+.+?الرَّحِيمِ\s*/, "").trim();
         }
         return {
           number:        a.number,
           numberInSurah: a.numberInSurah,
           arabic,
-          translation:   (transData.data.ayahs as any[])[i]?.text ?? "",
+          // Normalize ALL-CAPS translations (en.asad style) to sentence case
+          translation: ((transData.data.ayahs as any[])[i]?.text ?? "").replace(
+            /^[A-Z][A-Z\s,\-–—]+/,
+            (m: string) => m.charAt(0) + m.slice(1).toLowerCase()
+          ),
         };
       });
       setAyahs(combined);
