@@ -30,9 +30,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen bg-nude-50 font-body">
         <ServiceWorkerProvider />
-        <div className="mx-auto max-w-md min-h-screen relative">
-          {children}
-        </div>
+        {/*each route group owns its own max-width */}
+        {children}
       </body>
     </html>
   );
