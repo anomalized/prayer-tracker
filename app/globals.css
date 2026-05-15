@@ -69,3 +69,7 @@ html, body {
 .delay-3 { animation-delay: 0.18s; }
 .delay-4 { animation-delay: 0.24s; }
 .delay-5 { animation-delay: 0.30s; }
+
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
