@@ -6,6 +6,7 @@ import PrayerCard from "@/components/prayers/PrayerCard";
 import StreakBanner from "@/components/ui/StreakBanner";
 import Onboarding from "@/components/ui/Onboarding";
 import { useStreakCheck } from "@/hooks/useStreakCheck";
+import { useScheduleNotifications } from "@/hooks/useScheduleNotifications";
 import type { PrayerTime, PrayerLog } from "@/types";
 
 // ── Dua of the Day ─────────────────────────────────────────────
@@ -65,6 +66,8 @@ function getDuaOfDay(): typeof DUAS[0] {
 interface Props {
   userName: string;
   prayerTimes: PrayerTime[];
+  prayerTimezone: string;
+  prayerDateGregorian: string;
   todayLogs: PrayerLog[];
   stats: {
     total_points: number;
@@ -72,14 +75,30 @@ interface Props {
     best_streak: number;
     last_active_date?: string | null;
   } | null;
+  notificationsEnabled: boolean;
 }
 
-export default function TodayClient({ userName, prayerTimes, todayLogs, stats }: Props) {
+export default function TodayClient({
+  userName,
+  prayerTimes,
+  prayerTimezone,
+  prayerDateGregorian,
+  todayLogs,
+  stats,
+  notificationsEnabled,
+}: Props) {
   const [extraPoints, setExtraPoints] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [duaExpanded, setDuaExpanded] = useState(false);
 
   useStreakCheck();
+
+  useScheduleNotifications({
+    prayers: prayerTimes,
+    timezone: prayerTimezone,
+    dateGregorian: prayerDateGregorian,
+    notificationsEnabled,
+  });
 
   useEffect(() => {
     const seen = localStorage.getItem("onboarding_complete");

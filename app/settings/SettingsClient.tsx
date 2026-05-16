@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile, updatePassword, signOut, deleteAccount } from "@/lib/actions/settings";
+import { updateNotificationsEnabled } from "@/lib/actions/notifications";
 import MenuButton from "@/components/ui/MenuButton";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
   fullName: string;
   email: string;
   city: string;
+  notificationsEnabled: boolean;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -32,10 +34,11 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-export default function SettingsClient({ userId, fullName, email, city }: Props) {
+export default function SettingsClient({ userId, fullName, email, city, notificationsEnabled }: Props) {
   const router = useRouter();
   const [name, setName]         = useState(fullName);
   const [userCity, setUserCity] = useState(city);
+  const [notifsEnabled, setNotifsEnabled] = useState(notificationsEnabled);
   const [newPass, setNewPass]   = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [showDelete, setShowDelete]   = useState(false);
@@ -68,6 +71,45 @@ export default function SettingsClient({ userId, fullName, email, city }: Props)
 
   const handleSignOut = () => {
     startTransition(async () => { await signOut(); });
+  };
+
+  const handleToggleNotifications = (next: boolean) => {
+    setNotifsEnabled(next);
+
+    startTransition(async () => {
+      if (next && typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          setNotifsEnabled(false);
+          showMsg("Please allow notifications in your browser to enable this.", false);
+          return;
+        }
+      }
+
+      if (next && typeof window !== "undefined" && "Notification" in window && Notification.permission === "denied") {
+        setNotifsEnabled(false);
+        showMsg(
+          "Notifications are blocked in your browser. Enable them in browser settings first.",
+          false
+        );
+        return;
+      }
+
+      const res = await updateNotificationsEnabled(next);
+      if (res.error) {
+        setNotifsEnabled(!next);
+        showMsg(res.error, false);
+      } else {
+        showMsg(
+          next
+            ? "Prayer reminders enabled 🌸 You'll be notified 5 minutes before each prayer."
+            : "Prayer reminders disabled.",
+          true
+        );
+
+        if (!next) localStorage.removeItem("notifications_scheduled_date");
+      }
+    });
   };
 
   const handleDeleteAccount = () => {
@@ -120,6 +162,64 @@ export default function SettingsClient({ userId, fullName, email, city }: Props)
               Save Changes 🌸
             </button>
           </div>
+        </Section>
+
+        {/* Notifications */}
+        <Section title="Prayer Reminders">
+          <div className="px-4 py-4 flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <p className="font-body text-sm font-bold text-nude-700">
+                Prayer time notifications
+              </p>
+              <p className="font-body text-xs text-nude-400 mt-0.5 leading-relaxed">
+                Get notified 5 minutes before each of the 5 daily prayers.
+                Based on prayer times for <strong className="text-nude-600">{userCity || "your city"}</strong>.
+              </p>
+            </div>
+
+            <button
+              role="switch"
+              aria-checked={notifsEnabled}
+              onClick={() => handleToggleNotifications(!notifsEnabled)}
+              disabled={isPending}
+              className={`relative w-14 h-7 rounded-full transition-colors duration-300
+                flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-nude-400
+                focus:ring-offset-2 disabled:opacity-60
+                ${notifsEnabled ? "bg-nude-500" : "bg-nude-200"}`}
+            >
+              <span
+                className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow
+                  transition-transform duration-300
+                  ${notifsEnabled ? "translate-x-7" : "translate-x-0.5"}`}
+              />
+            </button>
+          </div>
+
+          {notifsEnabled && (
+            <div className="mx-4 mb-4 bg-nude-50 border border-nude-100 rounded-2xl px-4 py-3">
+              <p className="font-body text-xs text-nude-600 flex items-center gap-2">
+                <span>🔔</span>
+                <span>
+                  Reminders are active. They reschedule automatically each morning
+                  when you open the app.
+                </span>
+              </p>
+            </div>
+          )}
+
+          {notifsEnabled && typeof window !== "undefined"
+            && "Notification" in window
+            && Notification.permission === "denied" && (
+            <div className="mx-4 mb-4 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3">
+              <p className="font-body text-xs text-amber-700 font-bold mb-0.5">
+                Notifications blocked in browser
+              </p>
+              <p className="font-body text-xs text-amber-600">
+                Go to your browser's site settings and allow notifications
+                for this site, then reload.
+              </p>
+            </div>
+          )}
         </Section>
 
         {/* Password */}

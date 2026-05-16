@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { getPrayerTimes } from "@/lib/prayerTimes";
+import { getPrayerTimesWithMeta } from "@/lib/prayerTimes";
 import { getTodayLogs, getUserStats } from "@/lib/actions/prayers";
+import { getNotificationsEnabled } from "@/lib/actions/notifications";
 import TodayClient from "./TodayClient";
 
 export const dynamic = "force-dynamic";
@@ -19,18 +20,22 @@ export default async function TodayPage() {
   const city     = profile?.city ?? "Islamabad";
   const userName = profile?.full_name?.split(" ")[0] ?? "Friend";
 
-  const [prayerTimes, todayLogs, stats] = await Promise.all([
-    getPrayerTimes(city),
+  const [prayerMeta, todayLogs, stats, notificationsEnabled] = await Promise.all([
+    getPrayerTimesWithMeta(city),
     getTodayLogs(),
     getUserStats(),
+    getNotificationsEnabled(),
   ]);
 
   return (
     <TodayClient
       userName={userName}
-      prayerTimes={prayerTimes}
+      prayerTimes={prayerMeta.prayers}
+      prayerTimezone={prayerMeta.timezone}
+      prayerDateGregorian={prayerMeta.dateGregorian}
       todayLogs={todayLogs}
       stats={stats}
+      notificationsEnabled={notificationsEnabled}
     />
   );
 }

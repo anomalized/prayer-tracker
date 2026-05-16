@@ -1,18 +1,48 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
 
-// ─── Save OneSignal subscription ID to profile ───────────────
-export async function saveNotificationToken(token: string) {
+export async function saveNotificationToken(token: string): Promise<void> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user || !token) return;
 
   await supabase
+    .from("notification_tokens")
+    .upsert(
+      { user_id: user.id, token, platform: "web" },
+      { onConflict: "user_id,platform" }
+    );
+}
+
+export async function updateNotificationsEnabled(
+  enabled: boolean
+): Promise<{ error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
     .from("profiles")
-    .update({ notification_token: token })
+    .update({ notifications_enabled: enabled })
     .eq("id", user.id);
+
+  if (error) return { error: error.message };
+  return {};
+}
+
+export async function getNotificationsEnabled(): Promise<boolean> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("notifications_enabled")
+    .eq("id", user.id)
+    .single();
+
+  return data?.notifications_enabled ?? false;
 }
 
 // ─── Send a real push nudge via OneSignal REST API ───────────

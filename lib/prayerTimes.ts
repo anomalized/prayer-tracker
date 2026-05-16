@@ -8,6 +8,78 @@ const PRAYER_META: Record<string, { arabic: string; icon: string }> = {
   Isha:    { arabic: "العشاء", icon: "🌌" },
 };
 
+export interface PrayerTimesResult {
+  prayers: PrayerTime[];
+  timezone: string;
+  dateGregorian: string;
+}
+
+export async function getPrayerTimesWithMeta(city: string = "Islamabad"): Promise<PrayerTimesResult> {
+  const fallbackPrayers: PrayerTime[] = [
+    { name: "Fajr",    arabic: "الفجر",  icon: "🌙", time: "5:10 AM"  },
+    { name: "Dhuhr",   arabic: "الظهر",  icon: "☀️", time: "12:30 PM" },
+    { name: "Asr",     arabic: "العصر",  icon: "🌤️", time: "3:45 PM"  },
+    { name: "Maghrib", arabic: "المغرب", icon: "🌇", time: "6:20 PM"  },
+    { name: "Isha",    arabic: "العشاء", icon: "🌌", time: "7:50 PM"  },
+  ];
+
+  try {
+    const today = new Date();
+    const day   = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year  = today.getFullYear();
+
+    const res = await fetch(
+      `https://api.aladhan.com/v1/timingsByCity/${day}-${month}-${year}?city=${encodeURIComponent(city)}&country=&method=1`,
+      { next: { revalidate: 3600 } }
+    );
+
+    if (!res.ok) {
+      return {
+        prayers: fallbackPrayers,
+        timezone: "UTC",
+        dateGregorian: today.toISOString().split("T")[0],
+      };
+    }
+
+    const data = await res.json();
+    if (!data || data.code !== 200 || !data.data) {
+      return {
+        prayers: fallbackPrayers,
+        timezone: "UTC",
+        dateGregorian: today.toISOString().split("T")[0],
+      };
+    }
+
+    const timings = data.data.timings ?? {};
+    const meta = data.data.meta ?? {};
+    const dateData = data.data.date ?? {};
+
+    const timezone = meta.timezone ?? "UTC";
+    const gregorianDate = dateData?.gregorian?.date ?? "";
+
+    const [dd, mm, yyyy] = gregorianDate.split("-");
+    const dateGregorian = gregorianDate && dd && mm && yyyy
+      ? `${yyyy}-${mm}-${dd}`
+      : today.toISOString().split("T")[0];
+
+    const prayers: PrayerTime[] = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].map((name) => ({
+      name: name as PrayerTime["name"],
+      arabic: PRAYER_META[name].arabic,
+      icon: PRAYER_META[name].icon,
+      time: formatTime(timings[name] ?? "00:00"),
+    }));
+
+    return { prayers, timezone, dateGregorian };
+  } catch {
+    return {
+      prayers: fallbackPrayers,
+      timezone: "UTC",
+      dateGregorian: new Date().toISOString().split("T")[0],
+    };
+  }
+}
+
 export async function getPrayerTimes(city: string = "Islamabad"): Promise<PrayerTime[]> {
   const fallback: PrayerTime[] = [
     { name: "Fajr",    arabic: "الفجر",  icon: "🌙", time: "5:10 AM"  },
