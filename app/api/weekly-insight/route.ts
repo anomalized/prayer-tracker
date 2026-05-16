@@ -126,14 +126,14 @@ function processLogs(logs: PrayerLog[]): ProcessedInsight {
       completionByDate.set(log.date, (completionByDate.get(log.date) ?? 0) + 1);
     }
   }
-  const perfectDays = [...completionByDate.values()].filter((v) => v === 5).length;
+  const perfectDays = Array.from(completionByDate.values()).filter((v) => v === 5).length;
 
   // Unique dates in the dataset
   const uniqueDates     = new Set(logs.map((l) => l.date));
   const totalDaysTracked = uniqueDates.size;
 
   // ── Trend: compare first half vs second half of the period ─────────────────
-  const sortedDates = [...uniqueDates].sort();
+  const sortedDates = Array.from(uniqueDates).sort();
   const midpoint    = Math.floor(sortedDates.length / 2);
   const firstHalf   = sortedDates.slice(0, midpoint);
   const secondHalf  = sortedDates.slice(midpoint);
