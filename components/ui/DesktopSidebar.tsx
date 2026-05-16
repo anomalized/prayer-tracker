@@ -10,6 +10,7 @@ const NAV_SECTIONS = [
       { href: "/dashboard/today",   label: "Today",   icon: "🕌", desc: "Daily prayers" },
       { href: "/dashboard/stats",   label: "Stats",   icon: "📊", desc: "Progress & heatmap" },
       { href: "/dashboard/rewards", label: "Rewards", icon: "✨", desc: "Badges" },
+      { href: "/dashboard/qada",    label: "Qada",    icon: "🤲", desc: "Makeup prayer tracker" },
     ],
   },
   {
