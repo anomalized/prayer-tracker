@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { SURAHS } from "@/lib/quran";
 import MenuButton from "@/components/ui/MenuButton";
+import { useQuranProgress } from "@/hooks/useQuranProgress";
 
 interface Ayah {
   number: number;
@@ -125,10 +126,20 @@ export default function SurahReader({ surahNumber }: Props) {
   const [showTrans,   setShowTrans]   = useState(true);
   const [darkMode,    setDarkMode]    = useState(false);
   const [fontSize,    setFontSize]    = useState<"sm"|"md"|"lg"|"xl">("md");
-  const [bookmarks,   setBookmarks]   = useState<number[]>([]);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [audioLoading,setAudioLoading]= useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ayahRefsMap  = useRef<Map<number, HTMLDivElement>>(new Map());
+  const observerRef  = useRef<IntersectionObserver | null>(null);
+  const mostVisibleAyahRef = useRef<number>(1);
+
+  const {
+    bookmarks,
+    lastAyah,
+    syncing,
+    toggleBookmark,
+    recordScrolledTo,
+  } = useQuranProgress({ surahNumber });
 
   const arabicSize = { sm: "text-xl", md: "text-2xl", lg: "text-3xl", xl: "text-4xl" }[fontSize];
   const lineHeight = { sm: "leading-loose", md: "leading-loose", lg: "leading-[2.2]", xl: "leading-[2.4]" }[fontSize];
@@ -168,32 +179,58 @@ export default function SurahReader({ surahNumber }: Props) {
       });
       setAyahs(combined);
       localStorage.setItem("quran_last_read", String(surahNumber));
-      const saved = localStorage.getItem(`quran_pos_${surahNumber}`);
-      if (saved) setTimeout(() => window.scrollTo(0, parseInt(saved)), 100);
     }).catch(() => setError("Network error. Please try again."))
       .finally(() => setLoading(false));
   }, [surahNumber, surah]);
 
-  // ── Save scroll ───────────────────────────────────────────────
   useEffect(() => {
-    const onScroll = () => localStorage.setItem(`quran_pos_${surahNumber}`, String(window.scrollY));
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [surahNumber]);
+    if (loading || ayahs.length === 0 || syncing) return;
+    if (!lastAyah || lastAyah <= 1) return;
 
-  // ── Bookmarks ─────────────────────────────────────────────────
+    const t = setTimeout(() => {
+      const el = ayahRefsMap.current.get(lastAyah);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 150);
+
+    return () => clearTimeout(t);
+  // Only run when ayahs first load — not on every lastAyah change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, syncing, ayahs.length > 0]);
+
   useEffect(() => {
-    const saved = localStorage.getItem(`quran_bookmarks_${surahNumber}`);
-    if (saved) setBookmarks(JSON.parse(saved));
-  }, [surahNumber]);
+    if (ayahs.length === 0) return;
 
-  const toggleBookmark = useCallback((n: number) => {
-    setBookmarks(prev => {
-      const next = prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n];
-      localStorage.setItem(`quran_bookmarks_${surahNumber}`, JSON.stringify(next));
-      return next;
-    });
-  }, [surahNumber]);
+    observerRef.current?.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        let best: IntersectionObserverEntry | null = null;
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (!best || entry.intersectionRatio > best.intersectionRatio) {
+              best = entry;
+            }
+          }
+        }
+        if (best) {
+          const ayahNum = parseInt(
+            (best.target as HTMLElement).dataset.ayah ?? "1", 10
+          );
+          if (ayahNum !== mostVisibleAyahRef.current) {
+            mostVisibleAyahRef.current = ayahNum;
+            recordScrolledTo(ayahNum);
+          }
+        }
+      },
+      { threshold: [0.3, 0.5, 0.8], rootMargin: "0px 0px -20% 0px" }
+    );
+
+    ayahRefsMap.current.forEach((el) => observerRef.current?.observe(el));
+
+    return () => observerRef.current?.disconnect();
+  }, [ayahs, recordScrolledTo]);
 
   // ── Audio ─────────────────────────────────────────────────────
   const playAyah = useCallback(async (n: number) => {
@@ -258,6 +295,13 @@ export default function SurahReader({ surahNumber }: Props) {
               {surah.englishName}
             </p>
           </div>
+
+          {syncing && (
+            <div className={`w-4 h-4 border-2 rounded-full animate-spin flex-shrink-0
+              ${darkMode ? "border-amber-700/30 border-t-amber-400" : "border-nude-200 border-t-nude-400"}`}
+              title="Syncing bookmarks…"
+            />
+          )}
 
           <div className="hidden md:flex items-center gap-2 ml-auto">
             <div className={`flex rounded-xl overflow-hidden border ${darkMode ? "border-white/10" : "border-nude-200"}`}>
@@ -397,7 +441,13 @@ export default function SurahReader({ surahNumber }: Props) {
             const isPlaying    = playingAyah === ayah.numberInSurah;
 
             return (
-              <div key={ayah.numberInSurah}
+              <div
+                key={ayah.numberInSurah}
+                data-ayah={ayah.numberInSurah}
+                ref={(el) => {
+                  if (el) ayahRefsMap.current.set(ayah.numberInSurah, el);
+                  else    ayahRefsMap.current.delete(ayah.numberInSurah);
+                }}
                 className="rounded-3xl px-5 py-5 transition-colors duration-200"
                 style={{
                   background: isBookmarked
