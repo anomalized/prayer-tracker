@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from "react";
 import AddFriendForm from "@/components/friends/AddFriendForm";
+import ActivityFeed from "@/components/friends/ActivityFeed";
 import PendingRequests from "@/components/friends/PendingRequests";
 import { sendNudge } from "@/lib/actions/nudge";
 import { removeFriend } from "@/lib/actions/friends";
 import MenuButton from "@/components/ui/MenuButton";
+import { FriendActivity } from "@/types";
 
 const PRAYER_NAMES = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -32,6 +34,7 @@ interface Props {
     accepted: Friend[];
     pending: Array<{ friendshipId: string; id: string; name: string }>;
   } | null;
+  friendActivity?: FriendActivity[];
 }
 
 interface LeaderboardEntry {
@@ -166,7 +169,7 @@ function LeaderboardRow({ entry, rank, myPoints, showActions }: {
   );
 }
 
-export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = [], friendsData }: Props) {
+export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = [], friendsData, friendActivity }: Props) {
   const [showAdd, setShowAdd] = useState(false);
 
   const myPoints   = myStats?.total_points   ?? 0;
@@ -174,6 +177,7 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
   const accepted   = friendsData?.accepted   ?? [];
   const pending    = friendsData?.pending    ?? [];
   const myDonePrayers = myTodayPrayers.filter(p => p.status !== "missed").length;
+  const activityItems = friendActivity ?? [];
 
   const myEntry: LeaderboardEntry = {
     id: myId, name: myName ?? "You",
@@ -231,6 +235,8 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
             <PendingRequests requests={pending} />
           </div>
         )}
+
+        <ActivityFeed items={activityItems} />
 
         {/* Leaderboard table */}
         <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">

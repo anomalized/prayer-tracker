@@ -67,3 +67,16 @@ export interface Friendship {
   status: FriendshipStatus;
   created_at: string;
 }
+
+export type FriendActivityType = "prayer" | "qada" | "badge";
+
+export interface FriendActivity {
+  id: string;
+  friend_id: string;
+  friend_name: string;
+  activity_type: FriendActivityType;
+  title: string;
+  subtitle: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}

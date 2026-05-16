@@ -160,6 +160,20 @@ export async function getFriendsData() {
   return { accepted: enrichedFriends, pending: pendingFriends };
 }
 
+export async function getFriendActivity(limit = 20) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase.rpc("get_friend_activity", { p_limit: limit });
+  if (error) {
+    console.error("getFriendActivity error:", error);
+    return [];
+  }
+
+  return data ?? [];
+}
+
 // ─── Send nudge ──────────────────────────────────────────────
 export async function sendNudge(friendId: string) {
   return { success: true };
