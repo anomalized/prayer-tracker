@@ -5,6 +5,7 @@ import {
   getHeatmapData,
   getWeeklyTrend,
   getMonthStats,
+  getLast30DaysLogs,
 } from "@/lib/actions/stats";
 import StatsClient from "./StatsClient";
 
@@ -15,12 +16,13 @@ export default async function StatsPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [stats, breakdown, heatmap, weekly, monthStats] = await Promise.all([
+  const [stats, breakdown, heatmap, weekly, monthStats, recentLogs] = await Promise.all([
     getFullStats(user!.id),
     getPrayerBreakdown(user!.id),
     getHeatmapData(user!.id),
     getWeeklyTrend(user!.id),
     getMonthStats(user!.id),
+    getLast30DaysLogs(user!.id),
   ]);
 
   return (
@@ -30,6 +32,7 @@ export default async function StatsPage() {
       heatmap={heatmap}
       weekly={weekly}
       monthStats={monthStats}
+      recentLogs={recentLogs}
     />
   );
 }

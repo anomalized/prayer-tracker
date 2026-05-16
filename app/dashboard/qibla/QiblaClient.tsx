@@ -23,6 +23,7 @@ function getDist(lat: number, lng: number) {
 }
 
 export default function QiblaClient() {
+  const [isDesktop, setIsDesktop] = useState(false);
   const prevRef    = useRef(0);
   const alignedRef = useRef(false);
   const qiblaRef   = useRef<number | null>(null);
@@ -48,6 +49,11 @@ export default function QiblaClient() {
     const cached = localStorage.getItem("qibla_loc");
     if (cached) {
       try {
+        const noTouch = !('ontouchstart' in window) && navigator.maxTouchPoints === 0;
+        if (noTouch) {
+          setIsDesktop(true);
+          // Still get GPS for static bearing display
+        }
         const { lat, lng } = JSON.parse(cached);
         const q = getQibla(lat, lng);
         setLoc({ lat, lng }); setQibla(q); setDist(getDist(lat, lng));
@@ -71,6 +77,7 @@ export default function QiblaClient() {
 
   // ── Sensor init ──────────────────────────────────────────────
   function initSensor() {
+    if (isDesktop) return; // Desktop has no DeviceOrientation — show static mode only
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     if (isIOS && typeof (DeviceOrientationEvent as any).requestPermission === "function") {
@@ -173,7 +180,7 @@ export default function QiblaClient() {
     : null;
 
   return (
-    <div className="min-h-screen flex flex-col select-none" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen md:pb-8 flex flex-col select-none" style={{ background: "#fdf6f3" }}>
 
       {/* Calibration overlay */}
       {calibrating && (
@@ -195,13 +202,13 @@ export default function QiblaClient() {
       )}
 
       {/* Header */}
-      <div className="px-5 pt-12 pb-5 relative overflow-hidden text-white"
+      <div className="px-5 pt-12  md:pt-6 pb-5 relative overflow-hidden text-white"
         style={{ background: "linear-gradient(160deg,#c8705a,#d4786a 55%,#e8a090)" }}>
         <div className="flex flex-col gap-1">
           <p className="text-[10px] opacity-70 tracking-widest uppercase font-bold">Qibla Direction</p>
           <h1 className="text-2xl font-bold tracking-tight">Mecca Finder</h1>
         </div>
-        <MenuButton className="absolute top-12 right-5 z-10" dark={true} />
+        <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={true} />
         <div className="flex gap-2 mt-4 overflow-x-auto">
           {distLabel && (
             <div className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap">
@@ -225,11 +232,12 @@ export default function QiblaClient() {
         {gpsReady ? (
           <>
             {/* ── DYNAMIC / STATIC TOGGLE ── */}
-            <div className="flex items-center gap-3 bg-white border border-nude-200 rounded-2xl px-4 py-3 w-full max-w-sm shadow-sm">
-              <div className="flex-1">
-                <p className="text-sm font-bold text-slate-700">
-                  {dynamic ? "🧭 Dynamic Mode" : "📌 Static Mode"}
-                </p>
+            { !isDesktop && (
+              <div className="flex items-center gap-3 bg-white border border-nude-200 rounded-2xl px-4 py-3 w-full max-w-sm shadow-sm">
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-700">
+                    {dynamic ? "🧭 Dynamic Mode" : "📌 Static Mode"}
+                  </p>
                 <p className="text-[11px] text-slate-400 mt-0.5">
                   {dynamic
                     ? "Arrow follows your phone rotation"
@@ -246,6 +254,7 @@ export default function QiblaClient() {
                   ${dynamic ? "left-7" : "left-0.5"}`} />
               </button>
             </div>
+            )}
 
             {/* iOS permission prompt — replaces toggle action */}
             {showBtn && !dynamic && (
@@ -307,7 +316,18 @@ export default function QiblaClient() {
                   </div>
                 </div>
 
-                {/* Static mode label */}
+                {isDesktop && (
+                  <div className="w-full max-w-sm bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-start gap-3">
+                    <span className="text-xl flex-shrink-0">💻</span>
+                    <div>
+                      <p className="font-body text-sm font-bold text-amber-800">Compass unavailable on desktop</p>
+                      <p className="font-body text-xs text-amber-600 mt-0.5">
+                        The live compass requires a mobile device with a magnetometer.
+                        The arrow below shows your static Qibla bearing from your current location.
+                      </p>
+                    </div>
+                  </div>
+                )}
                 {!dynamic && (
                   <div className="absolute bottom-6 left-0 right-0 flex justify-center">
                     <span className="text-[10px] font-bold text-slate-400 bg-white/80 px-2 py-0.5 rounded-full">
@@ -341,16 +361,20 @@ export default function QiblaClient() {
                   <h3 className={`text-sm font-bold ${aligned && dynamic ? "text-green-800" : "text-slate-800"}`}>
                     {!dynamic
                       ? `Qibla is ${Math.round(qibla ?? 0)}° from North`
-                      : aligned
-                        ? "Qibla Aligned!"
-                        : live
-                          ? `Turn ${Math.round(absDeg)}° to the ${dir}`
-                          : "Sensor starting up…"}
+                      : isDesktop
+                        ? `Qibla bearing: ${Math.round(qibla ?? 0)}° — open on mobile for live compass`
+                        : aligned
+                          ? "Qibla Aligned!"
+                          : live
+                            ? `Turn ${Math.round(absDeg)}° to the ${dir}`
+                            : "Sensor starting up…"}
                   </h3>
                   <p className="text-[11px] text-slate-400 font-medium">
                     {!dynamic
                       ? "Turn on Dynamic Mode for live compass"
-                      : aligned
+                      : isDesktop
+                        ? "Open on mobile for live compass"
+                        : aligned
                         ? "You are now facing the Kaaba 🕋"
                         : live
                           ? "Rotate until the arrow turns green"

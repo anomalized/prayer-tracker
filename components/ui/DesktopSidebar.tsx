@@ -115,27 +115,3 @@ export default function DesktopSidebar({ userName, userEmail }: Props) {
     </aside>
   );
 }
-
-// ✅ AFTER — add hidden md:hidden to suppress on desktop
-export default function MenuButton({ className = "", dark = false }: Props) {
-  const { openDrawer } = useNav();
-
-  return (
-    <button
-      onClick={openDrawer}
-      aria-label="Open navigation"
-      // md:hidden — desktop has persistent sidebar; button only needed on mobile
-      className={`md:hidden w-9 h-9 rounded-xl flex items-center justify-center transition-all
-        active:scale-90 ${dark
-          ? "bg-white/20 hover:bg-white/30 text-white"
-          : "bg-white/60 hover:bg-white/80 text-nude-600 border border-nude-200"
-        } ${className}`}
-    >
-      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-        <rect x="0" y="0"  width="16" height="1.8" rx="0.9" fill="currentColor"/>
-        <rect x="0" y="5"  width="12" height="1.8" rx="0.9" fill="currentColor"/>
-        <rect x="0" y="10" width="16" height="1.8" rx="0.9" fill="currentColor"/>
-      </svg>
-    </button>
-  );
-}

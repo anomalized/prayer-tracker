@@ -46,7 +46,7 @@ export default function RewardsClient({ badges, stats }: Props) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-nude-50">
+    <div className="pb-28 md:pb-0 bg-nude-50">
       {/* Badge celebration modal */}
       {showCelebration && (
         <BadgeCelebration
@@ -56,9 +56,9 @@ export default function RewardsClient({ badges, stats }: Props) {
       )}
 
       {/* Header */}
-      <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 relative overflow-hidden">
+      <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12  md:pt-6 pb-6 relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-nude-300 opacity-20" />
-        <MenuButton className="absolute top-12 right-5 z-10" dark={false} />
+        <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
         <p className="font-body text-xs tracking-widest text-nude-500 uppercase mb-1">Your Achievements</p>
         <h1 className="font-display text-3xl font-bold text-nude-800 mb-4">Rewards ✨</h1>
 

@@ -23,7 +23,12 @@ interface Props {
 
 export default function NavProvider({ children, userName, userEmail }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const openDrawer  = useCallback(() => setIsOpen(true),  []);
+  const openDrawer = useCallback(() => {
+    // Don't open drawer on desktop (sidebar handles navigation there)
+    if (window.innerWidth >= 768) return;
+    setIsOpen(true);
+  }, []);
+
   const closeDrawer = useCallback(() => setIsOpen(false), []);
 
   return (

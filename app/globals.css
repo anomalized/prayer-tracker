@@ -27,8 +27,7 @@ html, body {
   font-family: 'Lato', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Mobile feel */
-  overscroll-behavior: none;
+  /* overscroll-behavior removed — applied surgically below where needed */
 }
 
 /* Scrollbar */
@@ -72,4 +71,30 @@ html, body {
 
 button, a, input, select, textarea {
   touch-action: manipulation;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [class*="active:scale"] {
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  [class*="active:scale"]:hover {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+.page-header-pt {
+  padding-top: 3rem; /* 48px — mobile default */
+}
+
+@media (min-width: 768px) {
+  .page-header-pt {
+    padding-top: 1.5rem; /* 24px — desktop */
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    overscroll-behavior-y: contain;  /* contain (not none) — still allows momentum scroll */
+  }
 }

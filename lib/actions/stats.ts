@@ -274,3 +274,19 @@ export async function getMonthStats(userId?: string) {
 
   return { pct, onTimeRate, mostMissed };
 }
+
+export async function getLast30DaysLogs(userId: string) {
+  const supabase = createClient();
+  const from = new Date();
+  from.setDate(from.getDate() - 30);
+
+  const { data } = await supabase
+    .from("prayers")
+    .select("prayer_name, date, status")
+    .eq("user_id", userId)
+    .gte("date", from.toISOString().split("T")[0])
+    .order("date", { ascending: false });
+
+  return data ?? [];
+}
+

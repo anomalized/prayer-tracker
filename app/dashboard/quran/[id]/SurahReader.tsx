@@ -259,6 +259,38 @@ export default function SurahReader({ surahNumber }: Props) {
             </p>
           </div>
 
+          <div className="hidden md:flex items-center gap-2 ml-auto">
+            <div className={`flex rounded-xl overflow-hidden border ${darkMode ? "border-white/10" : "border-nude-200"}`}>
+              {(["sm","md","lg","xl"] as const).map((s, i) => (
+                <button key={s} onClick={() => setFontSize(s)}
+                  className={`px-2.5 py-1.5 font-bold transition-colors ${
+                    fontSize === s
+                      ? darkMode ? "bg-amber-700 text-white" : "bg-nude-200 text-nude-700"
+                      : darkMode ? "bg-transparent text-amber-400/60" : "bg-white text-nude-400"
+                  }`}
+                  style={{ fontSize: [10,12,14,16][i] }}>
+                  A
+                </button>
+              ))}
+            </div>
+
+            <button onClick={() => setShowTrans(v => !v)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                showTrans
+                  ? darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-nude-200 text-nude-700 border-nude-300"
+                  : darkMode ? "bg-transparent text-amber-400/60 border-white/10" : "bg-white text-nude-400 border-nude-200"
+              }`}>
+              Translation
+            </button>
+
+            <button onClick={() => setDarkMode(v => !v)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex-shrink-0 ${
+                darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-white text-nude-400 border-nude-200"
+              }`}>
+              {darkMode ? "☀️" : "🌙"}
+            </button>
+          </div>
+
           <p className={`text-xl font-medium flex-shrink-0 ${darkMode ? "text-amber-200" : "text-nude-600"}`}
             style={{ fontFamily: ARABIC_FONT }}>
             {surah.name}
@@ -267,9 +299,7 @@ export default function SurahReader({ surahNumber }: Props) {
           <MenuButton dark={darkMode} />
         </div>
 
-        {/* Controls */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {/* Font size */}
+        <div className="flex md:hidden items-center gap-2 overflow-x-auto pb-1 mt-2">
           <div className={`flex rounded-xl overflow-hidden border ${darkMode ? "border-white/10" : "border-nude-200"}`}>
             {(["sm","md","lg","xl"] as const).map((s, i) => (
               <button key={s} onClick={() => setFontSize(s)}
@@ -284,7 +314,6 @@ export default function SurahReader({ surahNumber }: Props) {
             ))}
           </div>
 
-          {/* Translation toggle */}
           <button onClick={() => setShowTrans(v => !v)}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
               showTrans
@@ -294,9 +323,8 @@ export default function SurahReader({ surahNumber }: Props) {
             Translation
           </button>
 
-          {/* Dark mode */}
           <button onClick={() => setDarkMode(v => !v)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ml-auto flex-shrink-0 ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex-shrink-0 ${
               darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-white text-nude-400 border-nude-200"
             }`}>
             {darkMode ? "☀️" : "🌙"}

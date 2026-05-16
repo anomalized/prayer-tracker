@@ -8,6 +8,7 @@ import PrayerBreakdown from "@/components/stats/PrayerBreakdown";
 import WeeklyTrend from "@/components/stats/WeeklyTrend";
 import RankBadge from "@/components/ui/RankBadge";
 import MenuButton from "@/components/ui/MenuButton";
+import WeeklyInsightCard from "@/components/stats/WeeklyInsightCard";
 
 interface Props {
   stats: {
@@ -26,9 +27,10 @@ interface Props {
   heatmap: Array<{ date: string; count: number }>;
   weekly: Array<{ week: string; prayers: number; possible: number }>;
   monthStats: { pct: number; onTimeRate: number; mostMissed: string };
+  recentLogs: Array<{ prayer_name: string; date: string; status: string }>;
 }
 
-export default function StatsClient({ stats, breakdown, heatmap, weekly, monthStats }: Props) {
+export default function StatsClient({ stats, breakdown, heatmap, weekly, monthStats, recentLogs }: Props) {
   const router = useRouter();
   useEffect(() => {
     const onFocus = () => router.refresh();
@@ -43,9 +45,9 @@ export default function StatsClient({ stats, breakdown, heatmap, weekly, monthSt
   return (
     <div className="min-h-screen" style={{ background: "#fdf6f3" }}>
       {/* Header */}
-      <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 relative overflow-hidden">
+      <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12  md:pt-6 pb-6 relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-nude-300 opacity-20" />
-        <MenuButton className="absolute top-12 right-5 z-10" dark={false} />
+        <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
         <p className="font-body text-xs tracking-widest text-nude-500 uppercase mb-1">Your Journey</p>
         <h1 className="font-display text-3xl font-bold text-nude-800 mb-4">Stats 📊</h1>
 
@@ -64,30 +66,34 @@ export default function StatsClient({ stats, breakdown, heatmap, weekly, monthSt
         </div>
       </div>
 
-      <div className="px-4 py-4 space-y-4">
-        {/* Summary grid */}
-        <StatsSummary
-          totalPoints={points}
-          currentStreak={currentStreak}
-          bestStreak={bestStreak}
-          thisMonthPct={monthStats.pct}
-          mostMissed={monthStats.mostMissed}
-          onTimeRate={monthStats.onTimeRate}
-        />
-
-        {/* Heatmap */}
-        <Heatmap days={heatmap} />
-
-        {/* Weekly trend chart */}
-        <WeeklyTrend data={weekly} />
-
-        {/* Per-prayer breakdown */}
-        <PrayerBreakdown breakdown={breakdown} />
-
-        <p className="text-center text-xs text-nude-300 font-body pb-6">
+      <div className="px-4 py-4">
+        {/* On desktop: 2-column grid. Left = summary + heatmap, Right = trend + breakdown */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Left column */}
+          <div className="space-y-4">
+            <WeeklyInsightCard logs={recentLogs} />
+            <StatsSummary
+              totalPoints={points}
+              currentStreak={currentStreak}
+              bestStreak={bestStreak}
+              thisMonthPct={monthStats.pct}
+              mostMissed={monthStats.mostMissed}
+              onTimeRate={monthStats.onTimeRate}
+            />
+            <Heatmap days={heatmap} />
+          </div>
+          {/* Right column */}
+          <div className="space-y-4">
+            <WeeklyTrend data={weekly} />
+            <PrayerBreakdown breakdown={breakdown} />
+          </div>
+        </div>
+        <p className="text-center text-xs text-nude-300 font-body pb-6 pt-4">
           Every prayer counts 🌸
         </p>
       </div>
+
+      
     </div>
   );
 }

@@ -14,7 +14,7 @@ export default function MenuButton({ className = "", dark = false }: Props) {
     <button
       onClick={openDrawer}
       aria-label="Open navigation"
-      className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90 ${
+      className={`md:hidden w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90 ${
         dark
           ? "bg-white/20 hover:bg-white/30 text-white"
           : "bg-white/60 hover:bg-white/80 text-nude-600 border border-nude-200"

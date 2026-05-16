@@ -79,7 +79,7 @@ export default function SettingsClient({ userId, fullName, email, city }: Props)
       {/* Header */}
       <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-nude-300 opacity-20" />
-        <MenuButton className="absolute top-12 right-5 z-10" dark={false} />
+        <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
         <h1 className="font-display text-3xl font-bold text-nude-800">Settings ⚙️</h1>
         <p className="font-body text-sm text-nude-500 mt-1">{email}</p>
       </div>

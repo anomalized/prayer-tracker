@@ -63,7 +63,7 @@ export default function TodayHeader({ userName, donePrayers, totalPoints, curren
       <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-nude-300 opacity-15" />
 
       {/* Menu button */}
-      <MenuButton className="absolute top-12 right-5 z-10" dark={false} />
+      <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
 
       {/* Greeting */}
       <div className="mb-1">
