@@ -98,7 +98,7 @@ function processLogs(logs: PrayerLog[]): ProcessedInsight {
 
   // Group completion counts by day-of-week
   const dayBuckets: Record<number, number[]> = {};
-  for (const [dateStr, count] of dateMap.entries()) {
+  for (const [dateStr, count] of Array.from(dateMap.entries())) {
     const dow = new Date(dateStr).getDay(); // 0=Sun … 6=Sat
     if (!dayBuckets[dow]) dayBuckets[dow] = [];
     dayBuckets[dow].push(count);
