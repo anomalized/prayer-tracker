@@ -562,10 +562,9 @@ export default function TasbihCounter() {
           )}
 
           {/* The tap circle */}
-          <div
-            role="button"
+          <button
+            type="button"
             aria-label={`Tap to count ${displayName}. Count: ${count} of ${target}`}
-            tabIndex={0}
             className={circleClass}
             style={{
               width:        220,
@@ -588,7 +587,6 @@ export default function TasbihCounter() {
               touchAction:      "manipulation",
             }}
             onClick={handleTap}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTap(); }}
           >
             {/* Count number */}
             <span
