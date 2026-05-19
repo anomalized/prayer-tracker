@@ -465,7 +465,7 @@ export async function getStreakEvents(limit = 10): Promise<StreakEvent[]> {
 
   if (error || !data) return [];
 
-  return data.map((row) => ({
+  return (data as any[]).map((row) => ({
     eventType:         row.event_type,
     date:              row.date,
     streakValueBefore: row.streak_value_before,

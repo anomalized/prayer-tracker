@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getFriendsData, getFriendActivity } from "@/lib/actions/friends";
 import { getActiveChallenges } from "@/lib/actions/challenges";
+import type { Challenge } from "@/lib/actions/challenges";
 import FriendsClient from "./FriendsClient";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,7 @@ export default async function FriendsPage() {
 
     let friendsData = null;
     let activityFeed = [];
-    let challenges = [];
+    let challenges: Challenge[] = [];
 
     try {
       friendsData = await getFriendsData();
