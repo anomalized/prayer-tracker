@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getFriendsData, getFriendActivity } from "@/lib/actions/friends";
+import { getActiveChallenges } from "@/lib/actions/challenges";
 import FriendsClient from "./FriendsClient";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export default async function FriendsPage() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return <FriendsClient myId="" myName="You" myStats={null} friendsData={null} friendActivity={[]} />;
+      return <FriendsClient myId="" myName="You" myStats={null} friendsData={null} friendActivity={[]} challenges={[]} />;
     }
 
     const { data: profile } = await supabase
@@ -28,6 +29,7 @@ export default async function FriendsPage() {
 
     let friendsData = null;
     let activityFeed = [];
+    let challenges = [];
 
     try {
       friendsData = await getFriendsData();
@@ -43,6 +45,13 @@ export default async function FriendsPage() {
       activityFeed = [];
     }
 
+    try {
+      challenges = await getActiveChallenges();
+    } catch (e) {
+      console.error("getActiveChallenges error:", e);
+      challenges = [];
+    }
+
     return (
       <FriendsClient
         myId={user.id}
@@ -50,12 +59,13 @@ export default async function FriendsPage() {
         myStats={stats ?? null}
         friendsData={friendsData}
         friendActivity={activityFeed}
+        challenges={challenges}
       />
     );
   } catch (e) {
     console.error("FriendsPage error:", e);
     return (
-      <FriendsClient myId="" myName="You" myStats={null} friendsData={{ accepted: [], pending: [] }} friendActivity={[]} />
+      <FriendsClient myId="" myName="You" myStats={null} friendsData={{ accepted: [], pending: [] }} friendActivity={[]} challenges={[]} />
     );
   }
 }

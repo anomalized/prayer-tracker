@@ -4,8 +4,10 @@ import { useState, useTransition } from "react";
 import AddFriendForm from "@/components/friends/AddFriendForm";
 import ActivityFeed from "@/components/friends/ActivityFeed";
 import PendingRequests from "@/components/friends/PendingRequests";
+import ChallengesSection from "@/components/friends/ChallengesSection";
 import { sendNudge } from "@/lib/actions/nudge";
 import { removeFriend } from "@/lib/actions/friends";
+import type { Challenge } from "@/lib/actions/challenges";
 import MenuButton from "@/components/ui/MenuButton";
 import { FriendActivity } from "@/types";
 
@@ -35,6 +37,7 @@ interface Props {
     pending: Array<{ friendshipId: string; id: string; name: string }>;
   } | null;
   friendActivity?: FriendActivity[];
+  challenges: Challenge[];
 }
 
 interface LeaderboardEntry {
@@ -169,7 +172,7 @@ function LeaderboardRow({ entry, rank, myPoints, showActions }: {
   );
 }
 
-export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = [], friendsData, friendActivity }: Props) {
+export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = [], friendsData, friendActivity, challenges }: Props) {
   const [showAdd, setShowAdd] = useState(false);
 
   const myPoints   = myStats?.total_points   ?? 0;
@@ -177,6 +180,7 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
   const accepted   = friendsData?.accepted   ?? [];
   const pending    = friendsData?.pending    ?? [];
   const myDonePrayers = myTodayPrayers.filter(p => p.status !== "missed").length;
+  const friendsForChallenge = accepted.map((f) => ({ id: f.id, name: f.name ?? "Friend" }));
   const activityItems = friendActivity ?? [];
 
   const myEntry: LeaderboardEntry = {
@@ -264,6 +268,14 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
             </div>
           )}
         </div>
+
+        {(accepted.length > 0 || challenges.length > 0) && (
+          <ChallengesSection
+            initialChallenges={challenges}
+            acceptedFriends={friendsForChallenge}
+            myId={myId}
+          />
+        )}
 
         {/* Add friend */}
         <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
