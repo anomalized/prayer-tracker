@@ -23,9 +23,11 @@ const NAV_SECTIONS = [
   {
     label: "Tools",
     items: [
-      { href: "/dashboard/quran", label: "Qur'an",      icon: "📖", desc: "Read all 114 surahs" },
-      { href: "/dashboard/duas",  label: "Dua Library", icon: "🤲", desc: "Daily supplications" },
-      { href: "/dashboard/qibla", label: "Qibla",       icon: "🧭", desc: "Find direction to Mecca" },
+      { href: "/dashboard/quran",    label: "Qur'an",      icon: "📖", desc: "Read all 114 surahs" },
+      { href: "/dashboard/duas",     label: "Dua Library", icon: "🤲", desc: "Daily supplications" },
+      { href: "/dashboard/qibla",    label: "Qibla",       icon: "🧭", desc: "Find direction to Mecca" },
+      { href: "/dashboard/tasbih",   label: "Tasbih",      icon: "📿", desc: "Dhikr counter" },
+      { href: "/dashboard/calendar", label: "Calendar",    icon: "🌙", desc: "Hijri calendar & events" },
     ],
   },
   {
