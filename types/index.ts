@@ -41,6 +41,8 @@ export interface UserStats {
   last_active_date: string | null;
   // tracks if the introductory onboarding has been finished
   onboarding_complete?: boolean;
+  // number of available streak freezes (0-3)
+  streak_freeze_count?: number;
 }
 
 export type Rank = "Bronze" | "Silver" | "Gold" | "Diamond";
