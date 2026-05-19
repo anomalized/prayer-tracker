@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { markPrayer, saveNote } from "@/lib/actions/prayers";
 import { checkAndAwardBadges } from "@/lib/actions/badges";
 import { isPrayerTimePassed } from "@/lib/prayerTimes";
+import { queuePrayerLog } from "@/lib/offlineQueue";
 import type { PrayerTime, PrayerStatus } from "@/types";
 
 interface Props {
@@ -32,24 +33,52 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
     return () => window.removeEventListener("focus", onFocus);
   }, [router]);
 
+  // ── showToast helper ──────────────────────────────────────────────────────
+  const showToast = useCallback((msg: string, durationMs = 900) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), durationMs);
+  }, []);
+
+  // ── handleMark ────────────────────────────────────────────────────────────
+  // Changed: checks navigator.onLine before deciding to queue or call server.
   const handleMark = (newStatus: PrayerStatus) => {
     if (!timePassed) return;
-    const prev = status;
-    setStatus(newStatus);
 
-    const points = newStatus === "ontime" ? 20 : newStatus === "late" ? 10 : 0;
-    const prevPoints = prev === "ontime" ? 20 : prev === "late" ? 10 : 0;
+    const prev = status;
+    setStatus(newStatus);   // optimistic — always immediate
+
+    // Points feedback (same as before)
+    const points     = newStatus === "ontime" ? 20 : newStatus === "late" ? 10 : 0;
+    const prevPoints = prev    === "ontime"   ? 20 : prev    === "late"   ? 10 : 0;
     const diff = points - prevPoints;
     if (diff > 0) {
-      setToast(`+${diff} pts`);
+      showToast(`+${diff} pts`);
       onPointsEarned(diff);
-      setTimeout(() => setToast(null), 900);
     }
 
+    // ── Online path — unchanged behaviour ────────────────────────────────────
+    if (typeof navigator === "undefined" || navigator.onLine) {
+      startTransition(async () => {
+        await markPrayer(prayer.name, newStatus, prev);
+        await checkAndAwardBadges();
+        router.refresh();
+      });
+      return;
+    }
+
+    // ── Offline path — queue and show feedback ────────────────────────────────
+    const today = new Date().toISOString().split("T")[0];
+
     startTransition(async () => {
-      await markPrayer(prayer.name, newStatus, prev);
-      await checkAndAwardBadges();
-      router.refresh(); // update stats header without full reload
+      try {
+        await queuePrayerLog(prayer.name, newStatus, prev, today);
+        // Show offline toast — overrides the points toast if both would fire
+        showToast("saved offline 🔌", 2200);
+      } catch {
+        // Queue write failed (e.g. IndexedDB unavailable) — roll back
+        setStatus(prev);
+        showToast("save failed", 1500);
+      }
     });
   };
 
@@ -71,9 +100,16 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
             : "bg-white border-nude-100"
           }`}
       >
-        {/* Floating toast */}
+        {/* Floating toast — now handles both points and offline messages */}
         {toast && (
-          <div className="absolute top-3 right-3 text-nude-600 font-bold text-sm animate-float-up pointer-events-none">
+          <div
+            className={`absolute top-3 right-3 font-bold text-sm
+              animate-float-up pointer-events-none
+              ${toast.startsWith("saved offline") || toast.startsWith("Saved offline")
+                ? "text-amber-500"   // amber for offline
+                : "text-nude-600"    // terracotta for points
+              }`}
+          >
             {toast}
           </div>
         )}

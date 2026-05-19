@@ -7,6 +7,7 @@ import StreakBanner from "@/components/ui/StreakBanner";
 import Onboarding from "@/components/ui/Onboarding";
 import { useStreakCheck } from "@/hooks/useStreakCheck";
 import { useScheduleNotifications } from "@/hooks/useScheduleNotifications";
+import { useSyncQueue } from "@/hooks/useSyncQueue";
 import type { PrayerTime, PrayerLog } from "@/types";
 
 // ── Dua of the Day ─────────────────────────────────────────────
@@ -93,6 +94,10 @@ export default function TodayClient({
 
   useStreakCheck();
 
+  // ── NEW: offline sync ────────────────────────────────────────────────────
+  const { pendingCount, syncToast } = useSyncQueue();
+  // ────────────────────────────────────────────────────────────────────────
+
   useScheduleNotifications({
     prayers: prayerTimes,
     timezone: prayerTimezone,
@@ -123,12 +128,29 @@ export default function TodayClient({
         <Onboarding onComplete={handleOnboardingComplete} />
       )}
 
+      {/* ── NEW: Sync toast banner ──────────────────────────────────── */}
+      {syncToast && (
+        <div
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50
+            bg-green-50 border border-green-200 rounded-full px-4 py-2
+            shadow-md animate-fade-up"
+          role="status"
+          aria-live="polite"
+        >
+          <p className="font-body text-xs font-bold text-green-700 whitespace-nowrap">
+            {syncToast}
+          </p>
+        </div>
+      )}
+      {/* ──────────────────────────────────────────────────────────────── */}
+
       <TodayHeader
         userName={userName}
         donePrayers={donePrayers}
         totalPoints={stats?.total_points ?? 0}
         currentStreak={stats?.current_streak ?? 0}
         extraPoints={extraPoints}
+        pendingSync={pendingCount}              // ← NEW
       />
 
       <StreakBanner

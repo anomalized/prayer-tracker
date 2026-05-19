@@ -10,6 +10,7 @@ interface Props {
   totalPoints: number;
   currentStreak: number;
   extraPoints: number; // live points earned this session
+  pendingSync: number;   // ← NEW: count of queued offline prayers
 }
 
 
@@ -46,7 +47,7 @@ function toHijri(date: Date): string {
   }
 }
 
-export default function TodayHeader({ userName, donePrayers, totalPoints, currentStreak, extraPoints }: Props) {
+export default function TodayHeader({ userName, donePrayers, totalPoints, currentStreak, extraPoints, pendingSync }: Props) {
   const livePoints = totalPoints + extraPoints;
   const rank = getRank(livePoints);
   const progress = getRankProgress(livePoints);
@@ -65,7 +66,29 @@ export default function TodayHeader({ userName, donePrayers, totalPoints, curren
       {/* Menu button */}
       <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
 
-      {/* Greeting */}
+      {/* ── NEW: Offline sync indicator ─────────────────────────────── */}
+      {/* Only renders when there are prayers waiting to sync.            */}
+      {/* Positioned in the top-left, beneath the date line.             */}
+      {pendingSync > 0 && (
+        <div
+          className="inline-flex items-center gap-1.5 bg-amber-50 border
+            border-amber-200 rounded-full px-2.5 py-1 mb-2 relative z-10"
+          role="status"
+          aria-label={`${pendingSync} prayer${pendingSync > 1 ? "s" : ""} pending sync`}
+        >
+          {/* Pulsing amber dot */}
+          <span className="relative flex h-2 w-2 flex-shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full
+              rounded-full bg-amber-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+          </span>
+          <p className="font-body text-[10px] font-bold text-amber-700">
+            {pendingSync} prayer{pendingSync > 1 ? "s" : ""} pending sync
+          </p>
+        </div>
+      )}
+
+      {/* Greeting — unchanged */}
       <div className="mb-1">
         <p className="font-body text-xs tracking-widest text-nude-500 uppercase">
           {new Date().toLocaleDateString("en-US", { weekday:"long", day:"numeric", month:"long" })}

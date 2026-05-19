@@ -26,19 +26,20 @@ export async function getTodayLogs(): Promise<PrayerLog[]> {
 export async function markPrayer(
   prayerName: PrayerName,
   status: PrayerStatus,
-  previousStatus: PrayerStatus | null
+  previousStatus: PrayerStatus | null,
+  date?: string
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  const today = todayString();
+  const logDate = date ?? todayString();
 
   // Upsert the prayer log
   const { error } = await supabase
     .from("prayers")
     .upsert(
-      { user_id: user.id, prayer_name: prayerName, date: today, status },
+      { user_id: user.id, prayer_name: prayerName, date: logDate, status },
       { onConflict: "user_id,prayer_name,date" }
     );
 
@@ -61,7 +62,7 @@ export async function markPrayer(
         total_points: Math.max(0, POINTS[status]),
         current_streak: 1,
         best_streak: 1,
-        last_active_date: today,
+        last_active_date: logDate,
         onboarding_complete: false,
       });
     } else {
@@ -75,7 +76,7 @@ export async function markPrayer(
 
       if (last_active_date === yesterdayStr) {
         current_streak = (current_streak ?? 0) + 1;
-      } else if (last_active_date !== today) {
+      } else if (last_active_date !== logDate) {
         current_streak = 1;
       }
 
@@ -87,7 +88,7 @@ export async function markPrayer(
           total_points: newPoints,
           current_streak,
           best_streak,
-          last_active_date: today,
+          last_active_date: logDate,
         })
         .eq("user_id", user.id);
     }
