@@ -612,7 +612,7 @@ export default function TasbihCounter() {
                 🌸 Masha'Allah!
               </span>
             )}
-          </div>
+          </button>
         </div>
 
         {/* ── Target selector ─────────────────────────────────────── */}
