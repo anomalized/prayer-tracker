@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import { Sparkles } from "lucide-react";
 import BadgeCard          from "@/components/rewards/BadgeCard";
 import BadgeCelebration   from "@/components/rewards/BadgeCelebration";
 import StreakFreezeCard    from "@/components/rewards/StreakFreezeCard";
@@ -142,7 +143,9 @@ export default function RewardsClient({ badges, stats, streakEvents }: Props) {
         {/* Points shop teaser — unchanged */}
         <div className="bg-gradient-to-br from-nude-200 to-nude-300 rounded-3xl
           p-5 text-center border border-nude-300">
-          <p className="text-3xl mb-2">🌸</p>
+          <div className="flex items-center justify-center mx-auto mb-2 w-11 h-11 rounded-2xl bg-white/80 text-nude-700">
+            <Sparkles className="w-5 h-5" />
+          </div>
           <p className="font-display text-lg font-bold text-nude-800">
             Coming Soon
           </p>

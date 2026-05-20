@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { BookOpen, ChevronRight, Search } from "lucide-react";
 import { SURAHS, searchSurahs } from "@/lib/quran";
 import MenuButton from "@/components/ui/MenuButton";
 
@@ -78,9 +79,9 @@ export default function QuranClient() {
         {lastReadSurah && !query && (
           <Link href={`/dashboard/quran/${lastReadSurah.number}`}
             className="flex items-center gap-3 bg-white border border-nude-200 rounded-2xl px-4 py-3 shadow-sm active:scale-[0.98] transition-transform">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-nude-700 flex-shrink-0"
               style={{ background: "linear-gradient(135deg,#f0d8ce,#e8c4b8)" }}>
-              📖
+              <BookOpen className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold text-nude-400 uppercase tracking-wider">Continue Reading</p>
@@ -88,9 +89,7 @@ export default function QuranClient() {
                 {lastReadSurah.number}. {lastReadSurah.englishName} — {lastReadSurah.name}
               </p>
             </div>
-            <svg className="w-4 h-4 text-nude-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRight className="w-4 h-4 text-nude-300 flex-shrink-0" />
           </Link>
         )}
 
@@ -105,7 +104,9 @@ export default function QuranClient() {
         <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm divide-y divide-nude-50">
           {results.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="text-4xl mb-2">🔍</p>
+              <div className="mx-auto mb-2 w-12 h-12 rounded-2xl bg-nude-100 text-nude-500 flex items-center justify-center">
+                <Search className="w-6 h-6" />
+              </div>
               <p className="font-body text-sm font-bold text-nude-600">No surahs found</p>
               <p className="font-body text-xs text-nude-400 mt-1">Try a different name or number</p>
             </div>

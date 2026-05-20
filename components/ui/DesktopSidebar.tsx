@@ -1,38 +1,41 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Award, BarChart3, Repeat, Settings, Users } from "lucide-react";
+import IslamicIcon from "./IslamicIcon";
 
-const NAV_SECTIONS = [
+const NAV_SECTIONS: Array<{ label: string; items: Array<{ href: string; label: string; icon: ReactNode; desc: string }> }> = [
   {
     label: "Prayer",
     items: [
-      { href: "/dashboard/today",   label: "Today",   icon: "🕌", desc: "Daily prayers" },
-      { href: "/dashboard/stats",   label: "Stats",   icon: "📊", desc: "Progress & heatmap" },
-      { href: "/dashboard/rewards", label: "Rewards", icon: "✨", desc: "Badges" },
-      { href: "/dashboard/qada",    label: "Qada",    icon: "🤲", desc: "Makeup prayer tracker" },
+      { href: "/dashboard/today",   label: "Today",   icon: <IslamicIcon id="minaret" size={20} title="Today" />,   desc: "Daily prayers" },
+      { href: "/dashboard/stats",   label: "Stats",   icon: <BarChart3 className="w-5 h-5" />,                   desc: "Progress & heatmap" },
+      { href: "/dashboard/rewards", label: "Rewards", icon: <Award className="w-5 h-5" />,                    desc: "Badges" },
+      { href: "/dashboard/qada",    label: "Qada",    icon: <Repeat className="w-5 h-5" />,                   desc: "Makeup prayer tracker" },
     ],
   },
   {
     label: "Community",
     items: [
-      { href: "/dashboard/friends", label: "Friends", icon: "👯‍♀️", desc: "Leaderboard" },
+      { href: "/dashboard/friends", label: "Friends", icon: <Users className="w-5 h-5" />,                     desc: "Leaderboard" },
     ],
   },
   {
     label: "Tools",
     items: [
-      { href: "/dashboard/quran",    label: "Qur'an",      icon: "📖", desc: "114 surahs" },
-      { href: "/dashboard/duas",     label: "Dua Library", icon: "🤲", desc: "Supplications" },
-      { href: "/dashboard/qibla",    label: "Qibla",       icon: "🧭", desc: "Direction" },
-      { href: "/dashboard/tasbih",   label: "Tasbih",      icon: "📿", desc: "Dhikr counter" },
-      { href: "/dashboard/calendar", label: "Calendar",    icon: "🌙", desc: "Hijri calendar" },
+      { href: "/dashboard/quran",    label: "Qur'an",      icon: <IslamicIcon id="open-book" size={20} title="Qur'an" />, desc: "114 surahs" },
+      { href: "/dashboard/duas",     label: "Dua Library", icon: <IslamicIcon id="prayer-hands" size={20} title="Dua Library" />, desc: "Supplications" },
+      { href: "/dashboard/qibla",    label: "Qibla",       icon: <IslamicIcon id="compass" size={20} title="Qibla" />, desc: "Direction" },
+      { href: "/dashboard/tasbih",   label: "Tasbih",      icon: <IslamicIcon id="prayer-beads" size={20} title="Tasbih" />, desc: "Dhikr counter" },
+      { href: "/dashboard/calendar", label: "Calendar",    icon: <IslamicIcon id="kaaba" size={20} title="Calendar" />, desc: "Hijri calendar" },
     ],
   },
   {
     label: "Account",
     items: [
-      { href: "/settings", label: "Settings", icon: "⚙️", desc: "Preferences" },
+      { href: "/settings", label: "Settings", icon: <Settings className="w-5 h-5" />, desc: "Preferences" },
     ],
   },
 ];
@@ -68,7 +71,7 @@ export default function DesktopSidebar({ userName, userEmail }: Props) {
             <p className="font-body text-xs text-nude-400 truncate">{userEmail || ""}</p>
           </div>
         </div>
-        <p className="font-display text-lg font-bold text-nude-700 mt-3">Salah Tracker 🌸</p>
+        <p className="font-display text-lg font-bold text-nude-700 mt-3">Salah Tracker</p>
       </div>
 
       {/* Nav items */}
@@ -113,7 +116,7 @@ export default function DesktopSidebar({ userName, userEmail }: Props) {
       </nav>
 
       <div className="px-4 py-3 border-t border-nude-100 flex-shrink-0">
-        <p className="font-body text-[10px] text-nude-300 text-center">Made with 🌸</p>
+        <p className="font-body text-[10px] text-nude-300 text-center">Made with care</p>
       </div>
     </aside>
   );

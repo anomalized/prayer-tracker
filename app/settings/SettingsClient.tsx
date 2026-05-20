@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { updateProfile, updatePassword, signOut, deleteAccount } from "@/lib/actions/settings";
 import { updateNotificationsEnabled } from "@/lib/actions/notifications";
@@ -123,10 +124,11 @@ export default function SettingsClient({ userId, fullName, email, city, notifica
       <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-nude-300 opacity-20" />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
-        <h1 className="font-display text-3xl font-bold text-nude-800">Settings ⚙️</h1>
-        <p className="font-body text-sm text-nude-500 mt-1">{email}</p>
+        <div className="flex items-center gap-3">
+          <Settings className="w-6 h-6 text-nude-700" />
+          <h1 className="font-display text-3xl font-bold text-nude-800">Settings</h1>
+        </div>
       </div>
-
       <div className="px-4 py-4 space-y-4">
 
         {/* Toast */}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BADGES } from "@/lib/badges";
+import RewardBadgeIcon, { getBadgeShape } from "@/components/rewards/RewardBadgeIcon";
 
 interface Props {
   newBadgeIds: string[];
@@ -37,7 +38,9 @@ export default function BadgeCelebration({ newBadgeIds, onDismiss }: Props) {
         </div>
 
         <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-nude-300 to-nude-400 flex items-center justify-center text-5xl mx-auto mb-5 shadow-md">
-          {badge.icon}
+          <div className="w-16 h-16 text-white">
+            <RewardBadgeIcon shape={getBadgeShape(badge.id)} earned />
+          </div>
         </div>
 
         <p className="font-body text-xs tracking-widest text-nude-400 uppercase mb-2">
@@ -50,7 +53,7 @@ export default function BadgeCelebration({ newBadgeIds, onDismiss }: Props) {
           onClick={handleNext}
           className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-nude-400 to-nude-500 text-white font-bold font-body text-sm active:scale-95 transition-transform"
         >
-          {hasMore ? `Next Badge (${current + 2}/${newBadgeIds.length})` : "Yay! 🌸"}
+          {hasMore ? `Next Badge (${current + 2}/${newBadgeIds.length})` : "All set!"}
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { saveReflection } from "@/lib/actions/reflection";
 
@@ -102,8 +103,9 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
           <button
             onClick={() => router.back()}
             className="w-9 h-9 rounded-xl bg-white/60 flex items-center justify-center text-nude-600 font-bold"
+            aria-label="Go back"
           >
-            ←
+            <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
             <p className="font-body text-xs tracking-widest text-nude-500 uppercase">Reflection</p>

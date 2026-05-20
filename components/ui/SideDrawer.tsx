@@ -1,39 +1,42 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Award, BarChart3, Repeat, Settings, Users, X } from "lucide-react";
+import IslamicIcon from "./IslamicIcon";
 
-const NAV_SECTIONS = [
+const NAV_SECTIONS: Array<{ label: string; items: Array<{ href: string; label: string; icon: ReactNode; desc: string }> }> = [
   {
     label: "Prayer",
     items: [
-      { href: "/dashboard/today",   label: "Today",   icon: "🕌", desc: "Daily prayers & tracking" },
-      { href: "/dashboard/stats",   label: "Stats",   icon: "📊", desc: "Progress & heatmap" },
-      { href: "/dashboard/rewards", label: "Rewards", icon: "✨", desc: "Badges & achievements" },
-      { href: "/dashboard/qada",    label: "Qada",    icon: "🤲", desc: "Makeup prayer tracker" },
+      { href: "/dashboard/today",   label: "Today",   icon: <IslamicIcon id="minaret" size={20} title="Today" />,   desc: "Daily prayers & tracking" },
+      { href: "/dashboard/stats",   label: "Stats",   icon: <BarChart3 className="w-5 h-5" />,                   desc: "Progress & heatmap" },
+      { href: "/dashboard/rewards", label: "Rewards", icon: <Award className="w-5 h-5" />,                    desc: "Badges & achievements" },
+      { href: "/dashboard/qada",    label: "Qada",    icon: <Repeat className="w-5 h-5" />,                   desc: "Makeup prayer tracker" },
     ],
   },
   {
     label: "Community",
     items: [
-      { href: "/dashboard/friends", label: "Friends", icon: "👯‍♀️", desc: "Leaderboard & nudges" },
+      { href: "/dashboard/friends", label: "Friends", icon: <Users className="w-5 h-5" />,                     desc: "Leaderboard & nudges" },
     ],
   },
   {
     label: "Tools",
     items: [
-      { href: "/dashboard/quran",    label: "Qur'an",      icon: "📖", desc: "Read all 114 surahs" },
-      { href: "/dashboard/duas",     label: "Dua Library", icon: "🤲", desc: "Daily supplications" },
-      { href: "/dashboard/qibla",    label: "Qibla",       icon: "🧭", desc: "Find direction to Mecca" },
-      { href: "/dashboard/tasbih",   label: "Tasbih",      icon: "📿", desc: "Dhikr counter" },
-      { href: "/dashboard/calendar", label: "Calendar",    icon: "🌙", desc: "Hijri calendar & events" },
+      { href: "/dashboard/quran",    label: "Qur'an",      icon: <IslamicIcon id="open-book" size={20} title="Qur'an" />, desc: "Read all 114 surahs" },
+      { href: "/dashboard/duas",     label: "Dua Library", icon: <IslamicIcon id="prayer-hands" size={20} title="Dua Library" />, desc: "Daily supplications" },
+      { href: "/dashboard/qibla",    label: "Qibla",       icon: <IslamicIcon id="compass" size={20} title="Qibla" />, desc: "Find direction to Mecca" },
+      { href: "/dashboard/tasbih",   label: "Tasbih",      icon: <IslamicIcon id="prayer-beads" size={20} title="Tasbih" />, desc: "Dhikr counter" },
+      { href: "/dashboard/calendar", label: "Calendar",    icon: <IslamicIcon id="kaaba" size={20} title="Calendar" />, desc: "Hijri calendar & events" },
     ],
   },
   {
     label: "Account",
     items: [
-      { href: "/settings", label: "Settings", icon: "⚙️", desc: "Profile & preferences" },
+      { href: "/settings", label: "Settings", icon: <Settings className="w-5 h-5" />, desc: "Profile & preferences" },
     ],
   },
 ];
@@ -101,10 +104,9 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
           <button
             onClick={onClose}
             className="absolute top-12 right-4 w-8 h-8 rounded-xl bg-white/60 flex items-center justify-center text-nude-500 hover:bg-white transition-colors"
+            aria-label="Close navigation"
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+            <X className="w-4 h-4" />
           </button>
 
           {/* User info */}
@@ -192,7 +194,7 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
         {/* Footer */}
         <div className="px-5 py-4 border-t border-nude-100 flex-shrink-0">
           <p className="font-body text-[10px] text-nude-300 text-center">
-            Made with 🌸 for your spiritual journey
+            Made with care for your spiritual journey
           </p>
         </div>
       </div>
