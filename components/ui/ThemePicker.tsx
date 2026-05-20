@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import IslamicIcon from "./IslamicIcon";
 import { useTheme, type ThemeName } from "@/hooks/useTheme";
 
 const OPTIONS: Array<{ id: ThemeName; label: string; accent: string }> = [
@@ -12,9 +13,8 @@ const OPTIONS: Array<{ id: ThemeName; label: string; accent: string }> = [
 ];
 
 export default function ThemePicker() {
-  const { theme, setTheme, isRamadan } = useTheme();
-
-  const ramadanActive = useMemo(() => isRamadan && theme !== "ramadan", [isRamadan, theme]);
+  const { theme, setTheme } = useTheme();
+  const isRamadanActive = useMemo(() => theme === "ramadan", [theme]);
 
   return (
     <div className="theme-transition bg-theme-surface border border-theme-border rounded-3xl p-4 space-y-4">
@@ -57,9 +57,10 @@ export default function ThemePicker() {
         })}
       </div>
 
-      {ramadanActive && (
-        <div className="rounded-2xl border border-theme-border bg-theme-bg px-3 py-2 text-xs text-theme-muted">
-          Ramadan is currently active. Tap the Ramadan swatch to apply the special theme.
+      {isRamadanActive && (
+        <div className="flex items-center gap-2 rounded-2xl border border-theme-border bg-theme-bg px-3 py-2 text-xs text-theme-muted">
+          <IslamicIcon id="crescent" active size={16} title="Ramadan theme active" className="w-4 h-4 text-theme-accent" />
+          <span>Active during Ramadan 9 AH</span>
         </div>
       )}
     </div>

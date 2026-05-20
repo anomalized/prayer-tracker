@@ -6,10 +6,12 @@ interface IslamicIconProps extends HTMLAttributes<SVGElement> {
   id: string;
   size?: number;
   title?: string;
+  active?: boolean;
 }
 
-export default function IslamicIcon({ id, size = 20, className, title, ...props }: IslamicIconProps) {
-  const href = `/icons/islamic-sprite.svg#${id}`;
+export default function IslamicIcon({ id, size = 20, className, title, active = false, ...props }: IslamicIconProps) {
+  const symbolId = `${id}${active ? "-filled" : ""}`;
+  const href = `/icons/islamic-sprite.svg#${symbolId}`;
 
   return (
     <svg

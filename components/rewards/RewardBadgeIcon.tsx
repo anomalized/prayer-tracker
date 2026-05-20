@@ -26,13 +26,18 @@ interface Props {
 
 export default function RewardBadgeIcon({ shape, earned = false, className = "" }: Props) {
   const maskId = `badge-mask-${shape}`;
-  const gradientId = `badge-shine-${shape}`;
+  const shineId = `badge-shine-${shape}`;
+  const fillId = `badge-fill-${shape}`;
 
   return (
     <div className={`relative inline-flex items-center justify-center ${className}`.trim()}>
       <svg viewBox="0 0 64 64" className="w-full h-full" aria-hidden="true">
         <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id={fillId} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="var(--color-accent)" />
+            <stop offset="100%" stopColor="var(--color-accent-dark)" />
+          </linearGradient>
+          <linearGradient id={shineId} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="white" stopOpacity="0" />
             <stop offset="50%" stopColor="white" stopOpacity="0.65" />
             <stop offset="100%" stopColor="white" stopOpacity="0" />
@@ -42,14 +47,14 @@ export default function RewardBadgeIcon({ shape, earned = false, className = "" 
           </mask>
         </defs>
 
-        <path d={SHAPES[shape]} fill="currentColor" />
+        <path d={SHAPES[shape]} fill={earned ? `url(#${fillId})` : "currentColor"} />
 
         <rect
           x="-32"
           y="0"
           width="32"
           height="64"
-          fill={`url(#${gradientId})`}
+          fill={`url(#${shineId})`}
           mask={`url(#${maskId})`}
           className={earned ? "badge-shine-overlay" : "opacity-0"}
         />

@@ -7,11 +7,11 @@ import { usePathname } from "next/navigation";
 import { Award, BarChart3, Repeat, Settings, Users, X } from "lucide-react";
 import IslamicIcon from "./IslamicIcon";
 
-const NAV_SECTIONS: Array<{ label: string; items: Array<{ href: string; label: string; icon: ReactNode; desc: string }> }> = [
+const NAV_SECTIONS: Array<{ label: string; items: Array<{ href: string; label: string; icon?: ReactNode; svgId?: string; desc: string }> }> = [
   {
     label: "Prayer",
     items: [
-      { href: "/dashboard/today",   label: "Today",   icon: <IslamicIcon id="minaret" size={20} title="Today" />,   desc: "Daily prayers & tracking" },
+      { href: "/dashboard/today",   label: "Today",   svgId: "minaret", desc: "Daily prayers & tracking" },
       { href: "/dashboard/stats",   label: "Stats",   icon: <BarChart3 className="w-5 h-5" />,                   desc: "Progress & heatmap" },
       { href: "/dashboard/rewards", label: "Rewards", icon: <Award className="w-5 h-5" />,                    desc: "Badges & achievements" },
       { href: "/dashboard/qada",    label: "Qada",    icon: <Repeat className="w-5 h-5" />,                   desc: "Makeup prayer tracker" },
@@ -26,11 +26,11 @@ const NAV_SECTIONS: Array<{ label: string; items: Array<{ href: string; label: s
   {
     label: "Tools",
     items: [
-      { href: "/dashboard/quran",    label: "Qur'an",      icon: <IslamicIcon id="open-book" size={20} title="Qur'an" />, desc: "Read all 114 surahs" },
-      { href: "/dashboard/duas",     label: "Dua Library", icon: <IslamicIcon id="prayer-hands" size={20} title="Dua Library" />, desc: "Daily supplications" },
-      { href: "/dashboard/qibla",    label: "Qibla",       icon: <IslamicIcon id="compass" size={20} title="Qibla" />, desc: "Find direction to Mecca" },
-      { href: "/dashboard/tasbih",   label: "Tasbih",      icon: <IslamicIcon id="prayer-beads" size={20} title="Tasbih" />, desc: "Dhikr counter" },
-      { href: "/dashboard/calendar", label: "Calendar",    icon: <IslamicIcon id="kaaba" size={20} title="Calendar" />, desc: "Hijri calendar & events" },
+      { href: "/dashboard/quran",    label: "Qur'an",      svgId: "open-book", desc: "Read all 114 surahs" },
+      { href: "/dashboard/duas",     label: "Dua Library", svgId: "prayer-hands", desc: "Daily supplications" },
+      { href: "/dashboard/qibla",    label: "Qibla",       svgId: "compass", desc: "Find direction to Mecca" },
+      { href: "/dashboard/tasbih",   label: "Tasbih",      svgId: "prayer-beads", desc: "Dhikr counter" },
+      { href: "/dashboard/calendar", label: "Calendar",    svgId: "kaaba", desc: "Hijri calendar & events" },
     ],
   },
   {
@@ -166,7 +166,9 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
                           border: active ? "1.5px solid #e8c4b8" : "1.5px solid #f0e8e4",
                         }}
                       >
-                        {item.icon}
+                        {item.svgId
+                          ? <IslamicIcon id={item.svgId} active={active} size={18} title={item.label} />
+                          : item.icon}
                       </div>
 
                       <div className="flex-1 min-w-0">
