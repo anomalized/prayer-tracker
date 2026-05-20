@@ -25,6 +25,17 @@ module.exports = {
         display: ["'Cormorant Garamond'", "serif"],
         body:    ["'Lato'", "sans-serif"],
       },
+      colors: {
+        theme: {
+          bg: "var(--color-bg-primary)",
+          surface: "var(--color-surface)",
+          accent: "var(--color-accent)",
+          'accent-dark': "var(--color-accent-dark)",
+          border: "var(--color-border)",
+          text: "var(--color-text-primary)",
+          muted: "var(--color-text-muted)",
+        },
+      },
       borderRadius: {
         "2xl": "1rem",
         "3xl": "1.5rem",

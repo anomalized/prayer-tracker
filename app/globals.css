@@ -15,6 +15,64 @@
   --nude-700: #a06050;
   --nude-800: #7a4035;
   --nude-900: #5a2820;
+
+  --color-bg-primary:    #fdf6f2;
+  --color-bg-secondary:  #fdf0eb;
+  --color-surface:       #ffffff;
+  --color-border:        #f0c8bc;
+  --color-accent:        #d4786a;
+  --color-accent-dark:   #a06050;
+  --color-text-primary:  #5a2820;
+  --color-text-secondary:#7a4035;
+  --color-text-muted:    #a9918d;
+}
+
+[data-theme="midnight"] {
+  --color-bg-primary:    #06112f;
+  --color-bg-secondary:  #0f1b45;
+  --color-surface:       #11204b;
+  --color-border:        #23305c;
+  --color-accent:        #f7c25d;
+  --color-accent-dark:   #d49d36;
+  --color-text-primary:  #f6ecd7;
+  --color-text-secondary:#dfe2d7;
+  --color-text-muted:    #8fa3b4;
+}
+
+[data-theme="forest"] {
+  --color-bg-primary:    #11220f;
+  --color-bg-secondary:  #193117;
+  --color-surface:       #1f3d24;
+  --color-border:        #34683a;
+  --color-accent:        #7bbf6a;
+  --color-accent-dark:   #4f7a44;
+  --color-text-primary:  #f0f5ea;
+  --color-text-secondary:#c7d8bf;
+  --color-text-muted:    #8da586;
+}
+
+[data-theme="ocean"] {
+  --color-bg-primary:    #062b33;
+  --color-bg-secondary:  #0a414b;
+  --color-surface:       #0f5964;
+  --color-border:        #177383;
+  --color-accent:        #4bc8d2;
+  --color-accent-dark:   #1b94a3;
+  --color-text-primary:  #e8f8fb;
+  --color-text-secondary:#bde6eb;
+  --color-text-muted:    #88c2ca;
+}
+
+[data-theme="ramadan"] {
+  --color-bg-primary:    #0b1b2c;
+  --color-bg-secondary:  #102f4d;
+  --color-surface:       #163e64;
+  --color-border:        #305d8e;
+  --color-accent:        #f6d57b;
+  --color-accent-dark:   #d9b14d;
+  --color-text-primary:  #f8f6ec;
+  --color-text-secondary:#c6d9e4;
+  --color-text-muted:    #8fa3b5;
 }
 
 * {
@@ -22,12 +80,17 @@
 }
 
 html, body {
-  background-color: var(--nude-50);
-  color: var(--nude-800);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-family: 'Lato', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.3s ease, color 0.3s ease;
   /* overscroll-behavior removed — applied surgically below where needed */
+}
+
+.theme-transition {
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Scrollbar */

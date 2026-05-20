@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateProfile, updatePassword, signOut, deleteAccount } from "@/lib/actions/settings";
 import { updateNotificationsEnabled } from "@/lib/actions/notifications";
 import MenuButton from "@/components/ui/MenuButton";
+import ThemePicker from "@/components/ui/ThemePicker";
 
 interface Props {
   userId: string;
@@ -137,6 +138,12 @@ export default function SettingsClient({ userId, fullName, email, city, notifica
         )}
 
         {/* Profile */}
+        <Section title="Appearance">
+          <div className="px-4 py-4">
+            <ThemePicker />
+          </div>
+        </Section>
+
         <Section title="Profile">
           <Row label="Display Name">
             <input
