@@ -126,6 +126,50 @@ html, body {
   100% { transform: translateX(120%) scaleX(0.6); opacity: 0; }
 }
 
+@keyframes drawCheck {
+  from { stroke-dashoffset: 32; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes drawXLine1 {
+  from { stroke-dashoffset: 18; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes drawXLine2 {
+  from { stroke-dashoffset: 18; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes clockSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-draw-check path {
+  stroke-dasharray: 32;
+  stroke-dashoffset: 32;
+  animation: drawCheck 300ms ease-out forwards;
+}
+
+.animate-draw-x-line1 {
+  stroke-dasharray: 18;
+  stroke-dashoffset: 18;
+  animation: drawXLine1 200ms ease-out forwards;
+}
+
+.animate-draw-x-line2 {
+  stroke-dasharray: 18;
+  stroke-dashoffset: 18;
+  animation: drawXLine2 200ms ease-out 100ms forwards;
+}
+
+.animate-clock-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: clockSpin 400ms ease-out forwards;
+}
+
 .animate-fade-up   { animation: fadeUp  0.4s ease both; }
 .animate-pop       { animation: pop     0.6s ease; }
 .animate-float-up  { animation: floatUp 0.8s ease forwards; }

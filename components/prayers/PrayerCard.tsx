@@ -18,6 +18,7 @@ interface Props {
 
 export default function PrayerCard({ prayer, currentStatus, currentNote, index, onPointsEarned }: Props) {
   const [status, setStatus]       = useState<PrayerStatus | null>(currentStatus);
+  const [animateStatus, setAnimateStatus] = useState<PrayerStatus | null>(null);
   const [note, setNote]           = useState(currentNote ?? "");
   const [showNote, setShowNote]   = useState(false);
   const [toast, setToast]         = useState<string | null>(null);
@@ -46,6 +47,9 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
 
     const prev = status;
     setStatus(newStatus);   // optimistic — always immediate
+    if (newStatus !== prev) {
+      setAnimateStatus(newStatus);
+    }
 
     // Points feedback (same as before)
     const points     = newStatus === "ontime" ? 20 : newStatus === "late" ? 10 : 0;
@@ -143,6 +147,7 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
           <button
             onClick={() => handleMark("ontime")}
             disabled={!timePassed || isPending}
+            aria-label="Mark prayer on time"
             className={`flex-1 py-2.5 rounded-2xl text-xs font-bold tracking-wide transition-all active:scale-95
               ${!timePassed
                 ? "bg-nude-50 text-nude-300 cursor-not-allowed"
@@ -151,11 +156,25 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
                   : "bg-nude-100 text-nude-600 hover:bg-nude-200"
               }`}
           >
-            {status === "ontime" ? "✓ On Time" : "On Time"} {status === "ontime" && "· +20pts"}
+            <span className="inline-flex items-center justify-center w-full h-full">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`w-5 h-5 ${animateStatus === "ontime" && status === "ontime" ? "animate-draw-check" : ""}`}
+                onAnimationEnd={() => animateStatus === "ontime" && setAnimateStatus(null)}
+              >
+                <path d="M6 12.5l4 4 8-8" />
+              </svg>
+            </span>
           </button>
           <button
             onClick={() => handleMark("late")}
             disabled={!timePassed || isPending}
+            aria-label="Mark prayer late"
             className={`flex-1 py-2.5 rounded-2xl text-xs font-bold tracking-wide transition-all active:scale-95
               ${!timePassed
                 ? "bg-nude-50 text-nude-300 cursor-not-allowed"
@@ -164,11 +183,30 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
                   : "bg-nude-100 text-nude-400 hover:bg-nude-200"
               }`}
           >
-            {status === "late" ? "✓ Late" : "Late"} {status === "late" && "· +10pts"}
+            <span className="inline-flex items-center justify-center w-full h-full">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5"
+              >
+                <circle cx="12" cy="12" r="8" />
+                <path
+                  d="M12 12l0-4"
+                  className={animateStatus === "late" && status === "late" ? "origin-center animate-clock-spin" : ""}
+                  style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                  onAnimationEnd={() => animateStatus === "late" && setAnimateStatus(null)}
+                />
+              </svg>
+            </span>
           </button>
           <button
             onClick={() => handleMark("missed")}
             disabled={!timePassed || isPending}
+            aria-label="Mark prayer missed"
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold tracking-wide transition-all active:scale-95
               ${!timePassed
                 ? "bg-nude-50 text-nude-300 cursor-not-allowed"
@@ -177,7 +215,27 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
                   : "bg-nude-100 text-nude-300 hover:bg-nude-200"
               }`}
           >
-            {status === "missed" ? "✗" : "Missed"}
+            <span className="inline-flex items-center justify-center w-full h-full">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5"
+                onAnimationEnd={() => animateStatus === "missed" && setAnimateStatus(null)}
+              >
+                <path
+                  d="M7 7l10 10"
+                  className={animateStatus === "missed" && status === "missed" ? "animate-draw-x-line1" : ""}
+                />
+                <path
+                  d="M17 7l-10 10"
+                  className={animateStatus === "missed" && status === "missed" ? "animate-draw-x-line2" : ""}
+                />
+              </svg>
+            </span>
           </button>
         </div>
 
