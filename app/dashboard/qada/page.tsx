@@ -9,7 +9,7 @@ export default async function QadaPage() {
   const stats = await getQadaStats();
 
   return (
-    <div className="min-h-screen pb-28 md:pb-0" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen pb-28 md:pb-0" style={{ background: "var(--color-bg-primary)" }}>
       <div
         className="px-5 pt-12 md:pt-6 pb-6 relative overflow-hidden"
         style={{ background: "linear-gradient(160deg, #f5e6df 0%, #f0d8ce 60%, #ecddd6 100%)" }}

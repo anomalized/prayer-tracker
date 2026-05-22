@@ -28,7 +28,7 @@ export default async function CalendarPage() {
     : { detailMap: {}, completionMap: {} };
 
   return (
-    <div className="min-h-screen pb-28 md:pb-0" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen pb-28 md:pb-0" style={{ background: "var(--color-bg-primary)" }}>
 
       {/* Header */}
       <div

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { getRank, RANK_COLORS, getRankProgress } from "@/lib/utils";
 import MenuButton from "@/components/ui/MenuButton";
+import CanvasBackground from "@/components/ui/CanvasBackground";
+import { useTheme } from "@/hooks/useTheme";
 
 interface Props {
   userName: string;
@@ -56,30 +58,25 @@ export default function TodayHeader({ userName, donePrayers, totalPoints, curren
   const hijriDate = toHijri(new Date());
   const greetings = ["Peace be upon you", "Assalamu Alaikum", "Welcome back"];
   const greeting = greetings[0];
+  const { theme } = useTheme();
 
   return (
-    <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 relative overflow-hidden">
-      {/* Decorative blobs */}
-      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-nude-300 opacity-20" />
-      <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-nude-300 opacity-15" />
+    <div className="relative overflow-hidden px-5 pt-12 pb-6" style={{ background: 'var(--color-bg-secondary)' }}>
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <CanvasBackground theme={theme} />
+      </div>
 
       {/* Menu button */}
       <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
 
-      {/* ── NEW: Offline sync indicator ─────────────────────────────── */}
-      {/* Only renders when there are prayers waiting to sync.            */}
-      {/* Positioned in the top-left, beneath the date line.             */}
       {pendingSync > 0 && (
         <div
-          className="inline-flex items-center gap-1.5 bg-amber-50 border
-            border-amber-200 rounded-full px-2.5 py-1 mb-2 relative z-10"
+          className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 mb-2 relative z-10"
           role="status"
           aria-label={`${pendingSync} prayer${pendingSync > 1 ? "s" : ""} pending sync`}
         >
-          {/* Pulsing amber dot */}
           <span className="relative flex h-2 w-2 flex-shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full
-              rounded-full bg-amber-400 opacity-75" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
           </span>
           <p className="font-body text-[10px] font-bold text-amber-700">
@@ -88,71 +85,64 @@ export default function TodayHeader({ userName, donePrayers, totalPoints, curren
         </div>
       )}
 
-      {/* Greeting — unchanged */}
-      <div className="mb-1">
-        <p className="font-body text-xs tracking-widest text-nude-500 uppercase">
+      <div className="mb-1 z-10">
+        <p className="font-body text-xs tracking-widest uppercase" style={{ color: 'var(--color-text-muted)' }}>
           {new Date().toLocaleDateString("en-US", { weekday:"long", day:"numeric", month:"long" })}
         </p>
-        <p className="font-body text-xs text-nude-400 mt-0.5">
+        <p className="font-body text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
           🌙 {hijriDate}
         </p>
       </div>
-      <h1 className="font-display text-3xl font-bold text-nude-800 mb-1">
+      <h1 className="font-display text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
         {greeting},
       </h1>
-      <p className="font-display text-2xl text-nude-600 mb-5">{userName} 🌸</p>
+      <p className="font-display text-2xl mb-5" style={{ color: 'var(--color-text-secondary)' }}>{userName} 🌸</p>
 
-      {/* Daily progress */}
-      <div className="bg-white/60 rounded-2xl p-4 mb-4 backdrop-blur-sm">
+      <div className="glass rounded-2xl p-4 mb-4 z-10">
         <div className="flex justify-between items-center mb-2">
-          <span className="font-body text-xs font-bold tracking-wider text-nude-600 uppercase">
+          <span className="font-body text-xs font-bold tracking-wider uppercase" style={{ color: 'var(--color-text-muted)' }}>
             Today's Prayers
           </span>
-          <span className="font-display text-lg font-bold text-nude-800">
+          <span className="font-display text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {donePrayers} / 5
           </span>
         </div>
-        <div className="h-2 bg-nude-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-[color:var(--color-border)] rounded-full overflow-hidden">
           <div
-            className="h-full rounded-full transition-all duration-500"
+            className="h-full rounded-full transition-all duration-500 shimmer"
             style={{
               width: `${(donePrayers / 5) * 100}%`,
-              background: "linear-gradient(90deg, #e8a898, #d4786a)",
+              background: "var(--color-accent)",
             }}
           />
         </div>
         {donePrayers === 5 && (
-          <p className="text-center text-xs text-nude-500 font-body mt-2">
+          <p className="text-center text-xs font-body mt-2" style={{ color: 'var(--color-text-muted)' }}>
             ✨ Perfect day! All prayers complete
           </p>
         )}
       </div>
 
-      {/* Stats pills */}
-      <div className="flex gap-2">
-        <div className="flex-1 bg-white/60 rounded-2xl px-3 py-2.5 backdrop-blur-sm text-center">
-          <p className="font-body text-xs text-nude-500">Streak</p>
-          <p className="font-display text-lg font-bold text-nude-800">🔥 {currentStreak}</p>
+      <div className="flex gap-2 z-10">
+        <div className="flex-1 glass rounded-2xl px-3 py-2.5 text-center">
+          <p className="font-body text-xs" style={{ color: 'var(--color-text-muted)' }}>Streak</p>
+          <p className="font-display text-lg font-bold" style={{ color: 'var(--color-accent)' }}>🔥 {currentStreak}</p>
         </div>
-        <div className="flex-1 bg-white/60 rounded-2xl px-3 py-2.5 backdrop-blur-sm text-center">
-          <p className="font-body text-xs text-nude-500">Points</p>
-          <p className="font-display text-lg font-bold text-nude-800">⭐ {livePoints}</p>
+        <div className="flex-1 glass rounded-2xl px-3 py-2.5 text-center">
+          <p className="font-body text-xs" style={{ color: 'var(--color-text-muted)' }}>Points</p>
+          <p className="font-display text-lg font-bold" style={{ color: 'var(--color-accent)' }}>⭐ {livePoints}</p>
         </div>
-        <div className="flex-1 bg-white/60 rounded-2xl px-3 py-2.5 backdrop-blur-sm text-center">
-          <p className="font-body text-xs text-nude-500">Rank</p>
+        <div className="flex-1 glass rounded-2xl px-3 py-2.5 text-center">
+          <p className="font-body text-xs" style={{ color: 'var(--color-text-muted)' }}>Rank</p>
           <p className="font-display text-lg font-bold" style={{ color: rankColor }}>{rank}</p>
         </div>
       </div>
 
-      {/* Rank progress bar */}
-      <div className="mt-3">
-        <div className="h-1 bg-nude-200 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-700"
-            style={{ width: `${progress}%`, backgroundColor: rankColor }}
-          />
+      <div className="mt-3 z-10">
+        <div className="h-1 bg-[color:var(--color-border)] rounded-full overflow-hidden">
+          <div className="h-full rounded-full transition-all duration-700 shimmer" style={{ width: `${progress}%`, backgroundColor: rankColor }} />
         </div>
-        <p className="text-right font-body text-xs text-nude-400 mt-1">
+        <p className="text-right font-body text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
           {progress.toFixed(0)}% to next rank
         </p>
       </div>

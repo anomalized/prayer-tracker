@@ -7,6 +7,8 @@ import { checkAndAwardBadges } from "@/lib/actions/badges";
 import { isPrayerTimePassed } from "@/lib/prayerTimes";
 import { queuePrayerLog } from "@/lib/offlineQueue";
 import type { PrayerTime, PrayerStatus } from "@/types";
+import CanvasBackground from "@/components/ui/CanvasBackground";
+import { useTheme } from "@/hooks/useTheme";
 
 interface Props {
   prayer: PrayerTime;
@@ -17,266 +19,185 @@ interface Props {
 }
 
 export default function PrayerCard({ prayer, currentStatus, currentNote, index, onPointsEarned }: Props) {
-  const [status, setStatus]       = useState<PrayerStatus | null>(currentStatus);
-  const [animateStatus, setAnimateStatus] = useState<PrayerStatus | null>(null);
-  const [note, setNote]           = useState(currentNote ?? "");
-  const [showNote, setShowNote]   = useState(false);
-  const [toast, setToast]         = useState<string | null>(null);
+  const [status, setStatus] = useState<PrayerStatus | null>(currentStatus);
+  const [note, setNote] = useState(currentNote ?? "");
+  const [showNote, setShowNote] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { theme } = useTheme();
 
   const timePassed = isPrayerTimePassed(prayer.time);
+  const isDone = status === "ontime" || status === "late";
 
-  // Refresh data when user returns from reflection page
   useEffect(() => {
     const onFocus = () => router.refresh();
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, [router]);
 
-  // ── showToast helper ──────────────────────────────────────────────────────
-  const showToast = useCallback((msg: string, durationMs = 900) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), durationMs);
+  const showToast = useCallback((message: string, duration = 900) => {
+    setToast(message);
+    window.setTimeout(() => setToast(null), duration);
   }, []);
 
-  // ── handleMark ────────────────────────────────────────────────────────────
-  // Changed: checks navigator.onLine before deciding to queue or call server.
   const handleMark = (newStatus: PrayerStatus) => {
     if (!timePassed) return;
 
-    const prev = status;
-    setStatus(newStatus);   // optimistic — always immediate
-    if (newStatus !== prev) {
-      setAnimateStatus(newStatus);
-    }
+    const previousStatus = status;
+    setStatus(newStatus);
 
-    // Points feedback (same as before)
-    const points     = newStatus === "ontime" ? 20 : newStatus === "late" ? 10 : 0;
-    const prevPoints = prev    === "ontime"   ? 20 : prev    === "late"   ? 10 : 0;
-    const diff = points - prevPoints;
+    const points = newStatus === "ontime" ? 20 : newStatus === "late" ? 10 : 0;
+    const previousPoints = previousStatus === "ontime" ? 20 : previousStatus === "late" ? 10 : 0;
+    const diff = points - previousPoints;
     if (diff > 0) {
       showToast(`+${diff} pts`);
       onPointsEarned(diff);
     }
 
-    // ── Online path — unchanged behaviour ────────────────────────────────────
     if (typeof navigator === "undefined" || navigator.onLine) {
       startTransition(async () => {
-        await markPrayer(prayer.name, newStatus, prev);
+        await markPrayer(prayer.name, newStatus, previousStatus);
         await checkAndAwardBadges();
         router.refresh();
       });
       return;
     }
 
-    // ── Offline path — queue and show feedback ────────────────────────────────
     const today = new Date().toISOString().split("T")[0];
-
     startTransition(async () => {
-      try {
-        await queuePrayerLog(prayer.name, newStatus, prev, today);
-        // Show offline toast — overrides the points toast if both would fire
-        showToast("saved offline 🔌", 2200);
-      } catch {
-        // Queue write failed (e.g. IndexedDB unavailable) — roll back
-        setStatus(prev);
-        showToast("save failed", 1500);
-      }
+      await queuePrayerLog(prayer.name, newStatus, previousStatus, today);
+      showToast("Saved offline 🌙");
     });
   };
 
-  const handleSaveNote = () => {
+  const handleSaveNote = useCallback(() => {
     startTransition(async () => {
       await saveNote(prayer.name, note);
       setShowNote(false);
+      router.refresh();
+      showToast("Reflection saved ✨");
     });
-  };
-
-  const isDone = status !== null;
+  }, [note, prayer.name, router, showToast]);
 
   return (
     <>
-      <div
-        className={`relative rounded-3xl border p-4 transition-all duration-200 animate-fade-up delay-${index + 1}
-          ${isDone
-            ? "bg-gradient-to-br from-nude-100 to-nude-200 border-nude-300 shadow-sm"
-            : "bg-white border-nude-100"
-          }`}
-      >
-        {/* Floating toast — now handles both points and offline messages */}
-        {toast && (
-          <div
-            className={`absolute top-3 right-3 font-bold text-sm
-              animate-float-up pointer-events-none
-              ${toast.startsWith("saved offline") || toast.startsWith("Saved offline")
-                ? "text-amber-500"   // amber for offline
-                : "text-nude-600"    // terracotta for points
-              }`}
-          >
-            {toast}
-          </div>
-        )}
+      <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-theme-surface shadow-[0_20px_70px_rgba(0,0,0,0.06)]">
+        <div className="absolute inset-0 opacity-80">
+          <CanvasBackground theme={theme} />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/10" />
+        </div>
 
-        {/* Header row */}
-        <div className="flex items-center gap-3 mb-3">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0
-            ${isDone ? "bg-gradient-to-br from-nude-300 to-nude-400" : "bg-nude-100"}`}>
-            {prayer.icon}
-          </div>
-          <div className="flex-1">
-            <div className="flex items-baseline gap-2">
-              <span className="font-display text-xl font-bold text-nude-800">{prayer.name}</span>
-              <span className="text-xs text-nude-400 font-body">{prayer.arabic}</span>
+        <div className="relative p-5 space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-3xl shadow-lg" style={{ background: "var(--btn-gradient)" }}>
+              <span className="text-2xl">{prayer.icon}</span>
             </div>
-            <span className="text-xs text-nude-500 font-body">{prayer.time}</span>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="font-display text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>{prayer.name}</p>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/75">
+                  {status ?? "Pending"}
+                </span>
+              </div>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{prayer.arabic}</p>
+              <p className="text-xs mt-2 font-body" style={{ color: "var(--color-text-muted)" }}>{prayer.time}</p>
+            </div>
           </div>
-          {isDone && status !== "missed" && (
+
+          <div className="grid grid-cols-3 gap-3">
             <button
-              onClick={() => router.push(`/dashboard/today/reflection/${encodeURIComponent(prayer.name)}`)}
-              className={`w-8 h-8 rounded-xl border flex items-center justify-center text-sm transition-colors
-                ${currentNote ? "bg-nude-200 border-nude-300" : "bg-white border-nude-200 hover:border-nude-300"}`}
+              type="button"
+              onClick={() => handleMark("ontime")}
+              disabled={!timePassed || isPending}
+              className="rounded-3xl py-3 text-xs font-bold uppercase tracking-[0.18em] transition-transform active:scale-95 disabled:cursor-not-allowed"
+              style={status === "ontime" ? { background: "var(--btn-gradient)", color: "#fff" } : { background: "rgba(255,255,255,0.04)", color: "var(--color-text-primary)" }}
             >
-              {currentNote ? "📝" : "✍️"}
+              On time
             </button>
+            <button
+              type="button"
+              onClick={() => handleMark("late")}
+              disabled={!timePassed || isPending}
+              className="rounded-3xl py-3 text-xs font-bold uppercase tracking-[0.18em] transition-transform active:scale-95 disabled:cursor-not-allowed"
+              style={status === "late" ? { background: "rgba(255,185,95,0.16)", color: "var(--color-text-primary)" } : { background: "rgba(255,255,255,0.04)", color: "var(--color-text-muted)" }}
+            >
+              Late
+            </button>
+            <button
+              type="button"
+              onClick={() => handleMark("missed")}
+              disabled={!timePassed || isPending}
+              className="rounded-3xl py-3 text-xs font-bold uppercase tracking-[0.18em] transition-transform active:scale-95 disabled:cursor-not-allowed"
+              style={status === "missed" ? { background: "rgba(255,80,80,0.14)", color: "var(--color-accent)" } : { background: "rgba(255,255,255,0.04)", color: "var(--color-text-muted)" }}
+            >
+              Missed
+            </button>
+          </div>
+
+          {note && !showNote && (
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm italic" style={{ color: "var(--color-text-secondary)" }}>
+              “{note}”
+            </div>
           )}
+
+          {!timePassed && (
+            <p className="text-center text-xs font-body uppercase tracking-[0.2em]" style={{ color: "var(--color-text-muted)" }}>
+              Prayer time hasn't arrived yet
+            </p>
+          )}
+
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => setShowNote(true)}
+              className="flex-1 rounded-3xl border border-white/10 bg-white/5 py-3 text-sm font-semibold transition-all hover:border-white/20"
+              style={{ color: "var(--color-text-primary)" }}
+            >
+              {note ? "Edit reflection" : "Write reflection"}
+            </button>
+            <div className="rounded-3xl px-4 py-3 text-xs font-bold uppercase tracking-[0.18em]" style={{ background: "rgba(255,255,255,0.05)", color: "var(--color-text-secondary)" }}>
+              {isDone ? "Completed" : timePassed ? "Ready" : "Upcoming"}
+            </div>
+          </div>
         </div>
-
-        {/* Status buttons */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleMark("ontime")}
-            disabled={!timePassed || isPending}
-            aria-label="Mark prayer on time"
-            className={`flex-1 py-2.5 rounded-2xl text-xs font-bold tracking-wide transition-all active:scale-95
-              ${!timePassed
-                ? "bg-nude-50 text-nude-300 cursor-not-allowed"
-                : status === "ontime"
-                  ? "bg-gradient-to-r from-nude-400 to-nude-500 text-white shadow-sm"
-                  : "bg-nude-100 text-nude-600 hover:bg-nude-200"
-              }`}
-          >
-            <span className="inline-flex items-center justify-center w-full h-full">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className={`w-5 h-5 ${animateStatus === "ontime" && status === "ontime" ? "animate-draw-check" : ""}`}
-                onAnimationEnd={() => animateStatus === "ontime" && setAnimateStatus(null)}
-              >
-                <path d="M6 12.5l4 4 8-8" />
-              </svg>
-            </span>
-          </button>
-          <button
-            onClick={() => handleMark("late")}
-            disabled={!timePassed || isPending}
-            aria-label="Mark prayer late"
-            className={`flex-1 py-2.5 rounded-2xl text-xs font-bold tracking-wide transition-all active:scale-95
-              ${!timePassed
-                ? "bg-nude-50 text-nude-300 cursor-not-allowed"
-                : status === "late"
-                  ? "bg-nude-300 text-nude-800"
-                  : "bg-nude-100 text-nude-400 hover:bg-nude-200"
-              }`}
-          >
-            <span className="inline-flex items-center justify-center w-full h-full">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-5 h-5"
-              >
-                <circle cx="12" cy="12" r="8" />
-                <path
-                  d="M12 12l0-4"
-                  className={animateStatus === "late" && status === "late" ? "origin-center animate-clock-spin" : ""}
-                  style={{ transformBox: "fill-box", transformOrigin: "center" }}
-                  onAnimationEnd={() => animateStatus === "late" && setAnimateStatus(null)}
-                />
-              </svg>
-            </span>
-          </button>
-          <button
-            onClick={() => handleMark("missed")}
-            disabled={!timePassed || isPending}
-            aria-label="Mark prayer missed"
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold tracking-wide transition-all active:scale-95
-              ${!timePassed
-                ? "bg-nude-50 text-nude-300 cursor-not-allowed"
-                : status === "missed"
-                  ? "bg-red-100 text-red-400"
-                  : "bg-nude-100 text-nude-300 hover:bg-nude-200"
-              }`}
-          >
-            <span className="inline-flex items-center justify-center w-full h-full">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-5 h-5"
-                onAnimationEnd={() => animateStatus === "missed" && setAnimateStatus(null)}
-              >
-                <path
-                  d="M7 7l10 10"
-                  className={animateStatus === "missed" && status === "missed" ? "animate-draw-x-line1" : ""}
-                />
-                <path
-                  d="M17 7l-10 10"
-                  className={animateStatus === "missed" && status === "missed" ? "animate-draw-x-line2" : ""}
-                />
-              </svg>
-            </span>
-          </button>
-        </div>
-
-        {/* Note preview */}
-        {note && !showNote && (
-          <p className="mt-2 text-xs text-nude-500 italic pl-1 font-body">"{note}"</p>
-        )}
-
-        {/* Not yet available */}
-        {!timePassed && (
-          <p className="mt-2 text-center text-xs text-nude-300 font-body">
-            Prayer time hasn't arrived yet
-          </p>
-        )}
       </div>
 
-      {/* Note modal */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 w-[min(92vw,380px)] -translate-x-1/2 rounded-3xl border border-white/10 bg-black/80 px-4 py-3 text-center text-sm font-medium text-white shadow-xl">
+          {toast}
+        </div>
+      )}
+
       {showNote && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center"
-          style={{ background: "rgba(122,64,53,0.15)", backdropFilter: "blur(4px)" }}
-          onClick={() => setShowNote(false)}
-        >
-          <div
-            className="bg-nude-50 rounded-t-3xl w-full max-w-md p-6 pb-10 animate-slide-up"
-            onClick={e => e.stopPropagation()}
-          >
-            <p className="font-display text-2xl font-bold text-nude-800 mb-1">
-              📝 After {prayer.name}
-            </p>
-            <p className="text-xs text-nude-500 font-body mb-4">A dua, a thought, a gratitude...</p>
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8" style={{ background: "rgba(0,0,0,0.32)" }}>
+          <div className="w-full max-w-md rounded-3xl bg-theme-surface/95 p-6 backdrop-blur-xl shadow-2xl">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <p className="font-display text-xl font-bold" style={{ color: "var(--color-text-primary)" }}>
+                  Reflection for {prayer.name}
+                </p>
+                <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  Save a short note after your prayer.
+                </p>
+              </div>
+              <button type="button" onClick={() => setShowNote(false)} className="text-sm font-bold text-theme-accent">
+                Close
+              </button>
+            </div>
             <textarea
               value={note}
-              onChange={e => setNote(e.target.value)}
+              onChange={(event) => setNote(event.target.value)}
               placeholder="What's on your heart?"
-              className="w-full min-h-[100px] bg-white border border-nude-200 rounded-2xl p-4 text-nude-800 font-display text-base resize-none focus:outline-none focus:border-nude-400 transition-colors"
+              className="w-full min-h-[120px] rounded-3xl border border-white/10 bg-transparent p-4 text-sm leading-6 outline-none transition focus:border-white/20"
+              style={{ color: "var(--color-text-primary)" }}
             />
             <button
+              type="button"
               onClick={handleSaveNote}
               disabled={isPending}
-              className="w-full mt-3 py-3.5 rounded-2xl bg-gradient-to-r from-nude-400 to-nude-500 text-white font-bold text-sm tracking-wide active:scale-95 transition-transform disabled:opacity-60"
+              className="mt-4 w-full rounded-3xl py-3 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+              style={{ background: "var(--btn-gradient)" }}
             >
               Save Reflection 🌸
             </button>

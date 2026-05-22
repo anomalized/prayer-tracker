@@ -1,68 +1,86 @@
 "use client";
 
 import { useMemo } from "react";
-import IslamicIcon from "./IslamicIcon";
-import { useTheme, type ThemeName } from "@/hooks/useTheme";
-
-const OPTIONS: Array<{ id: ThemeName; label: string; accent: string }> = [
-  { id: "nude", label: "Nude", accent: "#d4786a" },
-  { id: "midnight", label: "Midnight", accent: "#f7c25d" },
-  { id: "forest", label: "Forest", accent: "#7bbf6a" },
-  { id: "ocean", label: "Ocean", accent: "#4bc8d2" },
-  { id: "ramadan", label: "Ramadan", accent: "#f6d57b" },
-];
+import CanvasBackground from "./CanvasBackground";
+import { useTheme, type ThemeName, THEME_META, THEMES } from "@/hooks/useTheme";
 
 export default function ThemePicker() {
-  const { theme, setTheme } = useTheme();
-  const isRamadanActive = useMemo(() => theme === "ramadan", [theme]);
+  const { theme, setTheme, meta } = useTheme();
+  const optionList = useMemo(
+    () => THEMES.map((id) => ({ id, ...THEME_META[id] })),
+    []
+  );
 
   return (
-    <div className="theme-transition bg-theme-surface border border-theme-border rounded-3xl p-4 space-y-4">
+    <div className="glass rounded-3xl p-4 space-y-5 border border-white/10">
       <div>
-        <p className="font-body text-xs font-bold tracking-widest uppercase text-theme-muted">
-          Theme
+        <p className="font-body text-xs font-bold tracking-widest uppercase" style={{ color: 'var(--color-text-muted)' }}>
+          Theme Studio
         </p>
-        <p className="mt-2 text-sm text-theme-secondary leading-relaxed">
-          Choose your favorite style. Ramadan theme activates automatically during the Hijri month of Ramadan.
+        <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+          Pick a mood and watch the preview update instantly. Your selected theme stays in local storage.
         </p>
       </div>
 
-      <div className="grid grid-cols-5 gap-3">
-        {OPTIONS.map((option) => {
-          const active = theme === option.id;
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {optionList.map(({ id, label, accent, emoji, description }) => {
+          const active = theme === id;
           return (
             <button
-              key={option.id}
+              key={id}
               type="button"
-              onClick={() => setTheme(option.id)}
-              aria-label={`Select ${option.label} theme`}
+              onClick={() => setTheme(id)}
+              aria-label={`Select ${label} theme`}
               aria-pressed={active}
-              className={`relative h-14 w-14 rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-theme-accent focus:ring-offset-2 ${
+              className={`group relative overflow-hidden rounded-[28px] border p-3 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 active
-                  ? "border-theme-accent shadow-lg"
-                  : "border-theme-border bg-theme-bg"
+                  ? "border-white/30 bg-white/10 shadow-[0_24px_70px_rgba(0,0,0,0.12)]"
+                  : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
               }`}
+              style={{ borderColor: active ? "rgba(255,255,255,0.35)" : undefined }}
             >
-              <span
-                className="absolute inset-0 rounded-full"
-                style={{ backgroundColor: option.accent }}
-              />
-              {active && (
-                <span className="relative flex h-full w-full items-center justify-center text-white text-xl font-bold">
-                  ✓
-                </span>
-              )}
+              <div className="relative h-32 overflow-hidden rounded-3xl bg-black/5 mb-3">
+                <CanvasBackground theme={id} className="absolute inset-0" height={128} />
+                <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/30 to-transparent" />
+                <div className="absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold text-white/90" style={{ backgroundColor: `${accent}cc` }}>
+                  {emoji} {label}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-display text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                    {label}
+                  </p>
+                  <p className="mt-1 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                    {description}
+                  </p>
+                </div>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl text-lg ${active ? "bg-white/20 text-white" : "bg-white/5 text-white/80"}`}>
+                  {active ? "✓" : "›"}
+                </div>
+              </div>
             </button>
           );
         })}
       </div>
 
-      {isRamadanActive && (
-        <div className="flex items-center gap-2 rounded-2xl border border-theme-border bg-theme-bg px-3 py-2 text-xs text-theme-muted">
-          <IslamicIcon id="crescent" active size={16} title="Ramadan theme active" className="w-4 h-4 text-theme-accent" />
-          <span>Active during Ramadan 9 AH</span>
+      <div className="glass rounded-3xl border border-white/10 p-4">
+        <p className="text-xs uppercase tracking-[0.22em] font-bold" style={{ color: 'var(--color-text-muted)' }}>
+          Current theme
+        </p>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <div>
+            <p className="font-display text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              {meta.label}
+            </p>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              {meta.description}
+            </p>
+          </div>
+          <div className="h-12 min-w-[3rem] rounded-2xl" style={{ background: meta.accent }} />
         </div>
-      )}
+      </div>
     </div>
   );
 }

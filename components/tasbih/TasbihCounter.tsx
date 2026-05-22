@@ -413,7 +413,7 @@ export default function TasbihCounter() {
   return (
     <div
       className="min-h-screen flex flex-col select-none"
-      style={{ background: "#fdf6f3" }}
+      style={{ background: "var(--color-bg-primary)" }}
     >
 
       {/* ── Header ─────────────────────────────────────────────────── */}

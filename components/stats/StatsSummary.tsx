@@ -31,11 +31,12 @@ export default function StatsSummary({
       {cards.map(card => (
         <div
           key={card.label}
-          className="bg-white border border-nude-100 rounded-2xl p-3.5 shadow-sm"
+          className="glass rounded-2xl p-3.5 shadow-sm hover:animate-glow-pulse transition-all"
+          style={{ borderLeft: '4px solid var(--color-accent)', borderColor: 'transparent' }}
         >
-          <p className="text-2xl mb-1">{card.icon}</p>
-          <p className="font-display text-xl font-bold text-nude-800">{card.value}</p>
-          <p className="font-body text-xs text-nude-400 mt-0.5">{card.label}</p>
+          <p className="text-2xl mb-1 opacity-60">{card.icon}</p>
+          <p className="font-display text-xl font-bold" style={{ color: 'var(--color-accent)' }}>{card.value}</p>
+          <p className="font-body text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{card.label}</p>
         </div>
       ))}
     </div>

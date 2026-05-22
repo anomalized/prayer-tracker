@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="min-h-screen" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen" style={{ background: "var(--color-bg-primary)" }}>
       {/* Header */}
       <div
         className="px-5 pt-12 pb-6"

@@ -12,7 +12,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
 
   return (
     <NavProvider userName={profile?.full_name ?? ""} userEmail={user?.email ?? ""}>
-      <div className="min-h-screen" style={{ background: "#fdf6f3" }}>
+      <div className="min-h-screen" style={{ background: "var(--color-bg-primary)" }}>
         {children}
       </div>
     </NavProvider>

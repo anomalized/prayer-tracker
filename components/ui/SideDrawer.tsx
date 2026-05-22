@@ -85,7 +85,7 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
         className="fixed top-0 left-0 h-full z-50 flex flex-col"
         style={{
           width: "min(400px, 85vw)",
-          background: "#fdf6f3",
+          background: "var(--color-bg-primary)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           boxShadow: open ? "8px 0 40px rgba(180,100,80,0.15)" : "none",

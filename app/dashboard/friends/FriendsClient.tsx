@@ -207,7 +207,7 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
   const pointsToTop = leader?.isMe ? 0 : (leader?.points ?? 0) - myPoints;
 
   return (
-    <div className="min-h-screen pb-28 md:pb-0" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen pb-28 md:pb-0" style={{ background: "var(--color-bg-primary)" }}>
 
       {/* Header — light peach matching Qibla and other pages */}
       <div className="px-5 pt-12  md:pt-6 pb-6 relative overflow-hidden"

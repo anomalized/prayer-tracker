@@ -12,7 +12,7 @@ export default function DuaCategoryPage({ params }: { params: { id: string } }) 
   if (!cat) notFound();
 
   return (
-    <div className="min-h-screen pb-28 md:pb-0" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen pb-28 md:pb-0" style={{ background: "var(--color-bg-primary)" }}>
 
       {/* Header */}
       <div className={`px-5 pt-12  md:pt-6 pb-6 relative overflow-hidden ${cat.color} border-b ${cat.borderColor}`}>

@@ -52,7 +52,7 @@ export default function DesktopSidebar({ userName, userEmail }: Props) {
     // hidden on mobile, sticky sidebar on desktop
     <aside
       className="hidden md:flex flex-col h-screen sticky top-0 border-r border-nude-200 overflow-y-auto"
-      style={{ background: "#fdf6f3" }}
+      style={{ background: "var(--color-bg-primary)" }}
     >
       {/* User header */}
       <div

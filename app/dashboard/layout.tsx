@@ -19,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {/* Mobile: single column. Desktop: sidebar + content. */}
       <div
         className="min-h-screen md:grid md:grid-cols-[260px_1fr]"
-        style={{ background: "#fdf6f3" }}
+        style={{ background: "var(--color-bg-primary)" }}
       >
         {/* Desktop sidebar — hidden on mobile */}
         <DesktopSidebar

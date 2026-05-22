@@ -180,7 +180,7 @@ export default function QiblaClient() {
     : null;
 
   return (
-    <div className="min-h-screen md:pb-8 flex flex-col select-none" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen md:pb-8 flex flex-col select-none" style={{ background: "var(--color-bg-primary)" }}>
 
       {/* Calibration overlay */}
       {calibrating && (

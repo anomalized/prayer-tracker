@@ -4,7 +4,7 @@ import MenuButton from "@/components/ui/MenuButton";
 
 export default function DuasPage() {
   return (
-    <div className="min-h-screen pb-10" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen pb-10" style={{ background: "var(--color-bg-primary)" }}>
 
       {/* Header */}
       <div className="px-5 pt-12 pb-6 relative overflow-hidden"

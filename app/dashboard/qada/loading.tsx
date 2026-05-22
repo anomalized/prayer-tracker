@@ -2,7 +2,7 @@ import { PrayerCardSkeleton } from "@/components/ui/Skeletons";
 
 export default function Loading() {
   return (
-    <div className="min-h-screen" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen" style={{ background: "var(--color-bg-primary)" }}>
       <div
         className="px-5 pt-12 pb-6"
         style={{ background: "linear-gradient(160deg, #f5e6df, #ecddd6)" }}

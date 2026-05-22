@@ -119,7 +119,7 @@ export default function SettingsClient({ userId, fullName, email, city, notifica
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen" style={{ background: "var(--color-bg-primary)" }}>
       {/* Header */}
       <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 pb-6 relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-nude-300 opacity-20" />

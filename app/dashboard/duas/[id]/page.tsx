@@ -17,7 +17,7 @@ export default function DuaDetailPage({ params }: { params: { id: string } }) {
 
   if (!dua) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#fdf6f3" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--color-bg-primary)" }}>
         <div className="text-center">
           <p className="text-4xl mb-3">🤲</p>
           <p className="font-body font-bold text-nude-600">Dua not found</p>
@@ -67,7 +67,7 @@ export default function DuaDetailPage({ params }: { params: { id: string } }) {
   const translationLines = dua.translation.split("\n");
 
   return (
-    <div className="min-h-screen pb-28 md:pb-0 flex flex-col" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen pb-28 md:pb-0 flex flex-col" style={{ background: "var(--color-bg-primary)" }}>
 
       {/* Header */}
       <div className={`px-5 pt-12  md:pt-6 pb-5 relative overflow-hidden ${cat?.color ?? "bg-nude-50"} border-b ${cat?.borderColor ?? "border-nude-100"}`}>

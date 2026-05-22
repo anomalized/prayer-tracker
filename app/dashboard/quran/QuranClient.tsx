@@ -26,7 +26,7 @@ export default function QuranClient() {
   const lastReadSurah = lastRead ? SURAHS.find(s => s.number === lastRead) : null;
 
   return (
-    <div className="min-h-screen pb-10" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen pb-10" style={{ background: "var(--color-bg-primary)" }}>
 
       {/* Header */}
       <div className="px-5 pt-12  md:pt-6 pb-5 relative overflow-hidden"

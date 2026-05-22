@@ -255,7 +255,7 @@ export default function SurahReader({ surahNumber }: Props) {
   const next = SURAHS.find(s => s.number === surahNumber + 1);
 
   if (!surah) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#fdf6f3" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--color-bg-primary)" }}>
       <div className="text-center p-8">
         <p className="text-4xl mb-3">📖</p>
         <p className="font-body font-bold text-nude-600">Surah not found</p>
@@ -264,7 +264,7 @@ export default function SurahReader({ surahNumber }: Props) {
     </div>
   );
 
-  const bg          = darkMode ? "#1a1208" : "#fdf6f3";
+  const bg          = darkMode ? "#1a1208" : "var(--color-bg-primary)";
   const card        = darkMode ? "#2a1e10" : "#ffffff";
   const borderColor = darkMode ? "#3d2b1f" : "#f0e0d8";
 
