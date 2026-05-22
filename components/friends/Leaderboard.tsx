@@ -21,10 +21,10 @@ export default function Leaderboard({ entries }: Props) {
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
-    <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
+    <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
       <div className="bg-gradient-to-r from-nude-100 to-nude-200 px-4 py-3">
-        <p className="font-display text-lg font-bold text-nude-800">Leaderboard ✨</p>
-        <p className="font-body text-xs text-nude-500">All-time points ranking</p>
+        <p className="font-display text-lg font-bold text-theme-text">Leaderboard ✨</p>
+        <p className="font-body text-xs text-theme-muted">All-time points ranking</p>
       </div>
       <div className="divide-y divide-nude-50">
         {sorted.map((entry, i) => {
@@ -35,10 +35,10 @@ export default function Leaderboard({ entries }: Props) {
             <div
               key={entry.id ?? i}
               className={`flex items-center gap-3 px-4 py-3 transition-colors
-                ${entry.isMe ? "bg-nude-50" : "hover:bg-nude-50/50"}`}
+                ${entry.isMe ? "bg-theme-bg" : "hover:bg-theme-bg/50"}`}
             >
               <span className="text-xl w-7 text-center">
-                {i < 3 ? medals[i] : <span className="font-body text-sm text-nude-400">{i + 1}</span>}
+                {i < 3 ? medals[i] : <span className="font-body text-sm text-theme-muted">{i + 1}</span>}
               </span>
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-display font-bold flex-shrink-0"
@@ -47,14 +47,14 @@ export default function Leaderboard({ entries }: Props) {
                 {safeName.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
-                <p className="font-body text-sm font-bold text-nude-800">
-                  {safeName} {entry.isMe && <span className="text-nude-400 font-normal text-xs">(you)</span>}
+                <p className="font-body text-sm font-bold text-theme-text">
+                  {safeName} {entry.isMe && <span className="text-theme-muted font-normal text-xs">(you)</span>}
                 </p>
-                <p className="font-body text-xs text-nude-400">🔥 {entry?.streak ?? 0} day streak</p>
+                <p className="font-body text-xs text-theme-muted">🔥 {entry?.streak ?? 0} day streak</p>
               </div>
               <div className="text-right">
                 <p className="font-display text-base font-bold" style={{ color }}>{entry?.points ?? 0}</p>
-                <p className="font-body text-xs text-nude-400">{rank}</p>
+                <p className="font-body text-xs text-theme-muted">{rank}</p>
               </div>
             </div>
           );

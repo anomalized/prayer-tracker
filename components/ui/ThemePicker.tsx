@@ -34,8 +34,8 @@ export default function ThemePicker() {
               aria-pressed={active}
               className={`group relative overflow-hidden rounded-[28px] border p-3 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 active
-                  ? "border-white/30 bg-white/10 shadow-[0_24px_70px_rgba(0,0,0,0.12)]"
-                  : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
+                  ? "border-white/30 bg-theme-surface/10 shadow-[0_24px_70px_rgba(0,0,0,0.12)]"
+                  : "border-white/10 bg-theme-surface/5 hover:border-white/20 hover:bg-theme-surface/10"
               }`}
               style={{ borderColor: active ? "rgba(255,255,255,0.35)" : undefined }}
             >
@@ -56,7 +56,7 @@ export default function ThemePicker() {
                     {description}
                   </p>
                 </div>
-                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl text-lg ${active ? "bg-white/20 text-white" : "bg-white/5 text-white/80"}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl text-lg ${active ? "bg-theme-surface/20 text-white" : "bg-theme-surface/5 text-white/80"}`}>
                   {active ? "✓" : "›"}
                 </div>
               </div>

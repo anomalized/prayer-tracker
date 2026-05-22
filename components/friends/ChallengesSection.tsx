@@ -37,10 +37,10 @@ export default function ChallengesSection({ initialChallenges, acceptedFriends, 
   }, []);
 
   return (
-    <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
+    <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
       <button
         onClick={() => setCollapsed((v) => !v)}
-        className="w-full flex items-center gap-3 px-5 py-4 hover:bg-nude-50 transition-colors text-left"
+        className="w-full flex items-center gap-3 px-5 py-4 hover:bg-theme-bg transition-colors text-left"
         aria-expanded={!collapsed}
       >
         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ background: "linear-gradient(135deg, #f0d8ce, #e8c4b8)" }}>
@@ -48,16 +48,16 @@ export default function ChallengesSection({ initialChallenges, acceptedFriends, 
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <p className="font-body text-sm font-bold text-nude-700">Prayer Challenges</p>
+            <p className="font-body text-sm font-bold text-theme-text">Prayer Challenges</p>
             {activeChallengeCount > 0 && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#fdf0ea", color: "#d4786a", border: "1px solid #f0c8b0" }}>
                 {activeChallengeCount} active
               </span>
             )}
           </div>
-          <p className="font-body text-xs text-nude-400">7-day head-to-head competitions</p>
+          <p className="font-body text-xs text-theme-muted">7-day head-to-head competitions</p>
         </div>
-        <svg className={`w-4 h-4 text-nude-300 flex-shrink-0 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <svg className={`w-4 h-4 text-theme-muted/70 flex-shrink-0 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
@@ -75,8 +75,8 @@ export default function ChallengesSection({ initialChallenges, acceptedFriends, 
           ) : (
             <div className="py-10 text-center px-6">
               <p className="text-3xl mb-2">⚡</p>
-              <p className="font-body text-sm font-bold text-nude-600">No challenges yet</p>
-              <p className="font-body text-xs text-nude-400 mt-1 leading-relaxed">
+              <p className="font-body text-sm font-bold text-theme-text">No challenges yet</p>
+              <p className="font-body text-xs text-theme-muted mt-1 leading-relaxed">
                 Challenge a friend to a 7-day prayer competition. Whoever completes more prayers wins!
               </p>
             </div>
@@ -86,17 +86,17 @@ export default function ChallengesSection({ initialChallenges, acceptedFriends, 
             <div className="border-t border-nude-50">
               <button
                 onClick={() => setShowSend((v) => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-nude-50 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-theme-bg transition-colors"
               >
-                <p className="font-body text-sm font-bold text-nude-600">⚡ Challenge a friend</p>
-                <span className={`text-nude-400 transition-transform duration-200 text-sm ${showSend ? "rotate-180" : ""}`}>▾</span>
+                <p className="font-body text-sm font-bold text-theme-text">⚡ Challenge a friend</p>
+                <span className={`text-theme-muted transition-transform duration-200 text-sm ${showSend ? "rotate-180" : ""}`}>▾</span>
               </button>
               {showSend && <ChallengeSender friends={acceptedFriends} myId={myId} onSent={handleSent} />}
             </div>
           )}
 
           <div className="px-4 py-3 border-t border-nude-50">
-            <p className="font-body text-[10px] text-nude-300 text-center">Winner gets 50 pts · Participation earns 20 pts 🌸</p>
+            <p className="font-body text-[10px] text-theme-muted/70 text-center">Winner gets 50 pts · Participation earns 20 pts 🌸</p>
           </div>
         </div>
       )}

@@ -25,9 +25,9 @@ export default function AddFriendForm() {
   };
 
   return (
-    <div className="bg-white border border-nude-100 rounded-3xl p-4 shadow-sm">
-      <p className="font-display text-lg font-bold text-nude-800 mb-1">Add a Friend</p>
-      <p className="font-body text-xs text-nude-400 mb-4">
+    <div className="bg-theme-surface border border-theme-border rounded-3xl p-4 shadow-sm">
+      <p className="font-display text-lg font-bold text-theme-text mb-1">Add a Friend</p>
+      <p className="font-body text-xs text-theme-muted mb-4">
         Enter their email address to send a friend request
       </p>
       <form onSubmit={handleSubmit} className="flex gap-2">
@@ -37,7 +37,7 @@ export default function AddFriendForm() {
           onChange={e => setEmail(e.target.value)}
           placeholder="friend@email.com"
           required
-          className="flex-1 bg-nude-50 border border-nude-200 rounded-2xl px-4 py-2.5 text-nude-800 text-sm placeholder-nude-300 focus:outline-none focus:border-nude-400 transition-colors font-body"
+          className="flex-1 bg-theme-bg border border-theme-border rounded-2xl px-4 py-2.5 text-theme-text text-sm placeholder-nude-300 focus:outline-none focus:border-nude-400 transition-colors font-body"
         />
         <button
           type="submit"

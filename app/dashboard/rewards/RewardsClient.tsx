@@ -57,7 +57,7 @@ export default function RewardsClient({ badges, stats, streakEvents }: Props) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-nude-50">
+    <div className="min-h-screen bg-theme-bg">
 
       {/* Badge celebration modal — unchanged */}
       {showCelebration && (
@@ -73,24 +73,24 @@ export default function RewardsClient({ badges, stats, streakEvents }: Props) {
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full
           bg-nude-300 opacity-20" />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
-        <p className="font-body text-xs tracking-widest text-nude-500 uppercase mb-1">
+        <p className="font-body text-xs tracking-widest text-theme-muted uppercase mb-1">
           Your Achievements
         </p>
-        <h1 className="font-display text-3xl font-bold text-nude-800 mb-4">
+        <h1 className="font-display text-3xl font-bold text-theme-text mb-4">
           Rewards ✨
         </h1>
 
         {/* Rank card — unchanged */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4
+        <div className="bg-theme-surface/60 backdrop-blur-sm rounded-2xl p-4
           flex items-center gap-4">
           <div className="flex-1">
             <RankBadge points={points} size="lg" />
           </div>
           <div className="text-right">
-            <p className="font-body text-xs text-nude-500">Badges earned</p>
-            <p className="font-display text-3xl font-bold text-nude-800">
+            <p className="font-body text-xs text-theme-muted">Badges earned</p>
+            <p className="font-display text-3xl font-bold text-theme-text">
               {earnedBadges.length}
-              <span className="font-body text-sm text-nude-400">
+              <span className="font-body text-sm text-theme-muted">
                 /{badges.length}
               </span>
             </p>
@@ -114,7 +114,7 @@ export default function RewardsClient({ badges, stats, streakEvents }: Props) {
         {earnedBadges.length > 0 && (
           <div>
             <p className="font-body text-xs font-bold tracking-widest
-              text-nude-500 uppercase mb-3 px-1">
+              text-theme-muted uppercase mb-3 px-1">
               Earned ({earnedBadges.length})
             </p>
             <div className="space-y-2">
@@ -129,7 +129,7 @@ export default function RewardsClient({ badges, stats, streakEvents }: Props) {
         {lockedBadges.length > 0 && (
           <div>
             <p className="font-body text-xs font-bold tracking-widest
-              text-nude-400 uppercase mb-3 px-1">
+              text-theme-muted uppercase mb-3 px-1">
               Locked ({lockedBadges.length})
             </p>
             <div className="space-y-2">
@@ -142,19 +142,19 @@ export default function RewardsClient({ badges, stats, streakEvents }: Props) {
 
         {/* Points shop teaser — unchanged */}
         <div className="bg-gradient-to-br from-nude-200 to-nude-300 rounded-3xl
-          p-5 text-center border border-nude-300">
-          <div className="flex items-center justify-center mx-auto mb-2 w-11 h-11 rounded-2xl bg-white/80 text-nude-700">
+          p-5 text-center border border-theme-border">
+          <div className="flex items-center justify-center mx-auto mb-2 w-11 h-11 rounded-2xl bg-theme-surface/80 text-theme-text">
             <Sparkles className="w-5 h-5" />
           </div>
-          <p className="font-display text-lg font-bold text-nude-800">
+          <p className="font-display text-lg font-bold text-theme-text">
             Coming Soon
           </p>
-          <p className="font-body text-xs text-nude-600 mt-1">
+          <p className="font-body text-xs text-theme-text mt-1">
             Redeem points for custom themes, special badges & more
           </p>
         </div>
 
-        <p className="text-center text-xs text-nude-300 font-body pb-6">
+        <p className="text-center text-xs text-theme-muted/70 font-body pb-6">
           Keep praying, keep growing 🌸
         </p>
       </div>

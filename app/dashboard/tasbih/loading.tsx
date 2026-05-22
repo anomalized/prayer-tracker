@@ -13,17 +13,17 @@ export default function Loading() {
 
       {/* Circle skeleton */}
       <div className="flex flex-col items-center justify-center py-12 gap-6">
-        <div className="h-8 bg-nude-100 rounded-2xl w-48 animate-pulse" />
+        <div className="h-8 bg-theme-surface rounded-2xl w-48 animate-pulse" />
         <div
           className="rounded-full bg-nude-200 animate-pulse"
           style={{ width: 220, height: 220 }}
         />
         <div className="flex gap-2 w-64">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex-1 h-10 bg-nude-100 rounded-2xl animate-pulse" />
+            <div key={i} className="flex-1 h-10 bg-theme-surface rounded-2xl animate-pulse" />
           ))}
         </div>
-        <div className="h-10 bg-nude-100 rounded-2xl w-64 animate-pulse" />
+        <div className="h-10 bg-theme-surface rounded-2xl w-64 animate-pulse" />
       </div>
     </div>
   );

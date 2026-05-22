@@ -35,17 +35,17 @@ export default function ActivityFeed({ items }: Props) {
   const displayedItems = expanded ? items : items.slice(0, 3);
 
   return (
-    <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
+    <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
       <div className="flex items-center justify-between px-5 py-4">
         <div>
-          <p className="font-display text-sm font-bold text-nude-800">Friend activity</p>
-          <p className="text-xs text-nude-400 mt-1">See recent prayer, qada, and badge updates from your accepted friends.</p>
+          <p className="font-display text-sm font-bold text-theme-text">Friend activity</p>
+          <p className="text-xs text-theme-muted mt-1">See recent prayer, qada, and badge updates from your accepted friends.</p>
         </div>
         <button
           type="button"
           onClick={() => setExpanded(prev => !prev)}
           disabled={items.length === 0}
-          className="text-xs font-bold text-nude-500 hover:text-nude-700 transition-colors disabled:opacity-50"
+          className="text-xs font-bold text-theme-muted hover:text-theme-text transition-colors disabled:opacity-50"
         >
           {items.length === 0
             ? "No activity yet"
@@ -59,7 +59,7 @@ export default function ActivityFeed({ items }: Props) {
 
       <div className="divide-y divide-nude-100">
         {items.length === 0 ? (
-          <div className="px-5 py-10 text-center text-sm text-nude-400">
+          <div className="px-5 py-10 text-center text-sm text-theme-muted">
             No recent friend activity yet. When friends log prayers, update qada, or earn badges, it will appear here.
           </div>
         ) : (
@@ -69,10 +69,10 @@ export default function ActivityFeed({ items }: Props) {
                 {ACTIVITY_ICONS[item.activity_type]}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-body text-sm font-bold text-nude-800 truncate">{item.title}</p>
-                <p className="text-xs text-nude-400 mt-1 truncate">{item.subtitle}</p>
+                <p className="font-body text-sm font-bold text-theme-text truncate">{item.title}</p>
+                <p className="text-xs text-theme-muted mt-1 truncate">{item.subtitle}</p>
               </div>
-              <span className="text-[11px] text-nude-300 whitespace-nowrap">{formatTime(item.created_at)}</span>
+              <span className="text-[11px] text-theme-muted/70 whitespace-nowrap">{formatTime(item.created_at)}</span>
             </div>
           ))
         )}

@@ -42,7 +42,7 @@ export default function RankBadge({ points, size = "md" }: Props) {
         />
       </div>
       {size === "lg" && (
-        <p className="text-xs text-nude-400 font-body">{remaining} pts to next rank</p>
+        <p className="text-xs text-theme-muted font-body">{remaining} pts to next rank</p>
       )}
     </div>
   );

@@ -78,9 +78,9 @@ function AyahExplanation({
         disabled={loading}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 disabled:opacity-60 ${
           open && text
-            ? darkMode ? "bg-amber-700/60 text-amber-100" : "bg-nude-200 text-nude-700"
-            : darkMode ? "bg-white/8 text-amber-400/80 border border-white/10 hover:bg-white/15"
-                       : "bg-nude-50 text-nude-500 border border-nude-200 hover:bg-nude-100"
+            ? darkMode ? "bg-amber-700/60 text-amber-100" : "bg-nude-200 text-theme-text"
+            : darkMode ? "bg-theme-surface/8 text-amber-400/80 border border-white/10 hover:bg-theme-surface/15"
+                       : "bg-theme-bg text-theme-muted border border-theme-border hover:bg-theme-surface"
         }`}
       >
         {loading
@@ -258,8 +258,8 @@ export default function SurahReader({ surahNumber }: Props) {
     <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--color-bg-primary)" }}>
       <div className="text-center p-8">
         <p className="text-4xl mb-3">📖</p>
-        <p className="font-body font-bold text-nude-600">Surah not found</p>
-        <button onClick={() => router.back()} className="text-sm text-nude-400 underline mt-2 block mx-auto">Go back</button>
+        <p className="font-body font-bold text-theme-text">Surah not found</p>
+        <button onClick={() => router.back()} className="text-sm text-theme-muted underline mt-2 block mx-auto">Go back</button>
       </div>
     </div>
   );
@@ -280,7 +280,7 @@ export default function SurahReader({ surahNumber }: Props) {
         <div className="flex items-center gap-3 mb-3">
           <button onClick={() => router.back()}
             className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-              darkMode ? "bg-white/10 text-amber-200" : "bg-white/60 text-nude-600 border border-nude-200"
+              darkMode ? "bg-theme-surface/10 text-amber-200" : "bg-theme-surface/60 text-theme-text border border-theme-border"
             }`}>
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -288,29 +288,29 @@ export default function SurahReader({ surahNumber }: Props) {
           </button>
 
           <div className="flex-1 min-w-0">
-            <p className={`font-body text-[10px] font-bold tracking-widest uppercase ${darkMode ? "text-amber-400/70" : "text-nude-400"}`}>
+            <p className={`font-body text-[10px] font-bold tracking-widest uppercase ${darkMode ? "text-amber-400/70" : "text-theme-muted"}`}>
               Surah {surahNumber} · {surah.type}
             </p>
-            <p className={`font-display text-base font-bold truncate ${darkMode ? "text-amber-100" : "text-nude-700"}`}>
+            <p className={`font-display text-base font-bold truncate ${darkMode ? "text-amber-100" : "text-theme-text"}`}>
               {surah.englishName}
             </p>
           </div>
 
           {syncing && (
             <div className={`w-4 h-4 border-2 rounded-full animate-spin flex-shrink-0
-              ${darkMode ? "border-amber-700/30 border-t-amber-400" : "border-nude-200 border-t-nude-400"}`}
+              ${darkMode ? "border-amber-700/30 border-t-amber-400" : "border-theme-border border-t-nude-400"}`}
               title="Syncing bookmarks…"
             />
           )}
 
           <div className="hidden md:flex items-center gap-2 ml-auto">
-            <div className={`flex rounded-xl overflow-hidden border ${darkMode ? "border-white/10" : "border-nude-200"}`}>
+            <div className={`flex rounded-xl overflow-hidden border ${darkMode ? "border-white/10" : "border-theme-border"}`}>
               {(["sm","md","lg","xl"] as const).map((s, i) => (
                 <button key={s} onClick={() => setFontSize(s)}
                   className={`px-2.5 py-1.5 font-bold transition-colors ${
                     fontSize === s
-                      ? darkMode ? "bg-amber-700 text-white" : "bg-nude-200 text-nude-700"
-                      : darkMode ? "bg-transparent text-amber-400/60" : "bg-white text-nude-400"
+                      ? darkMode ? "bg-amber-700 text-white" : "bg-nude-200 text-theme-text"
+                      : darkMode ? "bg-transparent text-amber-400/60" : "bg-theme-surface text-theme-muted"
                   }`}
                   style={{ fontSize: [10,12,14,16][i] }}>
                   A
@@ -321,21 +321,21 @@ export default function SurahReader({ surahNumber }: Props) {
             <button onClick={() => setShowTrans(v => !v)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                 showTrans
-                  ? darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-nude-200 text-nude-700 border-nude-300"
-                  : darkMode ? "bg-transparent text-amber-400/60 border-white/10" : "bg-white text-nude-400 border-nude-200"
+                  ? darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-nude-200 text-theme-text border-theme-border"
+                  : darkMode ? "bg-transparent text-amber-400/60 border-white/10" : "bg-theme-surface text-theme-muted border-theme-border"
               }`}>
               Translation
             </button>
 
             <button onClick={() => setDarkMode(v => !v)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex-shrink-0 ${
-                darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-white text-nude-400 border-nude-200"
+                darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-theme-surface text-theme-muted border-theme-border"
               }`}>
               {darkMode ? "☀️" : "🌙"}
             </button>
           </div>
 
-          <p className={`text-xl font-medium flex-shrink-0 ${darkMode ? "text-amber-200" : "text-nude-600"}`}
+          <p className={`text-xl font-medium flex-shrink-0 ${darkMode ? "text-amber-200" : "text-theme-text"}`}
             style={{ fontFamily: ARABIC_FONT }}>
             {surah.name}
           </p>
@@ -344,13 +344,13 @@ export default function SurahReader({ surahNumber }: Props) {
         </div>
 
         <div className="flex md:hidden items-center gap-2 overflow-x-auto pb-1 mt-2">
-          <div className={`flex rounded-xl overflow-hidden border ${darkMode ? "border-white/10" : "border-nude-200"}`}>
+          <div className={`flex rounded-xl overflow-hidden border ${darkMode ? "border-white/10" : "border-theme-border"}`}>
             {(["sm","md","lg","xl"] as const).map((s, i) => (
               <button key={s} onClick={() => setFontSize(s)}
                 className={`px-2.5 py-1.5 font-bold transition-colors ${
                   fontSize === s
-                    ? darkMode ? "bg-amber-700 text-white" : "bg-nude-200 text-nude-700"
-                    : darkMode ? "bg-transparent text-amber-400/60" : "bg-white text-nude-400"
+                    ? darkMode ? "bg-amber-700 text-white" : "bg-nude-200 text-theme-text"
+                    : darkMode ? "bg-transparent text-amber-400/60" : "bg-theme-surface text-theme-muted"
                 }`}
                 style={{ fontSize: [10,12,14,16][i] }}>
                 A
@@ -361,15 +361,15 @@ export default function SurahReader({ surahNumber }: Props) {
           <button onClick={() => setShowTrans(v => !v)}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
               showTrans
-                ? darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-nude-200 text-nude-700 border-nude-300"
-                : darkMode ? "bg-transparent text-amber-400/60 border-white/10" : "bg-white text-nude-400 border-nude-200"
+                ? darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-nude-200 text-theme-text border-theme-border"
+                : darkMode ? "bg-transparent text-amber-400/60 border-white/10" : "bg-theme-surface text-theme-muted border-theme-border"
             }`}>
             Translation
           </button>
 
           <button onClick={() => setDarkMode(v => !v)}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex-shrink-0 ${
-              darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-white text-nude-400 border-nude-200"
+              darkMode ? "bg-amber-700 text-white border-amber-600" : "bg-theme-surface text-theme-muted border-theme-border"
             }`}>
             {darkMode ? "☀️" : "🌙"}
           </button>
@@ -380,9 +380,9 @@ export default function SurahReader({ surahNumber }: Props) {
       {loading && (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className={`w-10 h-10 border-4 rounded-full animate-spin ${
-            darkMode ? "border-amber-700/30 border-t-amber-400" : "border-nude-200 border-t-nude-500"
+            darkMode ? "border-amber-700/30 border-t-amber-400" : "border-theme-border border-t-nude-500"
           }`} />
-          <p className={`text-sm font-body ${darkMode ? "text-amber-300/60" : "text-nude-400"}`}>
+          <p className={`text-sm font-body ${darkMode ? "text-amber-300/60" : "text-theme-muted"}`}>
             Loading {surah.englishName}…
           </p>
         </div>
@@ -393,7 +393,7 @@ export default function SurahReader({ surahNumber }: Props) {
         <div className="mx-4 mt-6 p-5 rounded-3xl text-center"
           style={{ background: card, border: `1px solid ${borderColor}` }}>
           <p className="text-3xl mb-2">⚠️</p>
-          <p className={`text-sm font-bold font-body mb-3 ${darkMode ? "text-amber-200" : "text-nude-700"}`}>{error}</p>
+          <p className={`text-sm font-bold font-body mb-3 ${darkMode ? "text-amber-200" : "text-theme-text"}`}>{error}</p>
           <button onClick={() => window.location.reload()}
             className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white"
             style={{ background: "linear-gradient(to right,#c8705a,#d4786a)" }}>
@@ -413,19 +413,19 @@ export default function SurahReader({ surahNumber }: Props) {
             style={{ fontFamily: ARABIC_FONT, color: darkMode ? "#f5e6df" : "#5a3520" }}>
             {surah.name}
           </p>
-          <p className={`font-display text-lg font-bold ${darkMode ? "text-amber-200" : "text-nude-700"}`}>
+          <p className={`font-display text-lg font-bold ${darkMode ? "text-amber-200" : "text-theme-text"}`}>
             {surah.englishName}
           </p>
-          <p className={`font-body text-xs mt-1 ${darkMode ? "text-amber-400/60" : "text-nude-400"}`}>
+          <p className={`font-body text-xs mt-1 ${darkMode ? "text-amber-400/60" : "text-theme-muted"}`}>
             {surah.englishMeaning} · {surah.ayahs} Ayahs · {surah.type}
           </p>
           {surahNumber !== 9 && (
-            <div className={`mt-4 pt-4 border-t ${darkMode ? "border-white/10" : "border-nude-200"}`}>
-              <p className={`text-2xl leading-loose ${darkMode ? "text-amber-100" : "text-nude-700"}`}
+            <div className={`mt-4 pt-4 border-t ${darkMode ? "border-white/10" : "border-theme-border"}`}>
+              <p className={`text-2xl leading-loose ${darkMode ? "text-amber-100" : "text-theme-text"}`}
                 style={{ fontFamily: ARABIC_FONT }}>
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
               </p>
-              <p className={`text-xs font-body mt-1 ${darkMode ? "text-amber-400/50" : "text-nude-400"}`}>
+              <p className={`text-xs font-body mt-1 ${darkMode ? "text-amber-400/50" : "text-theme-muted"}`}>
                 In the name of Allah, the Most Gracious, the Most Merciful
               </p>
             </div>
@@ -476,8 +476,8 @@ export default function SurahReader({ surahNumber }: Props) {
                       className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs transition-all ${
                         isPlaying
                           ? "bg-amber-500 text-white"
-                          : darkMode ? "bg-white/8 text-amber-400/70 border border-white/10 hover:bg-white/15"
-                                     : "bg-nude-50 text-nude-400 border border-nude-200 hover:bg-nude-100"
+                          : darkMode ? "bg-theme-surface/8 text-amber-400/70 border border-white/10 hover:bg-theme-surface/15"
+                                     : "bg-theme-bg text-theme-muted border border-theme-border hover:bg-theme-surface"
                       }`}>
                       {audioLoading && isPlaying
                         ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -493,8 +493,8 @@ export default function SurahReader({ surahNumber }: Props) {
                       className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
                         isBookmarked
                           ? "bg-amber-500 text-white"
-                          : darkMode ? "bg-white/8 text-amber-400/70 border border-white/10 hover:bg-white/15"
-                                     : "bg-nude-50 text-nude-400 border border-nude-200 hover:bg-nude-100"
+                          : darkMode ? "bg-theme-surface/8 text-amber-400/70 border border-white/10 hover:bg-theme-surface/15"
+                                     : "bg-theme-bg text-theme-muted border border-theme-border hover:bg-theme-surface"
                       }`}>
                       <svg width="12" height="14" viewBox="0 0 12 14" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M1 1h10v12l-5-3-5 3V1z"/>
@@ -521,9 +521,9 @@ export default function SurahReader({ surahNumber }: Props) {
                 {/* Translation */}
                 {showTrans && (
                   <p className={`text-sm font-body leading-relaxed mb-4 pb-4 border-b ${
-                    darkMode ? "text-amber-100/70 border-white/8" : "text-nude-500 border-nude-100"
+                    darkMode ? "text-amber-100/70 border-white/8" : "text-theme-muted border-theme-border"
                   }`}>
-                    <span className={`font-bold mr-1 text-xs ${darkMode ? "text-amber-500/50" : "text-nude-300"}`}>
+                    <span className={`font-bold mr-1 text-xs ${darkMode ? "text-amber-500/50" : "text-theme-muted/70"}`}>
                       {ayah.numberInSurah}.
                     </span>
                     {ayah.translation}
@@ -550,8 +550,8 @@ export default function SurahReader({ surahNumber }: Props) {
             <button onClick={() => router.push(`/dashboard/quran/${prev.number}`)}
               className="flex-1 rounded-2xl px-4 py-3 text-left transition-all active:scale-[0.97]"
               style={{ background: card, border: `1px solid ${borderColor}` }}>
-              <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${darkMode ? "text-amber-400/50" : "text-nude-300"}`}>← Previous</p>
-              <p className={`text-xs font-bold truncate ${darkMode ? "text-amber-200" : "text-nude-600"}`}>
+              <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${darkMode ? "text-amber-400/50" : "text-theme-muted/70"}`}>← Previous</p>
+              <p className={`text-xs font-bold truncate ${darkMode ? "text-amber-200" : "text-theme-text"}`}>
                 {prev.number}. {prev.englishName}
               </p>
             </button>
@@ -561,8 +561,8 @@ export default function SurahReader({ surahNumber }: Props) {
             <button onClick={() => router.push(`/dashboard/quran/${next.number}`)}
               className="flex-1 rounded-2xl px-4 py-3 text-right transition-all active:scale-[0.97]"
               style={{ background: card, border: `1px solid ${borderColor}` }}>
-              <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${darkMode ? "text-amber-400/50" : "text-nude-300"}`}>Next →</p>
-              <p className={`text-xs font-bold truncate ${darkMode ? "text-amber-200" : "text-nude-600"}`}>
+              <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${darkMode ? "text-amber-400/50" : "text-theme-muted/70"}`}>Next →</p>
+              <p className={`text-xs font-bold truncate ${darkMode ? "text-amber-200" : "text-theme-text"}`}>
                 {next.number}. {next.englishName}
               </p>
             </button>

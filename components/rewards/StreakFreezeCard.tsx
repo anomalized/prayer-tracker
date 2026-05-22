@@ -107,7 +107,7 @@ export default function StreakFreezeCard({
   const msgStyle = {
     success: "bg-green-50 border-green-100 text-green-700",
     error:   "bg-red-50 border-red-100 text-red-500",
-    info:    "bg-nude-50 border-nude-200 text-nude-600",
+    info:    "bg-theme-bg border-theme-border text-theme-text",
   } as const;
 
   return (
@@ -115,7 +115,7 @@ export default function StreakFreezeCard({
       className={`rounded-3xl border overflow-hidden transition-all duration-300
         ${justPurchased
           ? "border-green-200 bg-gradient-to-br from-green-50 to-white"
-          : "border-nude-100 bg-white"
+          : "border-theme-border bg-theme-surface"
         } shadow-sm`}
     >
       <div
@@ -133,10 +133,10 @@ export default function StreakFreezeCard({
             </span>
           </div>
           <div>
-            <p className="font-display text-base font-bold text-nude-800">
+            <p className="font-display text-base font-bold text-theme-text">
               Streak Freeze
             </p>
-            <p className="font-body text-xs text-nude-500">
+            <p className="font-body text-xs text-theme-muted">
               Protect your streak for one missed day
             </p>
           </div>
@@ -146,10 +146,10 @@ export default function StreakFreezeCard({
       <div className="px-5 pt-4 pb-3">
         <div className="flex items-center justify-between mb-3">
           <p className="font-body text-[10px] font-bold tracking-widest
-            text-nude-400 uppercase">
+            text-theme-muted uppercase">
             Your freezes
           </p>
-          <p className="font-body text-xs text-nude-400">
+          <p className="font-body text-xs text-theme-muted">
             {freezeCount} / {MAX_FREEZES}
           </p>
         </div>
@@ -165,7 +165,7 @@ export default function StreakFreezeCard({
                   ${isFilled
                     ? isNewlyFilled
                       ? "text-green-500 scale-125"
-                      : "text-nude-500"
+                      : "text-theme-muted"
                     : "text-nude-200"
                   }`}
               >
@@ -174,17 +174,17 @@ export default function StreakFreezeCard({
             );
           })}
 
-          <div className="ml-auto flex items-center gap-1.5 bg-nude-50
-            border border-nude-200 rounded-full px-3 py-1.5">
+          <div className="ml-auto flex items-center gap-1.5 bg-theme-bg
+            border border-theme-border rounded-full px-3 py-1.5">
             <span className="text-sm" aria-hidden>⭐</span>
-            <span className="font-body text-sm font-bold text-nude-700">
+            <span className="font-body text-sm font-bold text-theme-text">
               {points.toLocaleString()}
             </span>
-            <span className="font-body text-xs text-nude-400">pts</span>
+            <span className="font-body text-xs text-theme-muted">pts</span>
           </div>
         </div>
 
-        <p className="font-body text-xs text-nude-400 mt-1 leading-relaxed">
+        <p className="font-body text-xs text-theme-muted mt-1 leading-relaxed">
           {freezeCount === 0
             ? "Buy a freeze to protect your streak if you miss a day of prayers."
             : freezeCount === MAX_FREEZES
@@ -195,10 +195,10 @@ export default function StreakFreezeCard({
         </p>
       </div>
 
-      <div className="mx-4 mb-4 bg-nude-50 border border-nude-100 rounded-2xl
+      <div className="mx-4 mb-4 bg-theme-bg border border-theme-border rounded-2xl
         px-4 py-3 space-y-2">
         <p className="font-body text-[10px] font-bold tracking-widest
-          text-nude-400 uppercase">
+          text-theme-muted uppercase">
           How it works
         </p>
         {[
@@ -211,7 +211,7 @@ export default function StreakFreezeCard({
             <span className="text-sm flex-shrink-0 mt-0.5" aria-hidden>
               {icon}
             </span>
-            <p className="font-body text-xs text-nude-600 leading-relaxed">
+            <p className="font-body text-xs text-theme-text leading-relaxed">
               {text}
             </p>
           </div>
@@ -219,21 +219,21 @@ export default function StreakFreezeCard({
       </div>
 
       {currentStreak > 0 && (
-        <div className="mx-4 mb-4 flex items-center gap-3 bg-nude-100
+        <div className="mx-4 mb-4 flex items-center gap-3 bg-theme-surface
           rounded-2xl px-4 py-3">
           <span className="text-xl" aria-hidden>🔥</span>
           <div>
-            <p className="font-body text-sm font-bold text-nude-700">
+            <p className="font-body text-sm font-bold text-theme-text">
               {currentStreak}-day streak active
             </p>
-            <p className="font-body text-xs text-nude-400">
+            <p className="font-body text-xs text-theme-muted">
               {freezeCount > 0
                 ? `Protected by ${freezeCount} freeze${freezeCount > 1 ? "s" : ""}`
                 : "Not protected — buy a freeze to guard it"}
             </p>
           </div>
           {freezeCount > 0 && (
-            <div className="ml-auto text-nude-400">
+            <div className="ml-auto text-theme-muted">
               <ShieldIcon filled size={20} />
             </div>
           )}
@@ -265,9 +265,9 @@ export default function StreakFreezeCard({
             tracking-wide transition-all active:scale-95 touch-manipulation
             disabled:cursor-not-allowed
             ${atMax
-              ? "bg-nude-100 text-nude-400 border border-nude-200"
+              ? "bg-theme-surface text-theme-muted border border-theme-border"
               : !canAfford
-                ? "bg-nude-50 text-nude-300 border border-nude-100"
+                ? "bg-theme-bg text-theme-muted/70 border border-theme-border"
                 : isPending
                   ? "opacity-70 text-white"
                   : "text-white shadow-sm hover:shadow-md hover:opacity-90"
@@ -289,7 +289,7 @@ export default function StreakFreezeCard({
         </button>
 
         {!canAfford && !atMax && (
-          <p className="text-center font-body text-xs text-nude-300 mt-2">
+          <p className="text-center font-body text-xs text-theme-muted/70 mt-2">
             Earn points by logging prayers on time
           </p>
         )}

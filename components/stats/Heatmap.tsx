@@ -11,11 +11,11 @@ interface Props {
 
 export default function Heatmap({ days }: Props) {
   const getColor = (count: number) => {
-    if (count === 0) return "bg-nude-100";
+    if (count === 0) return "bg-theme-surface";
     if (count <= 1)  return "bg-nude-200";
     if (count <= 2)  return "bg-nude-300";
     if (count <= 3)  return "bg-nude-400";
-    if (count <= 4)  return "bg-nude-500";
+    if (count <= 4)  return "bg-theme-bg0";
     return "bg-nude-600"; // all 5
   };
 
@@ -31,9 +31,9 @@ export default function Heatmap({ days }: Props) {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="bg-white border border-nude-100 rounded-3xl p-4 shadow-sm">
-      <p className="font-display text-lg font-bold text-nude-800 mb-1">Monthly Heatmap</p>
-      <p className="font-body text-xs text-nude-400 mb-4">Last 35 days of prayers</p>
+    <div className="bg-theme-surface border border-theme-border rounded-3xl p-4 shadow-sm">
+      <p className="font-display text-lg font-bold text-theme-text mb-1">Monthly Heatmap</p>
+      <p className="font-body text-xs text-theme-muted mb-4">Last 35 days of prayers</p>
 
       <div className="grid grid-cols-7 gap-1.5">
         {padded.map((day, i) => (
@@ -49,11 +49,11 @@ export default function Heatmap({ days }: Props) {
 
       {/* Legend */}
       <div className="flex items-center gap-1.5 mt-4 justify-end">
-        <p className="font-body text-xs text-nude-400 mr-1">Less</p>
-        {["bg-nude-100", "bg-nude-200", "bg-nude-300", "bg-nude-400", "bg-nude-500", "bg-nude-600"].map(c => (
+        <p className="font-body text-xs text-theme-muted mr-1">Less</p>
+        {["bg-theme-surface", "bg-nude-200", "bg-nude-300", "bg-nude-400", "bg-theme-bg0", "bg-nude-600"].map(c => (
           <div key={c} className={`w-3 h-3 rounded-sm ${c}`} />
         ))}
-        <p className="font-body text-xs text-nude-400 ml-1">More</p>
+        <p className="font-body text-xs text-theme-muted ml-1">More</p>
       </div>
     </div>
   );

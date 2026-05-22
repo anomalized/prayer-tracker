@@ -25,7 +25,7 @@ export default function DuaCategoryPage({ params }: { params: { id: string } }) 
           All Categories
         </Link>
         <div className="flex items-center gap-3 relative z-10">
-          <div className="w-14 h-14 rounded-2xl bg-white/60 flex items-center justify-center text-3xl shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-theme-surface/60 flex items-center justify-center text-3xl shadow-sm">
             {cat.icon}
           </div>
           <div>
@@ -41,7 +41,7 @@ export default function DuaCategoryPage({ params }: { params: { id: string } }) 
           <Link
             key={dua.id}
             href={`/dashboard/duas/${dua.id}`}
-            className="block bg-white border border-nude-100 rounded-3xl p-5 shadow-sm active:scale-[0.98] transition-transform"
+            className="block bg-theme-surface border border-theme-border rounded-3xl p-5 shadow-sm active:scale-[0.98] transition-transform"
           >
             {/* Number + title */}
             <div className="flex items-start justify-between gap-3 mb-3">
@@ -50,9 +50,9 @@ export default function DuaCategoryPage({ params }: { params: { id: string } }) 
                   style={{ background: "linear-gradient(135deg,#c8705a,#d4786a)" }}>
                   {i + 1}
                 </span>
-                <p className="font-body text-sm font-bold text-nude-700">{dua.title}</p>
+                <p className="font-body text-sm font-bold text-theme-text">{dua.title}</p>
               </div>
-              <svg className="w-4 h-4 text-nude-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg className="w-4 h-4 text-theme-muted/70 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -67,7 +67,7 @@ export default function DuaCategoryPage({ params }: { params: { id: string } }) 
             <p className="font-body text-xs text-slate-400 line-clamp-2">{dua.translation}</p>
 
             {dua.source && (
-              <p className="font-body text-[10px] text-nude-300 mt-2">{dua.source}</p>
+              <p className="font-body text-[10px] text-theme-muted/70 mt-2">{dua.source}</p>
             )}
           </Link>
         ))}

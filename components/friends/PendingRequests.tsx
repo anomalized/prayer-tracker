@@ -27,7 +27,7 @@ export default function PendingRequests({ requests }: Props) {
   };
 
   return (
-    <div className="bg-white border border-nude-200 rounded-3xl overflow-hidden shadow-sm">
+    <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
       <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3 border-b border-amber-100">
         <p className="font-display text-base font-bold text-amber-700">
           Friend Requests 🌸
@@ -41,10 +41,10 @@ export default function PendingRequests({ requests }: Props) {
           const safeName = req?.name && req.name.length > 0 ? req.name : "Friend";
           return (
             <div key={req.friendshipId} className="flex items-center gap-3 px-4 py-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-nude-200 to-nude-300 flex items-center justify-center text-nude-700 font-display font-bold flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-nude-200 to-nude-300 flex items-center justify-center text-theme-text font-display font-bold flex-shrink-0">
                 {safeName.charAt(0).toUpperCase()}
               </div>
-              <p className="flex-1 font-body text-sm font-bold text-nude-800">{safeName}</p>
+              <p className="flex-1 font-body text-sm font-bold text-theme-text">{safeName}</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleAccept(req.friendshipId)}
@@ -56,7 +56,7 @@ export default function PendingRequests({ requests }: Props) {
                 <button
                   onClick={() => handleDecline(req.friendshipId)}
                   disabled={isPending}
-                  className="px-3 py-1.5 bg-nude-100 text-nude-400 text-xs font-bold font-body rounded-xl disabled:opacity-60 active:scale-95 transition-transform"
+                  className="px-3 py-1.5 bg-theme-surface text-theme-muted text-xs font-bold font-body rounded-xl disabled:opacity-60 active:scale-95 transition-transform"
                 >
                   Decline
                 </button>

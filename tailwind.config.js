@@ -9,16 +9,16 @@ module.exports = {
     extend: {
       colors: {
         nude: {
-          50:  "#fdf6f2",
-          100: "#fdf0eb",
-          200: "#fae4dc",
-          300: "#f0c8bc",
-          400: "#e8a898",
-          500: "#d4786a",
-          600: "#c4917a",
-          700: "#a06050",
-          800: "#7a4035",
-          900: "#5a2820",
+          50:  "var(--nude-50)",
+          100: "var(--nude-100)",
+          200: "var(--nude-200)",
+          300: "var(--nude-300)",
+          400: "var(--nude-400)",
+          500: "var(--nude-500)",
+          600: "var(--nude-600)",
+          700: "var(--nude-700)",
+          800: "var(--nude-800)",
+          900: "var(--nude-900)",
         },
       },
       fontFamily: {

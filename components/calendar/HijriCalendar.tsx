@@ -35,16 +35,16 @@ interface Props {
 // ─── Completion → colour mapping (matches Heatmap.tsx scale) ─────────────────
 
 function completionDotStyle(count: number | undefined): string {
-  if (!count || count === 0) return "bg-nude-100";
+  if (!count || count === 0) return "bg-theme-surface";
   if (count <= 2)             return "bg-nude-200";
   if (count <= 4)             return "bg-nude-300";
-  return                             "bg-nude-500";    // 5 = all prayers
+  return                             "bg-theme-bg0";    // 5 = all prayers
 }
 
 function completionBgStyle(count: number | undefined): string {
   if (!count || count === 0) return "";
-  if (count <= 2)             return "bg-nude-50";
-  if (count <= 4)             return "bg-nude-100/60";
+  if (count <= 2)             return "bg-theme-bg";
+  if (count <= 4)             return "bg-theme-surface/60";
   return                             "bg-nude-200/50";
 }
 
@@ -72,7 +72,7 @@ function DayCell({ day, completionMap, onSelect }: DayCellProps) {
         touch-manipulation
         ${day.isToday
           ? "ring-2 ring-nude-500 ring-offset-1"
-          : "hover:bg-nude-100/60"
+          : "hover:bg-theme-surface/60"
         }
         ${completionBgStyle(count)}
         ${isHoliday ? "bg-amber-50/80" : ""}
@@ -91,10 +91,10 @@ function DayCell({ day, completionMap, onSelect }: DayCellProps) {
       {/* Hijri day number */}
       <span
         className={`font-body text-sm font-bold leading-none
-          ${day.isToday   ? "text-nude-700"  :
+          ${day.isToday   ? "text-theme-text"  :
             isHoliday     ? "text-amber-700" :
-            hasEvent      ? "text-nude-600"  :
-                            "text-nude-700"  }
+            hasEvent      ? "text-theme-text"  :
+                            "text-theme-text"  }
         `}
       >
         {day.hijri.day}
@@ -175,7 +175,7 @@ export default function HijriCalendar({
 
   return (
     <>
-      <div className="bg-white border border-nude-100 rounded-3xl
+      <div className="bg-theme-surface border border-theme-border rounded-3xl
         overflow-hidden shadow-sm">
 
         {/* ── Header ─────────────────────────────────────────────── */}
@@ -184,7 +184,7 @@ export default function HijriCalendar({
           style={{ background: "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}
         >
           {/* Gregorian month context */}
-          <p className="font-body text-[10px] tracking-widest text-nude-400
+          <p className="font-body text-[10px] tracking-widest text-theme-muted
             uppercase mb-1">
             {/* Show the Gregorian months this Hijri month spans */}
             {monthDays.length > 0 &&
@@ -205,8 +205,8 @@ export default function HijriCalendar({
               onClick={() => navigate(-1)}
               disabled={isPending}
               aria-label="Previous Hijri month"
-              className="w-9 h-9 rounded-xl bg-white/60 flex items-center justify-center
-                text-nude-600 border border-nude-200 hover:bg-white/80
+              className="w-9 h-9 rounded-xl bg-theme-surface/60 flex items-center justify-center
+                text-theme-text border border-theme-border hover:bg-theme-surface/80
                 disabled:opacity-40 transition-all active:scale-90"
             >
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24"
@@ -218,13 +218,13 @@ export default function HijriCalendar({
             {/* Month + year */}
             <div className="text-center flex-1 px-3">
               <p
-                className="font-display text-2xl font-bold text-nude-800
+                className="font-display text-2xl font-bold text-theme-text
                   leading-tight"
               >
                 {monthMeta?.english ?? ""}
               </p>
               <p
-                className="text-base text-nude-500 mt-0.5"
+                className="text-base text-theme-muted mt-0.5"
                 style={{
                   fontFamily:
                     "'Scheherazade New', 'Traditional Arabic', serif",
@@ -240,8 +240,8 @@ export default function HijriCalendar({
               onClick={() => navigate(1)}
               disabled={isPending}
               aria-label="Next Hijri month"
-              className="w-9 h-9 rounded-xl bg-white/60 flex items-center justify-center
-                text-nude-600 border border-nude-200 hover:bg-white/80
+              className="w-9 h-9 rounded-xl bg-theme-surface/60 flex items-center justify-center
+                text-theme-text border border-theme-border hover:bg-theme-surface/80
                 disabled:opacity-40 transition-all active:scale-90"
             >
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24"
@@ -253,7 +253,7 @@ export default function HijriCalendar({
 
           {/* Loading bar */}
           {isPending && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-nude-100">
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-theme-surface">
               <div
                 className="h-full bg-nude-400 rounded-full"
                 style={{ animation: "slideRight 0.8s ease infinite" }}
@@ -268,7 +268,7 @@ export default function HijriCalendar({
             <div key={d} className="text-center">
               <span
                 className={`font-body text-[10px] font-bold tracking-wider uppercase
-                  ${d === "Fri" ? "text-nude-500" : "text-nude-300"}`}
+                  ${d === "Fri" ? "text-theme-muted" : "text-theme-muted/70"}`}
               >
                 {d}
               </span>
@@ -298,36 +298,36 @@ export default function HijriCalendar({
         <div className="px-4 pb-4 pt-1 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-nude-100" />
-              <span className="font-body text-[10px] text-nude-300">0</span>
+              <div className="w-2 h-2 rounded-full bg-theme-surface" />
+              <span className="font-body text-[10px] text-theme-muted/70">0</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-nude-200" />
-              <span className="font-body text-[10px] text-nude-300">1–2</span>
+              <span className="font-body text-[10px] text-theme-muted/70">1–2</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-nude-300" />
-              <span className="font-body text-[10px] text-nude-300">3–4</span>
+              <span className="font-body text-[10px] text-theme-muted/70">3–4</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-nude-500" />
-              <span className="font-body text-[10px] text-nude-300">5</span>
+              <div className="w-2 h-2 rounded-full bg-theme-bg0" />
+              <span className="font-body text-[10px] text-theme-muted/70">5</span>
             </div>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-[10px]">⭐</span>
-            <span className="font-body text-[10px] text-nude-300">Event</span>
+            <span className="font-body text-[10px] text-theme-muted/70">Event</span>
           </div>
         </div>
       </div>
 
       {/* ── Islamic events this month ───────────────────────────── */}
       {monthEvents.length > 0 && (
-        <div className="bg-white border border-nude-100 rounded-3xl
+        <div className="bg-theme-surface border border-theme-border rounded-3xl
           overflow-hidden shadow-sm">
           <div className="px-4 py-3 border-b border-nude-50">
             <p className="font-body text-[10px] font-bold tracking-widest
-              text-nude-400 uppercase">
+              text-theme-muted uppercase">
               This month
             </p>
           </div>
@@ -337,23 +337,23 @@ export default function HijriCalendar({
                 key={day.gregorianStr}
                 onClick={() => setSelectedDay(day)}
                 className="w-full flex items-center gap-3 px-4 py-3.5
-                  hover:bg-nude-50 transition-colors active:scale-[0.98]
+                  hover:bg-theme-bg transition-colors active:scale-[0.98]
                   text-left touch-manipulation"
               >
                 {/* Event emoji */}
                 <div
                   className={`w-9 h-9 rounded-xl flex items-center justify-center
                     text-lg flex-shrink-0
-                    ${day.event!.isHoliday ? "bg-amber-50" : "bg-nude-50"}`}
+                    ${day.event!.isHoliday ? "bg-amber-50" : "bg-theme-bg"}`}
                 >
                   {day.event!.emoji}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="font-body text-sm font-bold text-nude-700 truncate">
+                  <p className="font-body text-sm font-bold text-theme-text truncate">
                     {day.event!.name}
                   </p>
-                  <p className="font-body text-xs text-nude-400 mt-0.5">
+                  <p className="font-body text-xs text-theme-muted mt-0.5">
                     {day.hijri.day} {HIJRI_MONTH_NAMES[day.hijri.month]?.english} ·{" "}
                     {day.gregorian.toLocaleDateString("en-GB", {
                       day: "numeric", month: "short",
@@ -363,7 +363,7 @@ export default function HijriCalendar({
 
                 {/* Arabic name */}
                 <p
-                  className="text-sm text-nude-400 flex-shrink-0"
+                  className="text-sm text-theme-muted flex-shrink-0"
                   style={{
                     fontFamily:
                       "'Scheherazade New', 'Traditional Arabic', serif",
@@ -396,8 +396,8 @@ export default function HijriCalendar({
             });
           }}
           className="w-full py-3 rounded-2xl font-body text-sm font-bold
-            text-nude-600 bg-white border border-nude-200
-            hover:bg-nude-50 transition-colors active:scale-[0.98]
+            text-theme-text bg-theme-surface border border-theme-border
+            hover:bg-theme-bg transition-colors active:scale-[0.98]
             touch-manipulation"
         >
           Jump to today ↩

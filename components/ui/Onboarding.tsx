@@ -60,7 +60,7 @@ export default function Onboarding({ onComplete }: Props) {
       style={{ background: "rgba(122,64,53,0.2)", backdropFilter: "blur(6px)" }}
     >
       <div
-        className="w-full max-w-md bg-nude-50 md:rounded-3xl rounded-t-3xl px-6 pb-12 pt-8 md:pb-8 md:shadow-2xl"
+        className="w-full max-w-md bg-theme-bg md:rounded-3xl rounded-t-3xl px-6 pb-12 pt-8 md:pb-8 md:shadow-2xl"
         style={{ background: "linear-gradient(160deg, #fdf0eb 0%, #f0c8bc 100%)" }}
       >
         {/* Step dots */}
@@ -69,7 +69,7 @@ export default function Onboarding({ onComplete }: Props) {
             <div
               key={i}
               className={`rounded-full transition-all duration-300
-                ${i === step ? "w-6 h-2 bg-nude-500" : "w-2 h-2 bg-nude-300"}`}
+                ${i === step ? "w-6 h-2 bg-theme-bg0" : "w-2 h-2 bg-nude-300"}`}
             />
           ))}
         </div>
@@ -77,23 +77,23 @@ export default function Onboarding({ onComplete }: Props) {
         {/* Content */}
         <div className="text-center mb-10 animate-fade-up" key={step}>
           <p className="text-6xl mb-6">{current.icon}</p>
-          <h1 className="font-display text-3xl font-bold text-nude-800 mb-4 leading-tight">
+          <h1 className="font-display text-3xl font-bold text-theme-text mb-4 leading-tight">
             {current.title}
           </h1>
-          <p className="font-body text-sm text-nude-600 leading-relaxed">{current.body}</p>
+          <p className="font-body text-sm text-theme-text leading-relaxed">{current.body}</p>
         </div>
 
         {/* City input on last step */}
         {isLast && (
           <div className="mb-6 animate-fade-up">
-            <p className="font-body text-xs font-bold tracking-widest text-nude-500 uppercase mb-2 text-center">
+            <p className="font-body text-xs font-bold tracking-widest text-theme-muted uppercase mb-2 text-center">
               Your City (for prayer times)
             </p>
             <input
               value={city}
               onChange={e => setCity(e.target.value)}
               placeholder="e.g. Islamabad, London, Dubai"
-              className="w-full bg-white border border-nude-200 rounded-2xl px-4 py-3 text-nude-800 text-sm font-body text-center focus:outline-none focus:border-nude-400 transition-colors"
+              className="w-full bg-theme-surface border border-theme-border rounded-2xl px-4 py-3 text-theme-text text-sm font-body text-center focus:outline-none focus:border-nude-400 transition-colors"
             />
           </div>
         )}
@@ -109,7 +109,7 @@ export default function Onboarding({ onComplete }: Props) {
         {step > 0 && (
           <button
             onClick={() => setStep(s => s - 1)}
-            className="w-full mt-3 py-2 font-body text-sm text-nude-400"
+            className="w-full mt-3 py-2 font-body text-sm text-theme-muted"
           >
             Back
           </button>

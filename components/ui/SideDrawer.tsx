@@ -103,7 +103,7 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-12 right-4 w-8 h-8 rounded-xl bg-white/60 flex items-center justify-center text-nude-500 hover:bg-white transition-colors"
+            className="absolute top-12 right-4 w-8 h-8 rounded-xl bg-theme-surface/60 flex items-center justify-center text-theme-muted hover:bg-theme-surface transition-colors"
             aria-label="Close navigation"
           >
             <X className="w-4 h-4" />
@@ -118,10 +118,10 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
               {userName ? userName.charAt(0).toUpperCase() : "U"}
             </div>
             <div className="min-w-0">
-              <p className="font-body text-sm font-bold text-nude-700 truncate">
+              <p className="font-body text-sm font-bold text-theme-text truncate">
                 {userName || "Welcome"}
               </p>
-              <p className="font-body text-xs text-nude-400 truncate">
+              <p className="font-body text-xs text-theme-muted truncate">
                 {userEmail || ""}
               </p>
             </div>
@@ -129,8 +129,8 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
 
           {/* App title */}
           <div className="mt-4 relative z-10">
-            <p className="font-body text-[10px] tracking-widest text-nude-400 uppercase">Navigation</p>
-            <p className="font-display text-xl font-bold text-nude-700">Salah Tracker</p>
+            <p className="font-body text-[10px] tracking-widest text-theme-muted uppercase">Navigation</p>
+            <p className="font-display text-xl font-bold text-theme-text">Salah Tracker</p>
           </div>
         </div>
 
@@ -138,7 +138,7 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
         <div className="flex-1 overflow-y-auto py-3 px-3">
           {NAV_SECTIONS.map((section, si) => (
             <div key={si} className="mb-4">
-              <p className="font-body text-[9px] font-bold tracking-[0.15em] text-nude-300 uppercase px-3 py-1.5">
+              <p className="font-body text-[9px] font-bold tracking-[0.15em] text-theme-muted/70 uppercase px-3 py-1.5">
                 {section.label}
               </p>
               <div className="space-y-0.5">
@@ -151,8 +151,8 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
                       onClick={onClose}
                       className={`flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-150 active:scale-[0.97]
                         ${active
-                          ? "bg-nude-100 shadow-sm"
-                          : "hover:bg-nude-50"
+                          ? "bg-theme-surface shadow-sm"
+                          : "hover:bg-theme-bg"
                         }`}
                     >
                       {/* Icon bubble */}
@@ -173,10 +173,10 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
 
                       <div className="flex-1 min-w-0">
                         <p className={`font-body text-sm font-bold leading-tight
-                          ${active ? "text-nude-700" : "text-nude-600"}`}>
+                          ${active ? "text-theme-text" : "text-theme-text"}`}>
                           {item.label}
                         </p>
-                        <p className="font-body text-[10px] text-nude-300 truncate mt-0.5">
+                        <p className="font-body text-[10px] text-theme-muted/70 truncate mt-0.5">
                           {item.desc}
                         </p>
                       </div>
@@ -194,8 +194,8 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-nude-100 flex-shrink-0">
-          <p className="font-body text-[10px] text-nude-300 text-center">
+        <div className="px-5 py-4 border-t border-theme-border flex-shrink-0">
+          <p className="font-body text-[10px] text-theme-muted/70 text-center">
             Made with care for your spiritual journey
           </p>
         </div>

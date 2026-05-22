@@ -11,9 +11,9 @@ export default function DuasPage() {
         style={{ background: "linear-gradient(160deg, #f5e6df 0%, #f0d8ce 60%, #ecddd6 100%)" }}>
         <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-40" style={{ background: "#e8c4b8" }} />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
-        <p className="font-body text-[10px] tracking-widest text-nude-400 uppercase mb-1 relative z-10">Daily Worship</p>
-        <h1 className="font-display text-3xl font-bold text-nude-700 mb-1 relative z-10">Dua Library 🤲</h1>
-        <p className="font-body text-sm text-nude-500 relative z-10">
+        <p className="font-body text-[10px] tracking-widest text-theme-muted uppercase mb-1 relative z-10">Daily Worship</p>
+        <h1 className="font-display text-3xl font-bold text-theme-text mb-1 relative z-10">Dua Library 🤲</h1>
+        <p className="font-body text-sm text-theme-muted relative z-10">
           {DUA_CATEGORIES.reduce((sum, c) => sum + getDuasByCategory(c.id).length, 0)} duas across {DUA_CATEGORIES.length} categories
         </p>
       </div>
@@ -29,7 +29,7 @@ export default function DuasPage() {
                 href={`/dashboard/duas/category/${cat.id}`}
                 className={`flex items-center gap-4 p-4 rounded-3xl border ${cat.color} ${cat.borderColor} active:scale-[0.98] transition-transform shadow-sm`}
               >
-                <div className="w-12 h-12 rounded-2xl bg-white/70 flex items-center justify-center text-2xl shadow-inner flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-theme-surface/70 flex items-center justify-center text-2xl shadow-inner flex-shrink-0">
                   {cat.icon}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -45,7 +45,7 @@ export default function DuasPage() {
         </div>
       </div>
 
-      <p className="text-center text-xs text-nude-300 font-body pb-6 px-6">
+      <p className="text-center text-xs text-theme-muted/70 font-body pb-6 px-6">
         References from Quran, Bukhari, Muslim & other authentic sources
       </p>
     </div>

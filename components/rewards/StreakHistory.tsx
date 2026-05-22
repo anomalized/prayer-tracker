@@ -12,7 +12,7 @@ const EVENT_CONFIG: Record<string, {
   streak_extended: {
     icon:  "🔥",
     label: (e) => `Streak extended to ${e.streakValueAfter} days`,
-    color: "text-nude-600",
+    color: "text-theme-text",
   },
   freeze_used: {
     icon:  "🛡️",
@@ -43,13 +43,13 @@ export default function StreakHistory({ events }: Props) {
   const visible = expanded ? events : events.slice(0, 3);
 
   return (
-    <div className="bg-white border border-nude-100 rounded-3xl
+    <div className="bg-theme-surface border border-theme-border rounded-3xl
       overflow-hidden shadow-sm">
 
       <button
         onClick={() => setExpanded((v) => !v)}
         className="w-full flex items-center justify-between px-5 py-4
-          hover:bg-nude-50 transition-colors"
+          hover:bg-theme-bg transition-colors"
         aria-expanded={expanded}
       >
         <div className="flex items-center gap-3">
@@ -61,16 +61,16 @@ export default function StreakHistory({ events }: Props) {
             📜
           </div>
           <div className="text-left">
-            <p className="font-body text-sm font-bold text-nude-700">
+            <p className="font-body text-sm font-bold text-theme-text">
               Streak History
             </p>
-            <p className="font-body text-xs text-nude-400">
+            <p className="font-body text-xs text-theme-muted">
               {events.length} recent event{events.length !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
         <svg
-          className={`w-4 h-4 text-nude-300 transition-transform duration-200
+          className={`w-4 h-4 text-theme-muted/70 transition-transform duration-200
             ${expanded ? "rotate-180" : ""}`}
           fill="none"
           viewBox="0 0 24 24"
@@ -103,7 +103,7 @@ export default function StreakHistory({ events }: Props) {
                     {cfg.label(event)}
                   </p>
                   {isValid && (
-                    <p className="font-body text-xs text-nude-300 mt-0.5">
+                    <p className="font-body text-xs text-theme-muted/70 mt-0.5">
                       {format(date, "d MMM yyyy · h:mm a")}
                     </p>
                   )}
@@ -111,11 +111,11 @@ export default function StreakHistory({ events }: Props) {
                 {event.eventType !== "freeze_purchased" &&
                   event.streakValueBefore !== event.streakValueAfter && (
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <span className="font-body text-xs text-nude-300">
+                    <span className="font-body text-xs text-theme-muted/70">
                       {event.streakValueBefore}
                     </span>
                     <svg
-                      className="w-3 h-3 text-nude-300"
+                      className="w-3 h-3 text-theme-muted/70"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -139,8 +139,8 @@ export default function StreakHistory({ events }: Props) {
           {events.length > 3 && !expanded && (
             <button
               onClick={() => setExpanded(true)}
-              className="w-full py-3 font-body text-xs font-bold text-nude-400
-                hover:text-nude-600 hover:bg-nude-50 transition-colors"
+              className="w-full py-3 font-body text-xs font-bold text-theme-muted
+                hover:text-theme-text hover:bg-theme-bg transition-colors"
             >
               Show {events.length - 3} more
             </button>

@@ -195,7 +195,7 @@ export default function QiblaClient() {
             Move your phone in a large <span className="text-white font-bold">figure-8 motion</span> a few times.
           </p>
           <button onClick={() => setCalibrating(false)}
-            className="px-8 py-3 bg-white text-black font-bold rounded-2xl text-sm">
+            className="px-8 py-3 bg-theme-surface text-black font-bold rounded-2xl text-sm">
             Done
           </button>
         </div>
@@ -211,17 +211,17 @@ export default function QiblaClient() {
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={true} />
         <div className="flex gap-2 mt-4 overflow-x-auto">
           {distLabel && (
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap">
+            <div className="bg-theme-surface/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap">
               🕋 {distLabel} to Kaaba
             </div>
           )}
           {loc && (
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap">
+            <div className="bg-theme-surface/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap">
               📍 {loc.lat.toFixed(2)}°, {loc.lng.toFixed(2)}°
             </div>
           )}
           {qibla !== null && (
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap">
+            <div className="bg-theme-surface/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap">
               Qibla {Math.round(qibla)}° from N
             </div>
           )}
@@ -233,7 +233,7 @@ export default function QiblaClient() {
           <>
             {/* ── DYNAMIC / STATIC TOGGLE ── */}
             { !isDesktop && (
-              <div className="flex items-center gap-3 bg-white border border-nude-200 rounded-2xl px-4 py-3 w-full max-w-sm shadow-sm">
+              <div className="flex items-center gap-3 bg-theme-surface border border-theme-border rounded-2xl px-4 py-3 w-full max-w-sm shadow-sm">
                 <div className="flex-1">
                   <p className="text-sm font-bold text-slate-700">
                     {dynamic ? "🧭 Dynamic Mode" : "📌 Static Mode"}
@@ -250,7 +250,7 @@ export default function QiblaClient() {
                 className={`relative w-14 h-7 rounded-full transition-colors duration-300 flex-shrink-0
                   ${dynamic ? "bg-green-500" : "bg-slate-200"}`}
               >
-                <div className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-all duration-300
+                <div className={`absolute top-0.5 w-6 h-6 bg-theme-surface rounded-full shadow transition-all duration-300
                   ${dynamic ? "left-7" : "left-0.5"}`} />
               </button>
             </div>
@@ -330,7 +330,7 @@ export default function QiblaClient() {
                 )}
                 {!dynamic && (
                   <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-                    <span className="text-[10px] font-bold text-slate-400 bg-white/80 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-slate-400 bg-theme-surface/80 px-2 py-0.5 rounded-full">
                       Static — enable dynamic for live tracking
                     </span>
                   </div>
@@ -352,7 +352,7 @@ export default function QiblaClient() {
 
               {/* Direction card */}
               <div className={`p-5 rounded-[2.5rem] border transition-all duration-300 shadow-sm flex items-center gap-4
-                ${aligned && dynamic ? "bg-green-50 border-green-100" : "bg-white border-nude-100"}`}>
+                ${aligned && dynamic ? "bg-green-50 border-green-100" : "bg-theme-surface border-theme-border"}`}>
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner flex-shrink-0
                   ${aligned && dynamic ? "bg-green-100 text-green-600" : "bg-orange-50 text-orange-400"}`}>
                   {aligned && dynamic ? "✓" : "🧭"}

@@ -56,14 +56,14 @@ export default function ChallengeSender({ friends, myId, onSent }: Props) {
 
   return (
     <div className="px-4 pb-4 pt-2 border-t border-nude-50">
-      <p className="font-body text-xs font-bold tracking-widest text-nude-400 uppercase mb-2">
+      <p className="font-body text-xs font-bold tracking-widest text-theme-muted uppercase mb-2">
         Send a challenge
       </p>
       <div className="flex gap-2">
         <select
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
-          className="flex-1 appearance-none bg-nude-50 border border-nude-200 rounded-2xl px-3 py-2.5 font-body text-sm text-nude-800 focus:outline-none focus:border-nude-400 transition-colors"
+          className="flex-1 appearance-none bg-theme-bg border border-theme-border rounded-2xl px-3 py-2.5 font-body text-sm text-theme-text focus:outline-none focus:border-nude-400 transition-colors"
         >
           <option value="">Choose a friend…</option>
           {friends.map((f) => (

@@ -12,7 +12,7 @@ export default function Loading() {
         <div className="h-3 bg-nude-200 rounded-xl w-52 animate-pulse" />
       </div>
       <div className="px-4 py-4 space-y-3">
-        <div className="h-24 bg-nude-100 rounded-3xl animate-pulse" />
+        <div className="h-24 bg-theme-surface rounded-3xl animate-pulse" />
         <PrayerCardSkeleton />
         <PrayerCardSkeleton />
         <PrayerCardSkeleton />

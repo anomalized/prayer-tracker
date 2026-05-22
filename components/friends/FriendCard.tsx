@@ -64,27 +64,27 @@ export default function FriendCard({ friend, myPoints, myStreak }: Props) {
   };
 
   return (
-    <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
+    <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
       <div className="bg-gradient-to-r from-nude-100 to-nude-200 px-4 py-4 flex items-center gap-3">
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-nude-300 to-nude-400 flex items-center justify-center text-white font-display text-xl font-bold flex-shrink-0">
           {safeName.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1">
-          <p className="font-display text-lg font-bold text-nude-800">{safeName}</p>
-          <p className="font-body text-xs text-nude-500">📍 {friend?.city ?? "—"}</p>
+          <p className="font-display text-lg font-bold text-theme-text">{safeName}</p>
+          <p className="font-body text-xs text-theme-muted">📍 {friend?.city ?? "—"}</p>
         </div>
         <div className="relative">
           <button
             onClick={() => setShowMenu(v => !v)}
-            className="w-8 h-8 rounded-xl bg-white/60 flex items-center justify-center text-nude-400 hover:text-nude-600 transition-colors"
+            className="w-8 h-8 rounded-xl bg-theme-surface/60 flex items-center justify-center text-theme-muted hover:text-theme-text transition-colors"
           >
             ···
           </button>
           {showMenu && (
-            <div className="absolute right-0 top-10 bg-white border border-nude-200 rounded-2xl shadow-lg py-1 z-10 min-w-[140px]">
+            <div className="absolute right-0 top-10 bg-theme-surface border border-theme-border rounded-2xl shadow-lg py-1 z-10 min-w-[140px]">
               <button
                 onClick={handleRemove}
-                className="w-full text-left px-4 py-2.5 text-xs font-body text-red-400 hover:bg-nude-50"
+                className="w-full text-left px-4 py-2.5 text-xs font-body text-red-400 hover:bg-theme-bg"
               >
                 Remove friend
               </button>
@@ -93,29 +93,29 @@ export default function FriendCard({ friend, myPoints, myStreak }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 divide-x divide-nude-100 border-b border-nude-100">
+      <div className="grid grid-cols-3 divide-x divide-nude-100 border-b border-theme-border">
         <div className="py-3 text-center">
-          <p className="font-display text-lg font-bold text-nude-800">
+          <p className="font-display text-lg font-bold text-theme-text">
             {friend?.currentStreak ?? 0}
             {streakWinner && <span className="text-xs ml-1">👑</span>}
           </p>
-          <p className="font-body text-xs text-nude-400">🔥 Streak</p>
+          <p className="font-body text-xs text-theme-muted">🔥 Streak</p>
         </div>
         <div className="py-3 text-center">
           <p className="font-display text-lg font-bold" style={{ color: rankColor }}>
             {friend?.totalPoints ?? 0}
             {isAhead && <span className="text-xs ml-1">⬆️</span>}
           </p>
-          <p className="font-body text-xs text-nude-400">⭐ Points</p>
+          <p className="font-body text-xs text-theme-muted">⭐ Points</p>
         </div>
         <div className="py-3 text-center">
           <p className="font-display text-lg font-bold" style={{ color: rankColor }}>{rank}</p>
-          <p className="font-body text-xs text-nude-400">🏅 Rank</p>
+          <p className="font-body text-xs text-theme-muted">🏅 Rank</p>
         </div>
       </div>
 
-      <div className="px-4 py-3 border-b border-nude-100">
-        <p className="font-body text-xs font-bold tracking-widest text-nude-400 uppercase mb-2">
+      <div className="px-4 py-3 border-b border-theme-border">
+        <p className="font-body text-xs font-bold tracking-widest text-theme-muted uppercase mb-2">
           Today · {friend?.donePrayers ?? 0}/5 prayers
         </p>
         <div className="flex gap-2">
@@ -126,13 +126,13 @@ export default function FriendCard({ friend, myPoints, myStreak }: Props) {
                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-base
                   ${status === "ontime" ? "bg-gradient-to-br from-nude-300 to-nude-400" :
                     status === "late"   ? "bg-nude-200" :
-                    status === "missed" ? "bg-red-50" : "bg-nude-50"}`}>
+                    status === "missed" ? "bg-red-50" : "bg-theme-bg"}`}>
                   {PRAYER_ICONS[p]}
                 </div>
                 <div className={`w-1.5 h-1.5 rounded-full
-                  ${status === "ontime" ? "bg-nude-500" :
+                  ${status === "ontime" ? "bg-theme-bg0" :
                     status === "late"   ? "bg-nude-300" :
-                    status === "missed" ? "bg-red-200" : "bg-nude-100"}`} />
+                    status === "missed" ? "bg-red-200" : "bg-theme-surface"}`} />
               </div>
             );
           })}
@@ -145,10 +145,10 @@ export default function FriendCard({ friend, myPoints, myStreak }: Props) {
           disabled={isPending || nudgeSent || (friend?.donePrayers ?? 0) === 5}
           className={`w-full py-2.5 rounded-2xl text-xs font-bold tracking-wide transition-all active:scale-95
             ${nudgeSent
-              ? "bg-nude-100 text-nude-400"
+              ? "bg-theme-surface text-theme-muted"
               : (friend?.donePrayers ?? 0) === 5
-                ? "bg-nude-50 text-nude-300 cursor-not-allowed"
-                : "bg-gradient-to-r from-nude-200 to-nude-300 text-nude-700"}`}
+                ? "bg-theme-bg text-theme-muted/70 cursor-not-allowed"
+                : "bg-gradient-to-r from-nude-200 to-nude-300 text-theme-text"}`}
         >
           {nudgeSent ? "Nudge sent! 🌸" : (friend?.donePrayers ?? 0) === 5 ? "✓ All prayers done today" : "🌸 Send a gentle nudge"}
         </button>

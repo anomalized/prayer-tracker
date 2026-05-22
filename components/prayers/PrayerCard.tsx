@@ -21,7 +21,6 @@ interface Props {
 export default function PrayerCard({ prayer, currentStatus, currentNote, index, onPointsEarned }: Props) {
   const [status, setStatus] = useState<PrayerStatus | null>(currentStatus);
   const [note, setNote] = useState(currentNote ?? "");
-  const [showNote, setShowNote] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -71,14 +70,7 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
     });
   };
 
-  const handleSaveNote = useCallback(() => {
-    startTransition(async () => {
-      await saveNote(prayer.name, note);
-      setShowNote(false);
-      router.refresh();
-      showToast("Reflection saved ✨");
-    });
-  }, [note, prayer.name, router, showToast]);
+
 
   return (
     <>
@@ -96,7 +88,7 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <p className="font-display text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>{prayer.name}</p>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/75">
+                <span className="rounded-full bg-theme-surface/10 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/75">
                   {status ?? "Pending"}
                 </span>
               </div>
@@ -135,8 +127,8 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
             </button>
           </div>
 
-          {note && !showNote && (
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm italic" style={{ color: "var(--color-text-secondary)" }}>
+          {note && (
+            <div className="rounded-3xl border border-white/10 bg-theme-surface/5 p-4 text-sm italic" style={{ color: "var(--color-text-secondary)" }}>
               “{note}”
             </div>
           )}
@@ -150,8 +142,8 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
-              onClick={() => setShowNote(true)}
-              className="flex-1 rounded-3xl border border-white/10 bg-white/5 py-3 text-sm font-semibold transition-all hover:border-white/20"
+              onClick={() => router.push(`/dashboard/today/reflection/${prayer.name}`)}
+              className="flex-1 rounded-3xl border border-white/10 bg-theme-surface/5 py-3 text-sm font-semibold transition-all hover:border-white/20"
               style={{ color: "var(--color-text-primary)" }}
             >
               {note ? "Edit reflection" : "Write reflection"}
@@ -169,41 +161,7 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
         </div>
       )}
 
-      {showNote && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8" style={{ background: "rgba(0,0,0,0.32)" }}>
-          <div className="w-full max-w-md rounded-3xl bg-theme-surface/95 p-6 backdrop-blur-xl shadow-2xl">
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div>
-                <p className="font-display text-xl font-bold" style={{ color: "var(--color-text-primary)" }}>
-                  Reflection for {prayer.name}
-                </p>
-                <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                  Save a short note after your prayer.
-                </p>
-              </div>
-              <button type="button" onClick={() => setShowNote(false)} className="text-sm font-bold text-theme-accent">
-                Close
-              </button>
-            </div>
-            <textarea
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              placeholder="What's on your heart?"
-              className="w-full min-h-[120px] rounded-3xl border border-white/10 bg-transparent p-4 text-sm leading-6 outline-none transition focus:border-white/20"
-              style={{ color: "var(--color-text-primary)" }}
-            />
-            <button
-              type="button"
-              onClick={handleSaveNote}
-              disabled={isPending}
-              className="mt-4 w-full rounded-3xl py-3 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
-              style={{ background: "var(--btn-gradient)" }}
-            >
-              Save Reflection 🌸
-            </button>
-          </div>
-        </div>
-      )}
+
     </>
   );
 }

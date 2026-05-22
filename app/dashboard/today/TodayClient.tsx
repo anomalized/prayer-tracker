@@ -123,7 +123,7 @@ export default function TodayClient({
   const dua = getDuaOfDay();
 
   return (
-    <div className="min-h-screen bg-nude-50">
+    <div className="min-h-screen bg-theme-bg">
       {showOnboarding && (
         <Onboarding onComplete={handleOnboardingComplete} />
       )}
@@ -163,44 +163,44 @@ export default function TodayClient({
 
         {/* ── Dua of the Day ──────────────────────────────── */}
         <div className="mb-4">
-          <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
+          <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
             <button
               onClick={() => setDuaExpanded(v => !v)}
-              className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-nude-50 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-theme-bg/50 transition-colors"
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-nude-200 to-nude-300 flex items-center justify-center text-lg flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ background: "var(--btn-gradient)" }}>
                 🤲
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-body text-xs font-bold tracking-widest text-nude-400 uppercase">Dua of the Day</p>
-                <p className="font-body text-sm text-nude-600 truncate">{dua.translation}</p>
+                <p className="font-body text-xs font-bold tracking-widest text-theme-muted uppercase">Dua of the Day</p>
+                <p className="font-body text-sm text-theme-text truncate">{dua.translation}</p>
               </div>
-              <span className={`text-nude-300 text-sm flex-shrink-0 transition-transform duration-200 ${duaExpanded ? "rotate-180" : ""}`}>
+              <span className={`text-theme-muted text-sm flex-shrink-0 transition-transform duration-200 ${duaExpanded ? "rotate-180" : ""}`}>
                 ▾
               </span>
             </button>
 
             {duaExpanded && (
-              <div className="px-4 pb-4 border-t border-nude-100 pt-3 space-y-3">
+              <div className="px-4 pb-4 border-t border-theme-border pt-3 space-y-3">
                 {/* Arabic */}
                 <p
-                  className="text-center text-xl leading-relaxed text-nude-700"
+                  className="text-center text-xl leading-relaxed text-theme-text"
                   style={{ fontFamily: "serif", direction: "rtl", lineHeight: "2.2" }}
                 >
                   {dua.arabic}
                 </p>
                 {/* Transliteration */}
-                <p className="text-center font-body text-xs text-nude-500 italic">
+                <p className="text-center font-body text-xs text-theme-muted italic">
                   {dua.transliteration}
                 </p>
                 {/* Translation */}
-                <div className="bg-nude-50 rounded-2xl px-4 py-3">
-                  <p className="font-body text-sm text-nude-700 text-center leading-relaxed">
+                <div className="bg-theme-bg/50 rounded-2xl px-4 py-3">
+                  <p className="font-body text-sm text-theme-text text-center leading-relaxed">
                     "{dua.translation}"
                   </p>
                 </div>
                 {/* Source */}
-                <p className="text-center font-body text-xs text-nude-300">— {dua.source}</p>
+                <p className="text-center font-body text-xs text-theme-muted/70">— {dua.source}</p>
               </div>
             )}
           </div>
@@ -208,11 +208,11 @@ export default function TodayClient({
 
         {/* ── Section label ────────────────────────────────── */}
         <div className="flex items-center gap-3 px-1 mb-3">
-          <p className="font-body text-xs font-bold tracking-widest text-nude-400 uppercase">
+          <p className="font-body text-xs font-bold tracking-widest text-theme-muted uppercase">
             Today's Prayers
           </p>
-          <div className="flex-1 h-px bg-nude-200" />
-          <p className="font-body text-xs text-nude-400">{donePrayers}/5 done</p>
+          <div className="flex-1 h-px bg-theme-border" />
+          <p className="font-body text-xs text-theme-muted">{donePrayers}/5 done</p>
         </div>
 
         {/* ── Prayer cards ─────────────────────────────────── */}
@@ -229,7 +229,7 @@ export default function TodayClient({
           ))}
         </div>
 
-        <p className="text-center text-xs text-nude-300 font-body pt-2 pb-6">
+        <p className="text-center text-xs text-theme-muted font-body pt-2 pb-6">
           May Allah accept your prayers 🌸
         </p>
       </div>

@@ -31,11 +31,11 @@ export default function WeeklyReport({ report, onDismiss }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-sm" onClick={onDismiss}>
-      <div className="bg-nude-50 rounded-t-[2.5rem] w-full max-w-md pb-10 overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="bg-theme-bg rounded-t-[2.5rem] w-full max-w-md pb-10 overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
 
         <div className="relative overflow-hidden px-6 pt-8 pb-6 text-center"
           style={{ background: "linear-gradient(160deg, #c8705a, #e8a090)" }}>
-          <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
+          <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-theme-surface/10" />
           <p className="font-body text-xs tracking-widest text-white/70 uppercase mb-1">Weekly Report</p>
           <p className="font-body text-xs text-white/60 mb-3">{fromLabel} – {toLabel}</p>
           <div className="text-6xl mb-2">{grade.emoji}</div>
@@ -44,7 +44,7 @@ export default function WeeklyReport({ report, onDismiss }: Props) {
         </div>
 
         <div className="flex justify-center -mt-8 mb-4 relative z-10">
-          <div className="w-20 h-20 rounded-full bg-white shadow-lg flex flex-col items-center justify-center border-4"
+          <div className="w-20 h-20 rounded-full bg-theme-surface shadow-lg flex flex-col items-center justify-center border-4"
             style={{ borderColor: grade.color }}>
             <p className="font-display text-2xl font-bold" style={{ color: grade.color }}>{report.pct}%</p>
           </div>
@@ -57,15 +57,15 @@ export default function WeeklyReport({ report, onDismiss }: Props) {
               { label: "Late",    value: report.late,    emoji: "⏰" },
               { label: "Missed",  value: report.missed,  emoji: "❌" },
             ].map(s => (
-              <div key={s.label} className="bg-white rounded-2xl p-3 text-center border border-nude-100">
+              <div key={s.label} className="bg-theme-surface rounded-2xl p-3 text-center border border-theme-border">
                 <p className="text-xl">{s.emoji}</p>
-                <p className="font-display text-xl font-bold text-nude-800">{s.value}</p>
-                <p className="font-body text-xs text-nude-400">{s.label}</p>
+                <p className="font-display text-xl font-bold text-theme-text">{s.value}</p>
+                <p className="font-body text-xs text-theme-muted">{s.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border border-nude-100 space-y-2.5">
+          <div className="bg-theme-surface rounded-2xl p-4 border border-theme-border space-y-2.5">
             {[
               { icon: "⭐", label: "Points earned this week",      value: `+${report.pointsEarned}` },
               { icon: "🏅", label: "Perfect days (all 5 prayers)", value: `${report.perfectDays}/7` },
@@ -76,15 +76,15 @@ export default function WeeklyReport({ report, onDismiss }: Props) {
               <div key={h.label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span>{h.icon}</span>
-                  <p className="font-body text-sm text-nude-600">{h.label}</p>
+                  <p className="font-body text-sm text-theme-text">{h.label}</p>
                 </div>
-                <p className="font-body text-sm font-bold text-nude-800">{h.value}</p>
+                <p className="font-body text-sm font-bold text-theme-text">{h.value}</p>
               </div>
             ))}
           </div>
 
-          <div className="bg-nude-100 rounded-2xl p-4 text-center">
-            <p className="font-body text-sm text-nude-600 italic">
+          <div className="bg-theme-surface rounded-2xl p-4 text-center">
+            <p className="font-body text-sm text-theme-text italic">
               {report.pct >= 80
                 ? "\"Indeed, prayer has been decreed upon the believers at specified times.\" — Quran 4:103 🌸"
                 : report.mostMissed

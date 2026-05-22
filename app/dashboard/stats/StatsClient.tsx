@@ -48,19 +48,19 @@ export default function StatsClient({ stats, breakdown, heatmap, weekly, monthSt
       <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12  md:pt-6 pb-6 relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-nude-300 opacity-20" />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
-        <p className="font-body text-xs tracking-widest text-nude-500 uppercase mb-1">Your Journey</p>
-        <h1 className="font-display text-3xl font-bold text-nude-800 mb-4">Stats 📊</h1>
+        <p className="font-body text-xs tracking-widest text-theme-muted uppercase mb-1">Your Journey</p>
+        <h1 className="font-display text-3xl font-bold text-theme-text mb-4">Stats 📊</h1>
 
         {/* Rank card */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4">
+        <div className="bg-theme-surface/60 backdrop-blur-sm rounded-2xl p-4">
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <p className="font-body text-xs text-nude-500 mb-1">Current Rank</p>
+              <p className="font-body text-xs text-theme-muted mb-1">Current Rank</p>
               <RankBadge points={points} size="lg" />
             </div>
             <div className="text-right">
-              <p className="font-body text-xs text-nude-500">Total Points</p>
-              <p className="font-display text-3xl font-bold text-nude-800">{points}</p>
+              <p className="font-body text-xs text-theme-muted">Total Points</p>
+              <p className="font-display text-3xl font-bold text-theme-text">{points}</p>
             </div>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function StatsClient({ stats, breakdown, heatmap, weekly, monthSt
             <PrayerBreakdown breakdown={breakdown} />
           </div>
         </div>
-        <p className="text-center text-xs text-nude-300 font-body pb-6 pt-4">
+        <p className="text-center text-xs text-theme-muted/70 font-body pb-6 pt-4">
           Every prayer counts 🌸
         </p>
       </div>

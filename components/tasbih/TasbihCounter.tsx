@@ -78,7 +78,7 @@ function HistoryRow({ session }: { session: TasbihSession }) {
   const hasArabic = session.dhikrArabic.length > 0;
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-nude-50/60
+    <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-theme-bg/60
       transition-colors">
 
       {/* Round count badge */}
@@ -95,25 +95,25 @@ function HistoryRow({ session }: { session: TasbihSession }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="font-body text-sm font-bold text-nude-700 truncate">
+          <p className="font-body text-sm font-bold text-theme-text truncate">
             {session.dhikrName}
           </p>
           {hasArabic && (
             <p
-              className="text-sm text-nude-400 truncate flex-shrink-0"
+              className="text-sm text-theme-muted truncate flex-shrink-0"
               style={{ fontFamily: ARABIC_FONT }}
             >
               {session.dhikrArabic}
             </p>
           )}
         </div>
-        <p className="font-body text-xs text-nude-400 mt-0.5">
+        <p className="font-body text-xs text-theme-muted mt-0.5">
           {session.totalCount} total · target {session.target} · {relative}
         </p>
       </div>
 
       <div className="text-right flex-shrink-0">
-        <p className="font-body text-[10px] text-nude-300">{formatted}</p>
+        <p className="font-body text-[10px] text-theme-muted/70">{formatted}</p>
       </div>
     </div>
   );
@@ -146,23 +146,23 @@ function TodayStats({
 
   return (
     <div
-      className="flex gap-3 mx-4 px-4 py-3 rounded-2xl border border-nude-100"
+      className="flex gap-3 mx-4 px-4 py-3 rounded-2xl border border-theme-border"
       style={{ background: "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}
     >
       <div className="flex-1 text-center">
-        <p className="font-display text-xl font-bold text-nude-800">
+        <p className="font-display text-xl font-bold text-theme-text">
           {totalRoundsToday}
         </p>
-        <p className="font-body text-[10px] text-nude-400 uppercase tracking-wider">
+        <p className="font-body text-[10px] text-theme-muted uppercase tracking-wider">
           rounds today
         </p>
       </div>
       <div className="w-px bg-nude-200" />
       <div className="flex-1 text-center">
-        <p className="font-display text-xl font-bold text-nude-800">
+        <p className="font-display text-xl font-bold text-theme-text">
           {totalCountToday}
         </p>
-        <p className="font-body text-[10px] text-nude-400 uppercase tracking-wider">
+        <p className="font-body text-[10px] text-theme-muted uppercase tracking-wider">
           dhikr today
         </p>
       </div>
@@ -429,11 +429,11 @@ export default function TasbihCounter() {
         />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
 
-        <p className="font-body text-[10px] tracking-widest text-nude-400 uppercase
+        <p className="font-body text-[10px] tracking-widest text-theme-muted uppercase
           mb-1 relative z-10">
           Remembrance
         </p>
-        <h1 className="font-display text-3xl font-bold text-nude-700 mb-4 relative z-10">
+        <h1 className="font-display text-3xl font-bold text-theme-text mb-4 relative z-10">
           Tasbih 📿
         </h1>
 
@@ -442,7 +442,7 @@ export default function TasbihCounter() {
           <label
             htmlFor={selectId}
             className="block font-body text-[10px] font-bold tracking-widest
-              text-nude-400 uppercase mb-1.5"
+              text-theme-muted uppercase mb-1.5"
           >
             Dhikr
           </label>
@@ -451,8 +451,8 @@ export default function TasbihCounter() {
               id={selectId}
               value={selectedDhikrId}
               onChange={(e) => handleDhikrChange(e.target.value)}
-              className="w-full appearance-none bg-white/70 border border-nude-200
-                rounded-2xl px-4 py-3 pr-10 font-body text-sm text-nude-800
+              className="w-full appearance-none bg-theme-surface/70 border border-theme-border
+                rounded-2xl px-4 py-3 pr-10 font-body text-sm text-theme-text
                 focus:outline-none focus:border-nude-400 transition-colors
                 cursor-pointer"
             >
@@ -465,7 +465,7 @@ export default function TasbihCounter() {
             {/* Chevron */}
             <svg
               className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4
-                text-nude-400 pointer-events-none"
+                text-theme-muted pointer-events-none"
               fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -480,8 +480,8 @@ export default function TasbihCounter() {
               onChange={(e) => setCustomText(e.target.value)}
               placeholder="Type your dhikr…"
               maxLength={60}
-              className="mt-2 w-full bg-white/70 border border-nude-200 rounded-2xl
-                px-4 py-2.5 font-body text-sm text-nude-800 placeholder-nude-300
+              className="mt-2 w-full bg-theme-surface/70 border border-theme-border rounded-2xl
+                px-4 py-2.5 font-body text-sm text-theme-text placeholder-nude-300
                 focus:outline-none focus:border-nude-400 transition-colors"
             />
           )}
@@ -499,21 +499,21 @@ export default function TasbihCounter() {
         {displayArabic ? (
           <div className="text-center space-y-1">
             <p
-              className="text-4xl leading-loose text-nude-700"
+              className="text-4xl leading-loose text-theme-text"
               style={{ fontFamily: ARABIC_FONT, direction: "rtl" }}
             >
               {displayArabic}
             </p>
-            <p className="font-body text-sm text-nude-500 italic">
+            <p className="font-body text-sm text-theme-muted italic">
               {displayTranslit}
             </p>
-            <p className="font-body text-xs text-nude-400">
+            <p className="font-body text-xs text-theme-muted">
               {displayTrans}
             </p>
           </div>
         ) : customText ? (
           <div className="text-center">
-            <p className="font-display text-2xl text-nude-700">{customText}</p>
+            <p className="font-display text-2xl text-theme-text">{customText}</p>
           </div>
         ) : (
           <div className="h-16" />
@@ -617,7 +617,7 @@ export default function TasbihCounter() {
 
         {/* ── Target selector ─────────────────────────────────────── */}
         <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-          <p className="font-body text-[10px] font-bold tracking-widest text-nude-400 uppercase">
+          <p className="font-body text-[10px] font-bold tracking-widest text-theme-muted uppercase">
             Target
           </p>
           <div className="flex gap-2 w-full justify-center">
@@ -629,7 +629,7 @@ export default function TasbihCounter() {
                   transition-all active:scale-95 touch-manipulation
                   ${target === t && !showCustomTgt
                     ? "text-white shadow-sm"
-                    : "bg-white border border-nude-200 text-nude-500 hover:bg-nude-50"
+                    : "bg-theme-surface border border-theme-border text-theme-muted hover:bg-theme-bg"
                   }`}
                 style={
                   target === t && !showCustomTgt
@@ -646,7 +646,7 @@ export default function TasbihCounter() {
                 transition-all active:scale-95 touch-manipulation
                 ${showCustomTgt
                   ? "text-white shadow-sm"
-                  : "bg-white border border-nude-200 text-nude-500 hover:bg-nude-50"
+                  : "bg-theme-surface border border-theme-border text-theme-muted hover:bg-theme-bg"
                 }`}
               style={
                 showCustomTgt
@@ -670,8 +670,8 @@ export default function TasbihCounter() {
                 onBlur={handleCustomTargetCommit}
                 onKeyDown={(e) => { if (e.key === "Enter") handleCustomTargetCommit(); }}
                 placeholder="e.g. 500"
-                className="flex-1 bg-white border border-nude-200 rounded-2xl px-4 py-2.5
-                  font-body text-sm text-nude-800 text-center focus:outline-none
+                className="flex-1 bg-theme-surface border border-theme-border rounded-2xl px-4 py-2.5
+                  font-body text-sm text-theme-text text-center focus:outline-none
                   focus:border-nude-400 transition-colors"
                 autoFocus
               />
@@ -695,7 +695,7 @@ export default function TasbihCounter() {
               transition-all active:scale-95 touch-manipulation
               ${resetArmed
                 ? "bg-red-50 border-2 border-red-300 text-red-500"
-                : "bg-white border border-nude-200 text-nude-500 hover:bg-nude-50"
+                : "bg-theme-surface border border-theme-border text-theme-muted hover:bg-theme-bg"
               }`}
           >
             {resetArmed ? "Tap again to reset ⚠️" : "Reset"}
@@ -704,13 +704,13 @@ export default function TasbihCounter() {
           {/* Rounds indicator */}
           {roundsToday > 0 && (
             <div
-              className="px-4 py-3 rounded-2xl border border-nude-200 text-center flex-shrink-0"
+              className="px-4 py-3 rounded-2xl border border-theme-border text-center flex-shrink-0"
               style={{ background: "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}
             >
-              <p className="font-display text-xl font-bold text-nude-800">
+              <p className="font-display text-xl font-bold text-theme-text">
                 ×{roundsToday}
               </p>
-              <p className="font-body text-[9px] text-nude-400 uppercase tracking-wider">
+              <p className="font-body text-[9px] text-theme-muted uppercase tracking-wider">
                 rounds
               </p>
             </div>
@@ -720,13 +720,13 @@ export default function TasbihCounter() {
 
       {/* ── Session history ──────────────────────────────────────── */}
       <div className="px-4 pb-28 md:pb-8 flex-shrink-0">
-        <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
+        <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
 
           {/* History header / toggle */}
           <button
             onClick={() => setHistoryExpanded((v) => !v)}
             className="w-full flex items-center justify-between px-4 py-4
-              hover:bg-nude-50 transition-colors"
+              hover:bg-theme-bg transition-colors"
             aria-expanded={historyExpanded}
           >
             <div className="flex items-center gap-3">
@@ -737,10 +737,10 @@ export default function TasbihCounter() {
                 📜
               </div>
               <div className="text-left">
-                <p className="font-body text-sm font-bold text-nude-700">
+                <p className="font-body text-sm font-bold text-theme-text">
                   Session History
                 </p>
-                <p className="font-body text-xs text-nude-400">
+                <p className="font-body text-xs text-theme-muted">
                   {sessions.length > 0
                     ? `${sessions.length} completed round${sessions.length !== 1 ? "s" : ""}`
                     : "No completed rounds yet"}
@@ -748,7 +748,7 @@ export default function TasbihCounter() {
               </div>
             </div>
             <svg
-              className={`w-4 h-4 text-nude-300 transition-transform duration-200
+              className={`w-4 h-4 text-theme-muted/70 transition-transform duration-200
                 ${historyExpanded ? "rotate-180" : ""}`}
               fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
             >
@@ -762,10 +762,10 @@ export default function TasbihCounter() {
               {sessions.length === 0 ? (
                 <div className="py-10 text-center">
                   <p className="text-3xl mb-2">📿</p>
-                  <p className="font-body text-sm font-bold text-nude-600">
+                  <p className="font-body text-sm font-bold text-theme-text">
                     No history yet
                   </p>
-                  <p className="font-body text-xs text-nude-400 mt-1">
+                  <p className="font-body text-xs text-theme-muted mt-1">
                     Complete your first round to see it here.
                   </p>
                 </div>
@@ -779,7 +779,7 @@ export default function TasbihCounter() {
 
                   {sessions.length > 5 && (
                     <div className="px-4 py-3 border-t border-nude-50">
-                      <p className="font-body text-xs text-nude-300 text-center">
+                      <p className="font-body text-xs text-theme-muted/70 text-center">
                         Showing last 5 of {sessions.length} rounds
                       </p>
                     </div>
@@ -793,8 +793,8 @@ export default function TasbihCounter() {
                         saveSessions([]);
                       }}
                       className="w-full py-2 rounded-2xl font-body text-xs font-bold
-                        text-nude-300 hover:text-red-400 hover:bg-red-50
-                        transition-colors border border-nude-100 hover:border-red-100"
+                        text-theme-muted/70 hover:text-red-400 hover:bg-red-50
+                        transition-colors border border-theme-border hover:border-red-100"
                     >
                       Clear history
                     </button>
@@ -805,7 +805,7 @@ export default function TasbihCounter() {
           )}
         </div>
 
-        <p className="text-center text-xs text-nude-300 font-body mt-4">
+        <p className="text-center text-xs text-theme-muted/70 font-body mt-4">
           Every dhikr is recorded with Allah 🌸
         </p>
       </div>

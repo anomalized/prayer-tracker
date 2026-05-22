@@ -44,15 +44,15 @@ export default async function CalendarPage() {
         />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
 
-        <p className="font-body text-[10px] tracking-widest text-nude-400
+        <p className="font-body text-[10px] tracking-widest text-theme-muted
           uppercase mb-1 relative z-10">
           Islamic Calendar
         </p>
-        <h1 className="font-display text-3xl font-bold text-nude-700 mb-1
+        <h1 className="font-display text-3xl font-bold text-theme-text mb-1
           relative z-10">
           Hijri Calendar 🌙
         </h1>
-        <p className="font-body text-sm text-nude-500 relative z-10">
+        <p className="font-body text-sm text-theme-muted relative z-10">
           Prayer heatmap · Islamic events · Monthly view
         </p>
       </div>
@@ -65,7 +65,7 @@ export default async function CalendarPage() {
           initialHijriDate={todayHijri}
         />
 
-        <p className="text-center text-xs text-nude-300 font-body pb-2">
+        <p className="text-center text-xs text-theme-muted/70 font-body pb-2">
           Dates based on Umm al-Qura calculation 🌙
         </p>
       </div>

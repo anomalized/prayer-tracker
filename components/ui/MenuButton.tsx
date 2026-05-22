@@ -16,8 +16,8 @@ export default function MenuButton({ className = "", dark = false }: Props) {
       aria-label="Open navigation"
       className={`md:hidden w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90 ${
         dark
-          ? "bg-white/20 hover:bg-white/30 text-white"
-          : "bg-white/60 hover:bg-white/80 text-nude-600 border border-nude-200"
+          ? "bg-theme-surface/20 hover:bg-theme-surface/30 text-white"
+          : "bg-theme-surface/60 hover:bg-theme-surface/80 text-theme-text border border-theme-border"
       } ${className}`}
     >
       {/* Hamburger — 3 lines with top line shorter for elegance */}

@@ -96,32 +96,32 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
   const completedCount = selectedDhikr.length + selectedDuas.length + (note.trim() ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-nude-50 pb-32">
+    <div className="min-h-screen bg-theme-bg pb-32">
       {/* Header */}
       <div className="bg-gradient-to-b from-nude-200 to-nude-100 px-5 pt-12 md:pt-6 pb-6 sticky top-0 z-10">
         <div className="flex items-center gap-3 mb-1">
           <button
             onClick={() => router.back()}
-            className="w-9 h-9 rounded-xl bg-white/60 flex items-center justify-center text-nude-600 font-bold"
+            className="w-9 h-9 rounded-xl bg-theme-surface/60 flex items-center justify-center text-theme-text font-bold"
             aria-label="Go back"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
-            <p className="font-body text-xs tracking-widest text-nude-500 uppercase">Reflection</p>
-            <h1 className="font-display text-2xl font-bold text-nude-800 flex items-center gap-2">
+            <p className="font-body text-xs tracking-widest text-theme-muted uppercase">Reflection</p>
+            <h1 className="font-display text-2xl font-bold text-theme-text flex items-center gap-2">
               {PRAYER_ICONS[prayerName]} {prayerName}
             </h1>
           </div>
         </div>
         {completedCount > 0 && (
-          <div className="mt-3 bg-white/60 rounded-2xl px-4 py-2 flex items-center gap-2">
+          <div className="mt-3 bg-theme-surface/60 rounded-2xl px-4 py-2 flex items-center gap-2">
             <div className="flex gap-1">
               {Array.from({ length: Math.min(completedCount, 8) }).map((_, i) => (
-                <div key={i} className="w-1.5 h-1.5 rounded-full bg-nude-500" />
+                <div key={i} className="w-1.5 h-1.5 rounded-full bg-theme-bg0" />
               ))}
             </div>
-            <p className="font-body text-xs text-nude-600">{completedCount} reflection{completedCount > 1 ? "s" : ""} added</p>
+            <p className="font-body text-xs text-theme-text">{completedCount} reflection{completedCount > 1 ? "s" : ""} added</p>
           </div>
         )}
       </div>
@@ -129,12 +129,12 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
       <div className="px-4 py-4 space-y-5">
 
         {/* ── Section 1: Dhikr ─────────────────────────── */}
-        <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
-          <div className="px-4 py-3 border-b border-nude-100 bg-nude-50 flex items-center gap-2">
+        <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
+          <div className="px-4 py-3 border-b border-theme-border bg-theme-bg flex items-center gap-2">
             <span className="text-lg">📿</span>
             <div>
-              <p className="font-display text-base font-bold text-nude-800">Dhikr</p>
-              <p className="font-body text-xs text-nude-400">Tap to mark as recited</p>
+              <p className="font-display text-base font-bold text-theme-text">Dhikr</p>
+              <p className="font-body text-xs text-theme-muted">Tap to mark as recited</p>
             </div>
           </div>
           <div className="divide-y divide-nude-50">
@@ -145,25 +145,25 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
                   key={dhikr.id}
                   onClick={() => toggleDhikr(dhikr.id)}
                   className={`w-full flex items-center gap-4 px-4 py-4 text-left transition-colors
-                    ${selected ? "bg-nude-50" : "hover:bg-nude-50/50"}`}
+                    ${selected ? "bg-theme-bg" : "hover:bg-theme-bg/50"}`}
                 >
                   {/* Checkbox */}
                   <div className={`w-7 h-7 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all
                     ${selected
                       ? "bg-gradient-to-br from-nude-400 to-nude-500 border-nude-500"
-                      : "border-nude-200 bg-white"}`}>
+                      : "border-theme-border bg-theme-surface"}`}>
                     {selected && <span className="text-white text-sm font-bold">✓</span>}
                   </div>
                   {/* Text */}
                   <div className="flex-1">
                     <p className={`font-body text-sm font-bold transition-colors
-                      ${selected ? "text-nude-700" : "text-nude-600"}`}>
+                      ${selected ? "text-theme-text" : "text-theme-text"}`}>
                       {dhikr.label}
                     </p>
-                    <p className="font-body text-xs text-nude-400">{dhikr.meaning} · ×{dhikr.count}</p>
+                    <p className="font-body text-xs text-theme-muted">{dhikr.meaning} · ×{dhikr.count}</p>
                   </div>
                   {/* Arabic */}
-                  <p className="text-right text-base text-nude-500 font-arabic"
+                  <p className="text-right text-base text-theme-muted font-arabic"
                      style={{ fontFamily: "serif", direction: "rtl" }}>
                     {dhikr.arabic}
                   </p>
@@ -174,12 +174,12 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
         </div>
 
         {/* ── Section 2: Duas ──────────────────────────── */}
-        <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
-          <div className="px-4 py-3 border-b border-nude-100 bg-nude-50 flex items-center gap-2">
+        <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
+          <div className="px-4 py-3 border-b border-theme-border bg-theme-bg flex items-center gap-2">
             <span className="text-lg">🤲</span>
             <div>
-              <p className="font-display text-base font-bold text-nude-800">Duas</p>
-              <p className="font-body text-xs text-nude-400">Mark which duas you read</p>
+              <p className="font-display text-base font-bold text-theme-text">Duas</p>
+              <p className="font-body text-xs text-theme-muted">Mark which duas you read</p>
             </div>
           </div>
 
@@ -193,14 +193,14 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
                   onClick={() => toggleDua(dua.id)}
                   className={`rounded-2xl p-3 text-left transition-all border
                     ${selected
-                      ? "bg-nude-100 border-nude-300"
-                      : "bg-nude-50 border-nude-100 hover:border-nude-200"}`}
+                      ? "bg-theme-surface border-theme-border"
+                      : "bg-theme-bg border-theme-border hover:border-theme-border"}`}
                 >
                   <p className={`font-body text-xs font-bold leading-tight
-                    ${selected ? "text-nude-700" : "text-nude-500"}`}>
+                    ${selected ? "text-theme-text" : "text-theme-muted"}`}>
                     {selected && "✓ "}{dua.label}
                   </p>
-                  <p className="text-xs text-nude-400 mt-0.5"
+                  <p className="text-xs text-theme-muted mt-0.5"
                      style={{ fontFamily: "serif", direction: "rtl" }}>
                     {dua.arabic}
                   </p>
@@ -212,19 +212,19 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
             {customDuas.map((dua, i) => (
               <button
                 key={`custom_${i}`}
-                className="rounded-2xl p-3 text-left bg-nude-100 border border-nude-300"
+                className="rounded-2xl p-3 text-left bg-theme-surface border border-theme-border"
               >
-                <p className="font-body text-xs font-bold text-nude-700">✓ {dua}</p>
-                <p className="font-body text-xs text-nude-400">Custom dua</p>
+                <p className="font-body text-xs font-bold text-theme-text">✓ {dua}</p>
+                <p className="font-body text-xs text-theme-muted">Custom dua</p>
               </button>
             ))}
 
             {/* Add custom button */}
             <button
               onClick={() => setShowCustomInput(true)}
-              className="rounded-2xl p-3 text-left bg-white border border-dashed border-nude-300 hover:border-nude-400 transition-colors"
+              className="rounded-2xl p-3 text-left bg-theme-surface border border-dashed border-theme-border hover:border-nude-400 transition-colors"
             >
-              <p className="font-body text-xs font-bold text-nude-400">+ Add custom dua</p>
+              <p className="font-body text-xs font-bold text-theme-muted">+ Add custom dua</p>
             </button>
           </div>
 
@@ -235,7 +235,7 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
                 value={customDua}
                 onChange={e => setCustomDua(e.target.value)}
                 placeholder="Enter dua name..."
-                className="flex-1 bg-nude-50 border border-nude-200 rounded-2xl px-3 py-2 text-sm font-body text-nude-800 focus:outline-none focus:border-nude-400"
+                className="flex-1 bg-theme-bg border border-theme-border rounded-2xl px-3 py-2 text-sm font-body text-theme-text focus:outline-none focus:border-nude-400"
                 autoFocus
                 onKeyDown={e => e.key === "Enter" && addCustomDua()}
               />
@@ -250,12 +250,12 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
         </div>
 
         {/* ── Section 3: Notes ─────────────────────────── */}
-        <div className="bg-white border border-nude-100 rounded-3xl overflow-hidden shadow-sm">
-          <div className="px-4 py-3 border-b border-nude-100 bg-nude-50 flex items-center gap-2">
+        <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm">
+          <div className="px-4 py-3 border-b border-theme-border bg-theme-bg flex items-center gap-2">
             <span className="text-lg">✍️</span>
             <div>
-              <p className="font-display text-base font-bold text-nude-800">Personal Reflection</p>
-              <p className="font-body text-xs text-nude-400">Gratitude, reminders, thoughts...</p>
+              <p className="font-display text-base font-bold text-theme-text">Personal Reflection</p>
+              <p className="font-body text-xs text-theme-muted">Gratitude, reminders, thoughts...</p>
             </div>
           </div>
           <div className="p-4">
@@ -264,7 +264,7 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
               onChange={e => setNote(e.target.value)}
               placeholder="What are you grateful for today? Any reminders for yourself? How was this prayer?..."
               rows={5}
-              className="w-full bg-nude-50 border border-nude-200 rounded-2xl px-4 py-3 text-sm font-body text-nude-800 placeholder-nude-300 focus:outline-none focus:border-nude-400 transition-colors resize-none"
+              className="w-full bg-theme-bg border border-theme-border rounded-2xl px-4 py-3 text-sm font-body text-theme-text placeholder-nude-300 focus:outline-none focus:border-nude-400 transition-colors resize-none"
             />
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function ReflectionClient({ prayerName, prayerLog }: Props) {
           {saved ? "Saved! 🌸 Going back..." : isPending ? "Saving..." : "Save Reflection 🌸"}
         </button>
 
-        <p className="text-center text-xs text-nude-300 font-body">
+        <p className="text-center text-xs text-theme-muted/70 font-body">
           May your prayers be accepted 🤲
         </p>
       </div>

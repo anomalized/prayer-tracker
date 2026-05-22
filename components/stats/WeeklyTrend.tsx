@@ -17,18 +17,18 @@ function CustomTooltip({ active, payload, label }: any) {
   const d = payload[0].payload;
   const pct = d.possible > 0 ? Math.round((d.prayers / d.possible) * 100) : 0;
   return (
-    <div className="bg-white border border-nude-200 rounded-2xl px-3 py-2 shadow-sm">
-      <p className="font-body text-xs font-bold text-nude-700">{label}</p>
-      <p className="font-body text-xs text-nude-500">{d.prayers}/{d.possible} prayers · {pct}%</p>
+    <div className="bg-theme-surface border border-theme-border rounded-2xl px-3 py-2 shadow-sm">
+      <p className="font-body text-xs font-bold text-theme-text">{label}</p>
+      <p className="font-body text-xs text-theme-muted">{d.prayers}/{d.possible} prayers · {pct}%</p>
     </div>
   );
 }
 
 export default function WeeklyTrend({ data }: Props) {
   return (
-    <div className="bg-white border border-nude-100 rounded-3xl p-4 shadow-sm">
-      <p className="font-display text-lg font-bold text-nude-800 mb-1">Weekly Trend</p>
-      <p className="font-body text-xs text-nude-400 mb-4">Prayers completed per week</p>
+    <div className="bg-theme-surface border border-theme-border rounded-3xl p-4 shadow-sm">
+      <p className="font-display text-lg font-bold text-theme-text mb-1">Weekly Trend</p>
+      <p className="font-body text-xs text-theme-muted mb-4">Prayers completed per week</p>
 
       <ResponsiveContainer width="100%" height={160}>
         <LineChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>

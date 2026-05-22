@@ -29,10 +29,10 @@ export default function BadgeCelebration({ newBadgeIds, onDismiss }: Props) {
       className="fixed inset-0 z-50 flex items-center justify-center px-6"
       style={{ background: "rgba(122,64,53,0.25)", backdropFilter: "blur(6px)" }}
     >
-      <div className="bg-white rounded-3xl w-full max-w-sm p-8 text-center shadow-xl animate-fade-up">
+      <div className="bg-theme-surface rounded-3xl w-full max-w-sm p-8 text-center shadow-xl animate-fade-up">
         {/* Confetti-like dots */}
         <div className="flex justify-center gap-2 mb-4">
-          {["bg-nude-300", "bg-nude-400", "bg-nude-200", "bg-nude-500", "bg-nude-300"].map((c, i) => (
+          {["bg-nude-300", "bg-nude-400", "bg-nude-200", "bg-theme-bg0", "bg-nude-300"].map((c, i) => (
             <div key={i} className={`w-2 h-2 rounded-full ${c}`} style={{ animationDelay: `${i * 0.1}s` }} />
           ))}
         </div>
@@ -43,11 +43,11 @@ export default function BadgeCelebration({ newBadgeIds, onDismiss }: Props) {
           </div>
         </div>
 
-        <p className="font-body text-xs tracking-widest text-nude-400 uppercase mb-2">
+        <p className="font-body text-xs tracking-widest text-theme-muted uppercase mb-2">
           Badge Unlocked!
         </p>
-        <p className="font-display text-2xl font-bold text-nude-800 mb-2">{badge.label}</p>
-        <p className="font-body text-sm text-nude-500 mb-6">{badge.description}</p>
+        <p className="font-display text-2xl font-bold text-theme-text mb-2">{badge.label}</p>
+        <p className="font-body text-sm text-theme-muted mb-6">{badge.description}</p>
 
         <button
           onClick={handleNext}

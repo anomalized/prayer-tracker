@@ -51,34 +51,34 @@ export default function DesktopSidebar({ userName, userEmail }: Props) {
   return (
     // hidden on mobile, sticky sidebar on desktop
     <aside
-      className="hidden md:flex flex-col h-screen sticky top-0 border-r border-nude-200 overflow-y-auto"
+      className="hidden md:flex flex-col h-screen sticky top-0 border-r border-theme-border overflow-y-auto"
       style={{ background: "var(--color-bg-primary)" }}
     >
       {/* User header */}
       <div
-        className="px-4 pt-8 pb-5 flex-shrink-0 border-b border-nude-100"
-        style={{ background: "linear-gradient(160deg,#f5e6df,#ecddd6)" }}
+        className="px-4 pt-8 pb-5 flex-shrink-0 border-b border-theme-border"
+        style={{ background: "var(--color-bg-secondary)" }}
       >
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold text-base flex-shrink-0"
-            style={{ background: "linear-gradient(135deg,#c8705a,#d4786a)" }}
+            style={{ background: "var(--btn-gradient)" }}
           >
             {userName ? userName.charAt(0).toUpperCase() : "U"}
           </div>
           <div className="min-w-0">
-            <p className="font-body text-sm font-bold text-nude-700 truncate">{userName || "Welcome"}</p>
-            <p className="font-body text-xs text-nude-400 truncate">{userEmail || ""}</p>
+            <p className="font-body text-sm font-bold text-theme-text truncate">{userName || "Welcome"}</p>
+            <p className="font-body text-xs text-theme-muted truncate">{userEmail || ""}</p>
           </div>
         </div>
-        <p className="font-display text-lg font-bold text-nude-700 mt-3">Salah Tracker</p>
+        <p className="font-display text-lg font-bold text-theme-text mt-3">Salah Tracker</p>
       </div>
 
       {/* Nav items */}
       <nav className="flex-1 py-3 px-3 space-y-4">
         {NAV_SECTIONS.map((section, si) => (
           <div key={si}>
-            <p className="font-body text-[9px] font-bold tracking-[0.15em] text-nude-300 uppercase px-3 py-1">
+            <p className="font-body text-[9px] font-bold tracking-[0.15em] text-theme-muted uppercase px-3 py-1">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -89,13 +89,14 @@ export default function DesktopSidebar({ userName, userEmail }: Props) {
                     key={item.href}
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all
-                      ${active ? "bg-nude-100 shadow-sm" : "hover:bg-nude-50"}`}
+                      ${active ? "bg-theme-surface shadow-sm" : "hover:bg-theme-surface/50"}`}
                   >
                     <div
                       className="w-8 h-8 rounded-xl flex items-center justify-center text-base flex-shrink-0"
                       style={{
-                        background: active ? "linear-gradient(135deg,#f0d8ce,#e8c4b8)" : "white",
-                        border: active ? "1.5px solid #e8c4b8" : "1.5px solid #f0e8e4",
+                        background: active ? "var(--color-bg-secondary)" : "transparent",
+                        border: active ? "1.5px solid var(--color-border)" : "1.5px solid transparent",
+                        color: active ? "var(--color-accent)" : "var(--color-text-secondary)"
                       }}
                     >
                       {item.svgId
@@ -103,12 +104,12 @@ export default function DesktopSidebar({ userName, userEmail }: Props) {
                         : item.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`font-body text-sm font-bold ${active ? "text-nude-700" : "text-nude-600"}`}>
+                      <p className={`font-body text-sm font-bold ${active ? "text-theme-text" : "text-theme-muted"}`}>
                         {item.label}
                       </p>
-                      <p className="font-body text-[10px] text-nude-300 truncate">{item.desc}</p>
+                      <p className="font-body text-[10px] text-theme-muted/70 truncate">{item.desc}</p>
                     </div>
-                    {active && <div className="w-1.5 h-1.5 rounded-full bg-nude-400 flex-shrink-0" />}
+                    {active && <div className="w-1.5 h-1.5 rounded-full bg-theme-accent flex-shrink-0" />}
                   </Link>
                 );
               })}
@@ -117,8 +118,8 @@ export default function DesktopSidebar({ userName, userEmail }: Props) {
         ))}
       </nav>
 
-      <div className="px-4 py-3 border-t border-nude-100 flex-shrink-0">
-        <p className="font-body text-[10px] text-nude-300 text-center">Made with care</p>
+      <div className="px-4 py-3 border-t border-theme-border flex-shrink-0">
+        <p className="font-body text-[10px] text-theme-muted text-center">Made with care</p>
       </div>
     </aside>
   );

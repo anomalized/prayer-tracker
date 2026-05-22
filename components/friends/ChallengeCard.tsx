@@ -44,7 +44,7 @@ function DualProgressBar({ myPct, theirPct, isMe }: { myPct: number; theirPct: n
           style={{ background: "linear-gradient(135deg, #f0d8ce, #e8c4b8)", color: "#9a6050" }}>
           Me
         </div>
-        <div className="flex-1 h-2.5 bg-nude-100 rounded-full overflow-hidden">
+        <div className="flex-1 h-2.5 bg-theme-surface rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-700"
             style={{
@@ -53,7 +53,7 @@ function DualProgressBar({ myPct, theirPct, isMe }: { myPct: number; theirPct: n
             }}
           />
         </div>
-        <span className="font-body text-xs font-bold text-nude-600 w-10 text-right">
+        <span className="font-body text-xs font-bold text-theme-text w-10 text-right">
           {nudePct.toFixed(0)}%
         </span>
       </div>
@@ -61,7 +61,7 @@ function DualProgressBar({ myPct, theirPct, isMe }: { myPct: number; theirPct: n
         <div className="w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center text-[9px] font-bold bg-slate-100 text-slate-500">
           🤝
         </div>
-        <div className="flex-1 h-2.5 bg-nude-100 rounded-full overflow-hidden">
+        <div className="flex-1 h-2.5 bg-theme-surface rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all duration-700 bg-slate-300" style={{ width: `${slatePct}%` }} />
         </div>
         <span className="font-body text-xs font-bold text-slate-500 w-10 text-right">
@@ -91,11 +91,11 @@ function DaysRing({ daysRemaining }: { daysRemaining: number }) {
             style={{ transition: "stroke-dashoffset 0.6s ease" }}
           />
         </svg>
-        <span className="absolute font-display text-sm font-bold text-nude-700">
+        <span className="absolute font-display text-sm font-bold text-theme-text">
           {daysRemaining}
         </span>
       </div>
-      <span className="font-body text-[9px] text-nude-400 uppercase tracking-wider">
+      <span className="font-body text-[9px] text-theme-muted uppercase tracking-wider">
         {daysRemaining === 1 ? "day left" : "days left"}
       </span>
     </div>
@@ -173,14 +173,14 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
   const endFormatted   = challenge.endDate   ? new Date(challenge.endDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
 
   return (
-    <div className={`rounded-3xl border overflow-hidden transition-all duration-300 ${challenge.status === "completed" ? iWon ? "border-amber-200 bg-gradient-to-br from-amber-50/60 to-white" : "border-nude-100 bg-white" : challenge.status === "active" ? "border-nude-200 bg-white" : "border-nude-100 bg-white"} shadow-sm`}>
+    <div className={`rounded-3xl border overflow-hidden transition-all duration-300 ${challenge.status === "completed" ? iWon ? "border-amber-200 bg-gradient-to-br from-amber-50/60 to-white" : "border-theme-border bg-theme-surface" : challenge.status === "active" ? "border-theme-border bg-theme-surface" : "border-theme-border bg-theme-surface"} shadow-sm`}>
       <div className="px-4 py-3 border-b border-nude-50 flex items-center justify-between gap-3"
         style={{ background: challenge.status === "completed" && iWon ? "linear-gradient(135deg, #fef9e7, #fdf0d0)" : "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}>
         <div>
-          <span className={`inline-flex items-center font-body text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full border ${challenge.status === "active" ? "bg-green-50 border-green-200 text-green-700" : challenge.status === "pending" ? "bg-amber-50 border-amber-200 text-amber-700" : iWon ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-nude-50 border-nude-200 text-nude-500"}`}>
+          <span className={`inline-flex items-center font-body text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full border ${challenge.status === "active" ? "bg-green-50 border-green-200 text-green-700" : challenge.status === "pending" ? "bg-amber-50 border-amber-200 text-amber-700" : iWon ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-theme-bg border-theme-border text-theme-muted"}`}>
             {challenge.status === "active" ? "⚡ Active" : challenge.status === "pending" ? "⏳ Pending" : iWon ? "🏆 You won!" : theyWon ? "🌸 Completed" : "Completed"}
           </span>
-          <p className="font-body text-xs text-nude-400 mt-1">
+          <p className="font-body text-xs text-theme-muted mt-1">
             7-day prayer challenge{startFormatted && endFormatted ? ` · ${startFormatted} – ${endFormatted}` : ""}
           </p>
         </div>
@@ -191,13 +191,13 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
         <div className="flex flex-col items-center gap-1.5 text-center min-w-0">
           <Avatar name={myName} size={44} isWinner={challenge.status === "completed" && iWon} />
           <div>
-            <p className="font-body text-xs font-bold text-nude-700 truncate max-w-[72px]">{myName}</p>
-            <p className="font-body text-[9px] text-nude-400">(you)</p>
+            <p className="font-body text-xs font-bold text-theme-text truncate max-w-[72px]">{myName}</p>
+            <p className="font-body text-[9px] text-theme-muted">(you)</p>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center pt-2 flex-shrink-0">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-bold text-nude-500 border border-nude-200" style={{ background: "linear-gradient(135deg, #fdf0ea, #ecddd6)" }}>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-bold text-theme-muted border border-theme-border" style={{ background: "linear-gradient(135deg, #fdf0ea, #ecddd6)" }}>
             vs
           </div>
         </div>
@@ -205,9 +205,9 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
         <div className="flex flex-col items-center gap-1.5 text-center min-w-0">
           <Avatar name={theirName} size={44} isWinner={challenge.status === "completed" && theyWon} />
           <div>
-            <p className="font-body text-xs font-bold text-nude-700 truncate max-w-[72px]">{theirName}</p>
+            <p className="font-body text-xs font-bold text-theme-text truncate max-w-[72px]">{theirName}</p>
             {!isChallenger && challenge.status === "pending" && (
-              <p className="font-body text-[9px] text-nude-400">challenged you</p>
+              <p className="font-body text-[9px] text-theme-muted">challenged you</p>
             )}
           </div>
         </div>
@@ -220,11 +220,11 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
       )}
 
       {challenge.status === "completed" && result && (
-        <div className={`mx-4 mb-3 rounded-2xl px-4 py-3 border ${iWon ? "bg-amber-50 border-amber-100" : "bg-nude-50 border-nude-100"}`}>
-          <p className={`font-body text-sm font-bold text-center ${iWon ? "text-amber-700" : "text-nude-600"}`}>
+        <div className={`mx-4 mb-3 rounded-2xl px-4 py-3 border ${iWon ? "bg-amber-50 border-amber-100" : "bg-theme-bg border-theme-border"}`}>
+          <p className={`font-body text-sm font-bold text-center ${iWon ? "text-amber-700" : "text-theme-text"}`}>
             {iWon ? `You won! 🏆 +50 pts awarded` : theyWon ? `${theirName} won this round 🌸 +20 pts for participating` : "It was a tie! 🤝"}
           </p>
-          <p className="font-body text-xs text-center text-nude-400 mt-0.5">
+          <p className="font-body text-xs text-center text-theme-muted mt-0.5">
             Your score: {myPct.toFixed(1)}% · Theirs: {theirPct.toFixed(1)}%
           </p>
         </div>
@@ -238,7 +238,7 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
 
       {challenge.status === "pending" && !isChallenger && (
         <div className="px-4 pb-4 flex gap-2">
-          <button onClick={handleDecline} disabled={isPending} className="flex-1 py-2.5 rounded-2xl font-body text-sm font-bold bg-nude-100 text-nude-500 border border-nude-200 hover:bg-nude-200 disabled:opacity-60 active:scale-95 transition-all touch-manipulation">
+          <button onClick={handleDecline} disabled={isPending} className="flex-1 py-2.5 rounded-2xl font-body text-sm font-bold bg-theme-surface text-theme-muted border border-theme-border hover:bg-nude-200 disabled:opacity-60 active:scale-95 transition-all touch-manipulation">
             Decline
           </button>
           <button onClick={handleAccept} disabled={isPending} className="flex-1 py-2.5 rounded-2xl font-body text-sm font-bold text-white disabled:opacity-60 active:scale-95 transition-all touch-manipulation shadow-sm hover:opacity-90" style={{ background: "linear-gradient(to right, #e8a898, #d4786a)" }}>
@@ -249,16 +249,16 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
 
       {challenge.status === "pending" && isChallenger && (
         <div className="px-4 pb-4">
-          <div className="py-2.5 rounded-2xl bg-nude-50 border border-dashed border-nude-200 text-center">
-            <p className="font-body text-xs text-nude-400">Waiting for {theirName} to accept…</p>
+          <div className="py-2.5 rounded-2xl bg-theme-bg border border-dashed border-theme-border text-center">
+            <p className="font-body text-xs text-theme-muted">Waiting for {theirName} to accept…</p>
           </div>
         </div>
       )}
 
       {challenge.status === "active" && (
         <div className="px-4 pb-4">
-          <div className="py-2.5 rounded-2xl text-center border border-nude-100" style={{ background: "linear-gradient(135deg, #fdf0ea, #ecddd6)" }}>
-            <p className="font-body text-xs font-bold text-nude-600">
+          <div className="py-2.5 rounded-2xl text-center border border-theme-border" style={{ background: "linear-gradient(135deg, #fdf0ea, #ecddd6)" }}>
+            <p className="font-body text-xs font-bold text-theme-text">
               {result ? myPct > theirPct ? `You're leading by ${(myPct - theirPct).toFixed(0)}% 🔥` : myPct < theirPct ? `${theirName} is ahead — keep going! 💪` : "You're tied — every prayer counts! 🌸" : "Logging prayers daily…"}
             </p>
           </div>

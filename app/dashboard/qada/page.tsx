@@ -17,13 +17,13 @@ export default async function QadaPage() {
         <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-40" style={{ background: "#e8c4b8" }} />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
 
-        <p className="font-body text-[10px] tracking-widest text-nude-400 uppercase mb-1 relative z-10">
+        <p className="font-body text-[10px] tracking-widest text-theme-muted uppercase mb-1 relative z-10">
           Makeup Prayers
         </p>
-        <h1 className="font-display text-3xl font-bold text-nude-700 mb-1 relative z-10">
+        <h1 className="font-display text-3xl font-bold text-theme-text mb-1 relative z-10">
           Qada Tracker 🤲
         </h1>
-        <p className="font-body text-sm text-nude-500 relative z-10">
+        <p className="font-body text-sm text-theme-muted relative z-10">
           Log your missed prayers, one at a time
         </p>
       </div>
