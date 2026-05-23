@@ -35,6 +35,20 @@ export function useWeeklyInsight(): UseWeeklyInsightReturn {
   const [error, setError]     = useState<string | null>(null);
 
   const fetchInsight = useCallback(async (logs: PrayerLog[]) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const cacheKey = `insight_${todayStr}`;
+    
+    // Check cache
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        setInsight(JSON.parse(cached));
+        return;
+      } catch (e) {
+        // Fallback to fetch if parse fails
+      }
+    }
+
     setLoading(true);
     setError(null);
 
@@ -53,6 +67,7 @@ export function useWeeklyInsight(): UseWeeklyInsightReturn {
       }
 
       setInsight(data as WeeklyInsight);
+      localStorage.setItem(cacheKey, JSON.stringify(data));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {

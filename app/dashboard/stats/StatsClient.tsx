@@ -31,12 +31,6 @@ interface Props {
 }
 
 export default function StatsClient({ stats, breakdown, heatmap, weekly, monthStats, recentLogs }: Props) {
-  const router = useRouter();
-  useEffect(() => {
-    const onFocus = () => router.refresh();
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [router]);
 
   const points = stats?.total_points ?? 0;
   const currentStreak = stats?.current_streak ?? 0;

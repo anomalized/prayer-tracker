@@ -59,7 +59,18 @@ export default function CanvasBackground({theme,className="",height}:Props){
     // Dune silhouette (desert only)
     const hasDunes=theme==="desert-dusk";
 
-    const draw=()=>{
+    let lastTime = 0;
+    const fpsInterval = 1000 / 30; // 30fps throttle
+
+    const draw=(time: number)=>{
+      rafRef.current=requestAnimationFrame(draw);
+
+      if (document.hidden) return; // Pause when tab is inactive
+
+      const elapsed = time - lastTime;
+      if (elapsed < fpsInterval) return; // Throttle to 30fps
+      lastTime = time - (elapsed % fpsInterval);
+
       t++;
       ctx.clearRect(0,0,canvas.width,canvas.height);
 
@@ -147,9 +158,8 @@ export default function CanvasBackground({theme,className="",height}:Props){
         }
       }
 
-      rafRef.current=requestAnimationFrame(draw);
     };
-    draw();
+    rafRef.current=requestAnimationFrame(draw);
     return()=>{cancelAnimationFrame(rafRef.current);ro.disconnect();};
   },[theme,height]);
 
