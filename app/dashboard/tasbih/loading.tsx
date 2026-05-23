@@ -4,7 +4,7 @@ export default function Loading() {
       {/* Header skeleton */}
       <div
         className="px-5 pt-12 pb-5"
-        style={{ background: "linear-gradient(160deg, #f5e6df, #ecddd6)" }}
+        style={{ background: "var(--card-gradient)" }}
       >
         <div className="h-3 bg-nude-300 rounded-xl w-24 mb-2 animate-pulse" />
         <div className="h-8 bg-nude-300 rounded-xl w-36 mb-4 animate-pulse" />

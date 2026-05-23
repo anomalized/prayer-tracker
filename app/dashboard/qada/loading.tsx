@@ -5,7 +5,7 @@ export default function Loading() {
     <div className="min-h-screen" style={{ background: "var(--color-bg-primary)" }}>
       <div
         className="px-5 pt-12 pb-6"
-        style={{ background: "linear-gradient(160deg, #f5e6df, #ecddd6)" }}
+        style={{ background: "var(--card-gradient)" }}
       >
         <div className="h-3 bg-nude-300 rounded-xl w-28 mb-2 animate-pulse" />
         <div className="h-7 bg-nude-300 rounded-xl w-44 mb-2 animate-pulse" />

@@ -45,7 +45,7 @@ export default function DayDetailSheet({ day, prayers, onClose }: Props) {
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-40"
-        style={{ background: "rgba(122,64,53,0.18)", backdropFilter: "blur(4px)" }}
+        style={{ background: "var(--glow-color)", backdropFilter: "blur(4px)" }}
         onClick={onClose}
         aria-hidden
       />
@@ -54,7 +54,7 @@ export default function DayDetailSheet({ day, prayers, onClose }: Props) {
       <div
         className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md
           bg-theme-bg rounded-t-3xl animate-slide-up pb-safe"
-        style={{ boxShadow: "0 -8px 40px rgba(180,100,80,0.12)" }}
+        style={{ boxShadow: "0 -8px 40px rgba(212,120,106,0.12)" }}
         role="dialog"
         aria-modal="true"
         aria-label={`Prayer details for ${gregFormatted}`}
@@ -70,7 +70,7 @@ export default function DayDetailSheet({ day, prayers, onClose }: Props) {
           style={{
             background: event?.isHoliday
               ? "linear-gradient(135deg, #fef9e7, #fdf0d0)"
-              : "linear-gradient(135deg, #fdf0ea, #f5e2d8)",
+              : "var(--card-gradient)",
           }}
         >
           {/* Close */}

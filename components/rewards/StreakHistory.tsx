@@ -56,7 +56,7 @@ export default function StreakHistory({ events }: Props) {
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center
               text-lg flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #f0d8ce, #e8c4b8)" }}
+            style={{ background: "var(--card-gradient)" }}
           >
             📜
           </div>

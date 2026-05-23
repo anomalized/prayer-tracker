@@ -111,8 +111,8 @@ function LeaderboardRow({ entry, rank, myPoints, showActions }: {
       <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-display font-bold text-sm flex-shrink-0"
         style={{ background: isMedal
           ? `linear-gradient(135deg, ${RANK_COLORS[rank-1]}66, ${RANK_COLORS[rank-1]})`
-          : entry.isMe ? "linear-gradient(135deg, #c8a09888, #d4786a)"
-          : "linear-gradient(135deg, #e8c4b888, #c8a098)" }}
+          : entry.isMe ? "var(--btn-gradient)"
+          : "var(--card-gradient)" }}
       >{initial}</div>
 
       <div className="flex-1 min-w-0">
@@ -132,7 +132,7 @@ function LeaderboardRow({ entry, rank, myPoints, showActions }: {
 
       <div className="text-right flex-shrink-0 mr-1">
         <p className="font-display text-base font-bold"
-          style={{ color: isMedal ? RANK_COLORS[rank-1] : entry.isMe ? "#d4786a" : "#b08070" }}>
+          style={{ color: isMedal ? RANK_COLORS[rank-1] : entry.isMe ? "var(--color-accent)" : "var(--color-accent-dark)" }}>
           {entry.points.toLocaleString()}
         </p>
         {!entry.isMe && (
@@ -211,8 +211,8 @@ export default function FriendsClient({ myId, myName, myStats, myTodayPrayers = 
 
       {/* Header — light peach matching Qibla and other pages */}
       <div className="px-5 pt-12  md:pt-6 pb-6 relative overflow-hidden"
-        style={{ background: "linear-gradient(160deg, #f5e6df 0%, #f0d8ce 60%, #ecddd6 100%)" }}>
-        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-40" style={{ background: "#e8c4b8" }} />
+        style={{ background: "var(--card-gradient)" }}>
+        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-40" style={{ background: "var(--nude-200)" }} />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
         <p className="font-body text-xs tracking-widest text-theme-muted uppercase mb-1 relative z-10">Leaderboard</p>
         <h1 className="font-display text-3xl font-bold text-theme-text mb-3 relative z-10">Friends 🏆</h1>

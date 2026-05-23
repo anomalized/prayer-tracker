@@ -57,11 +57,11 @@ export default function Onboarding({ onComplete }: Props) {
   return (
     <div
       className="fixed inset-0 z-50 flex md:items-center items-end justify-center"
-      style={{ background: "rgba(122,64,53,0.2)", backdropFilter: "blur(6px)" }}
+      style={{ background: "var(--glow-color)", backdropFilter: "blur(6px)" }}
     >
       <div
         className="w-full max-w-md bg-theme-bg md:rounded-3xl rounded-t-3xl px-6 pb-12 pt-8 md:pb-8 md:shadow-2xl"
-        style={{ background: "linear-gradient(160deg, #fdf0eb 0%, #f0c8bc 100%)" }}
+        style={{ background: "var(--card-gradient)" }}
       >
         {/* Step dots */}
         <div className="flex justify-center gap-2 mb-10">

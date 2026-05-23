@@ -86,8 +86,8 @@ function HistoryRow({ session }: { session: TasbihSession }) {
         className="w-10 h-10 rounded-2xl flex items-center justify-center
           text-sm font-bold flex-shrink-0"
         style={{
-          background: "linear-gradient(135deg, #f0d8ce, #e8c4b8)",
-          color:      "#9a6050",
+          background: "var(--card-gradient)",
+          color:      "var(--color-accent)",
         }}
       >
         ×{session.roundsCount}
@@ -147,7 +147,7 @@ function TodayStats({
   return (
     <div
       className="flex gap-3 mx-4 px-4 py-3 rounded-2xl border border-theme-border"
-      style={{ background: "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}
+      style={{ background: "var(--card-gradient)" }}
     >
       <div className="flex-1 text-center">
         <p className="font-display text-xl font-bold text-theme-text">
@@ -395,7 +395,7 @@ export default function TasbihCounter() {
   // Circle colours
   const circleBackground = isCelebrating
     ? "linear-gradient(135deg, #86efac, #22c55e)"
-    : "linear-gradient(135deg, #e8c4b8, #d4786a)";
+    : "var(--btn-gradient)";
 
   const circleClass = [
     "transition-none select-none cursor-pointer",
@@ -420,12 +420,12 @@ export default function TasbihCounter() {
       <div
         className="px-5 pt-12 md:pt-6 pb-5 relative overflow-hidden flex-shrink-0"
         style={{
-          background: "linear-gradient(160deg, #f5e6df 0%, #f0d8ce 60%, #ecddd6 100%)",
+          background: "var(--card-gradient)",
         }}
       >
         <div
           className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-40"
-          style={{ background: "#e8c4b8" }}
+          style={{ background: "var(--nude-200)" }}
         />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
 
@@ -578,7 +578,7 @@ export default function TasbihCounter() {
               gap:          4,
               boxShadow:    isCelebrating
                 ? "0 20px 60px -12px rgba(34,197,94,0.4)"
-                : "0 20px 60px -12px rgba(200,112,90,0.3)",
+                : "0 20px 60px -12px rgba(212,120,106,0.3)",
               transition:   "background 0.4s ease, box-shadow 0.4s ease",
               // Prevent text selection on rapid taps
               WebkitUserSelect: "none",
@@ -633,7 +633,7 @@ export default function TasbihCounter() {
                   }`}
                 style={
                   target === t && !showCustomTgt
-                    ? { background: "linear-gradient(135deg, #e8a898, #d4786a)" }
+                    ? { background: "var(--btn-gradient)" }
                     : {}
                 }
               >
@@ -650,7 +650,7 @@ export default function TasbihCounter() {
                 }`}
               style={
                 showCustomTgt
-                  ? { background: "linear-gradient(135deg, #e8a898, #d4786a)" }
+                  ? { background: "var(--btn-gradient)" }
                   : {}
               }
             >
@@ -679,7 +679,7 @@ export default function TasbihCounter() {
                 onClick={handleCustomTargetCommit}
                 className="px-4 py-2.5 rounded-2xl font-body text-sm font-bold text-white
                   active:scale-95 transition-transform"
-                style={{ background: "linear-gradient(135deg, #e8a898, #d4786a)" }}
+                style={{ background: "var(--btn-gradient)" }}
               >
                 Set
               </button>
@@ -705,7 +705,7 @@ export default function TasbihCounter() {
           {roundsToday > 0 && (
             <div
               className="px-4 py-3 rounded-2xl border border-theme-border text-center flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}
+              style={{ background: "var(--card-gradient)" }}
             >
               <p className="font-display text-xl font-bold text-theme-text">
                 ×{roundsToday}
@@ -732,7 +732,7 @@ export default function TasbihCounter() {
             <div className="flex items-center gap-3">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #f0d8ce, #e8c4b8)" }}
+                style={{ background: "var(--card-gradient)" }}
               >
                 📜
               </div>

@@ -32,16 +32,16 @@ export default function WeeklyTrend({ data }: Props) {
 
       <ResponsiveContainer width="100%" height={160}>
         <LineChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0c8bc" strokeOpacity={0.5} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.5} />
           <XAxis
             dataKey="week"
-            tick={{ fontSize: 10, fill: "#c4917a", fontFamily: "Lato" }}
+            tick={{ fontSize: 10, fill: "var(--color-accent)", fontFamily: "Lato" }}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
             domain={[0, 35]}
-            tick={{ fontSize: 10, fill: "#c4917a", fontFamily: "Lato" }}
+            tick={{ fontSize: 10, fill: "var(--color-accent)", fontFamily: "Lato" }}
             tickLine={false}
             axisLine={false}
           />
@@ -49,10 +49,10 @@ export default function WeeklyTrend({ data }: Props) {
           <Line
             type="monotone"
             dataKey="prayers"
-            stroke="#d4786a"
+            stroke="var(--color-accent)"
             strokeWidth={2.5}
-            dot={{ fill: "#d4786a", strokeWidth: 0, r: 4 }}
-            activeDot={{ r: 6, fill: "#c4917a" }}
+            dot={{ fill: "var(--color-accent)", strokeWidth: 0, r: 4 }}
+            activeDot={{ r: 6, fill: "var(--color-accent-light)" }}
           />
         </LineChart>
       </ResponsiveContainer>

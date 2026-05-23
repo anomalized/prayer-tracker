@@ -275,7 +275,7 @@ export default function SurahReader({ surahNumber }: Props) {
       <div className="sticky top-0 z-30 px-4 pt-10 pb-3 transition-colors duration-300"
         style={{ background: darkMode
           ? "linear-gradient(160deg,#2a1e10,#1a1208)"
-          : "linear-gradient(160deg,#f5e6df,#ecddd6)" }}>
+          : "var(--card-gradient)" }}>
 
         <div className="flex items-center gap-3 mb-3">
           <button onClick={() => router.back()}
@@ -396,7 +396,7 @@ export default function SurahReader({ surahNumber }: Props) {
           <p className={`text-sm font-bold font-body mb-3 ${darkMode ? "text-amber-200" : "text-theme-text"}`}>{error}</p>
           <button onClick={() => window.location.reload()}
             className="px-6 py-2.5 rounded-2xl text-sm font-bold text-white"
-            style={{ background: "linear-gradient(to right,#c8705a,#d4786a)" }}>
+            style={{ background: "var(--btn-gradient)" }}>
             Try Again
           </button>
         </div>
@@ -407,7 +407,7 @@ export default function SurahReader({ surahNumber }: Props) {
         <div className="mx-4 mt-4 mb-2 rounded-3xl p-6 text-center"
           style={{ background: darkMode
             ? "linear-gradient(135deg,#2a1e10,#1e1508)"
-            : "linear-gradient(135deg,#fdf0ea,#f5e2d8)",
+            : "var(--card-gradient)",
             border: `1px solid ${borderColor}` }}>
           <p className="text-4xl mb-2 font-medium"
             style={{ fontFamily: ARABIC_FONT, color: darkMode ? "#f5e6df" : "#5a3520" }}>

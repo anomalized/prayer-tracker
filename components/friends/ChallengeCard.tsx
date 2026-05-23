@@ -20,7 +20,7 @@ function Avatar({ name, size = 36, isWinner = false }: { name: string; size?: nu
           fontSize:   size * 0.38,
           background: isWinner
             ? "linear-gradient(135deg, #f59e0b, #d97706)"
-            : "linear-gradient(135deg, #e8c4b888, #c8a098)",
+            : "var(--card-gradient)",
           boxShadow: isWinner ? "0 0 0 2px #fbbf24" : undefined,
         }}
       >
@@ -41,7 +41,7 @@ function DualProgressBar({ myPct, theirPct, isMe }: { myPct: number; theirPct: n
     <div className="space-y-1.5">
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center text-[9px] font-bold"
-          style={{ background: "linear-gradient(135deg, #f0d8ce, #e8c4b8)", color: "#9a6050" }}>
+          style={{ background: "var(--card-gradient)", color: "var(--color-accent)" }}>
           Me
         </div>
         <div className="flex-1 h-2.5 bg-theme-surface rounded-full overflow-hidden">
@@ -49,7 +49,7 @@ function DualProgressBar({ myPct, theirPct, isMe }: { myPct: number; theirPct: n
             className="h-full rounded-full transition-all duration-700"
             style={{
               width:      `${nudePct}%`,
-              background: "linear-gradient(90deg, #e8a898, #d4786a)",
+              background: "var(--btn-gradient)",
             }}
           />
         </div>
@@ -175,7 +175,7 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
   return (
     <div className={`rounded-3xl border overflow-hidden transition-all duration-300 ${challenge.status === "completed" ? iWon ? "border-amber-200 bg-gradient-to-br from-amber-50/60 to-white" : "border-theme-border bg-theme-surface" : challenge.status === "active" ? "border-theme-border bg-theme-surface" : "border-theme-border bg-theme-surface"} shadow-sm`}>
       <div className="px-4 py-3 border-b border-nude-50 flex items-center justify-between gap-3"
-        style={{ background: challenge.status === "completed" && iWon ? "linear-gradient(135deg, #fef9e7, #fdf0d0)" : "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}>
+        style={{ background: challenge.status === "completed" && iWon ? "linear-gradient(135deg, #fef9e7, #fdf0d0)" : "var(--card-gradient)" }}>
         <div>
           <span className={`inline-flex items-center font-body text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full border ${challenge.status === "active" ? "bg-green-50 border-green-200 text-green-700" : challenge.status === "pending" ? "bg-amber-50 border-amber-200 text-amber-700" : iWon ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-theme-bg border-theme-border text-theme-muted"}`}>
             {challenge.status === "active" ? "⚡ Active" : challenge.status === "pending" ? "⏳ Pending" : iWon ? "🏆 You won!" : theyWon ? "🌸 Completed" : "Completed"}
@@ -197,7 +197,7 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
         </div>
 
         <div className="flex flex-col items-center justify-center pt-2 flex-shrink-0">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-bold text-theme-muted border border-theme-border" style={{ background: "linear-gradient(135deg, #fdf0ea, #ecddd6)" }}>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-bold text-theme-muted border border-theme-border" style={{ background: "var(--card-gradient)" }}>
             vs
           </div>
         </div>
@@ -241,7 +241,7 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
           <button onClick={handleDecline} disabled={isPending} className="flex-1 py-2.5 rounded-2xl font-body text-sm font-bold bg-theme-surface text-theme-muted border border-theme-border hover:bg-nude-200 disabled:opacity-60 active:scale-95 transition-all touch-manipulation">
             Decline
           </button>
-          <button onClick={handleAccept} disabled={isPending} className="flex-1 py-2.5 rounded-2xl font-body text-sm font-bold text-white disabled:opacity-60 active:scale-95 transition-all touch-manipulation shadow-sm hover:opacity-90" style={{ background: "linear-gradient(to right, #e8a898, #d4786a)" }}>
+          <button onClick={handleAccept} disabled={isPending} className="flex-1 py-2.5 rounded-2xl font-body text-sm font-bold text-white disabled:opacity-60 active:scale-95 transition-all touch-manipulation shadow-sm hover:opacity-90" style={{ background: "var(--btn-gradient)" }}>
             {isPending ? "Accepting…" : "Accept ⚡"}
           </button>
         </div>
@@ -257,7 +257,7 @@ export default function ChallengeCard({ challenge, myId, onRemove, onUpdate }: P
 
       {challenge.status === "active" && (
         <div className="px-4 pb-4">
-          <div className="py-2.5 rounded-2xl text-center border border-theme-border" style={{ background: "linear-gradient(135deg, #fdf0ea, #ecddd6)" }}>
+          <div className="py-2.5 rounded-2xl text-center border border-theme-border" style={{ background: "var(--card-gradient)" }}>
             <p className="font-body text-xs font-bold text-theme-text">
               {result ? myPct > theirPct ? `You're leading by ${(myPct - theirPct).toFixed(0)}% 🔥` : myPct < theirPct ? `${theirName} is ahead — keep going! 💪` : "You're tied — every prayer counts! 🌸" : "Logging prayers daily…"}
             </p>

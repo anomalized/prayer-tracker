@@ -30,8 +30,8 @@ export default function QuranClient() {
 
       {/* Header */}
       <div className="px-5 pt-12  md:pt-6 pb-5 relative overflow-hidden"
-        style={{ background: "linear-gradient(160deg, #f5e6df 0%, #f0d8ce 60%, #ecddd6 100%)" }}>
-        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-30" style={{ background: "#e8c4b8" }} />
+        style={{ background: "var(--card-gradient)" }}>
+        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-30" style={{ background: "var(--nude-200)" }} />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
         <p className="font-body text-[10px] tracking-widest text-theme-muted uppercase mb-1 relative z-10">Holy Quran</p>
         <h1 className="font-display text-3xl font-bold text-theme-text relative z-10">القرآن الكريم</h1>
@@ -80,7 +80,7 @@ export default function QuranClient() {
           <Link href={`/dashboard/quran/${lastReadSurah.number}`}
             className="flex items-center gap-3 bg-theme-surface border border-theme-border rounded-2xl px-4 py-3 shadow-sm active:scale-[0.98] transition-transform">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center text-theme-text flex-shrink-0"
-              style={{ background: "linear-gradient(135deg,#f0d8ce,#e8c4b8)" }}>
+              style={{ background: "var(--card-gradient)" }}>
               <BookOpen className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
@@ -116,7 +116,7 @@ export default function QuranClient() {
 
               {/* Number badge */}
               <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 relative"
-                style={{ background: "linear-gradient(135deg, #f5e6df, #ecddd6)", border: "1px solid #e8c4b8" }}>
+                style={{ background: "var(--card-gradient)", border: "1px solid var(--color-border)" }}>
                 <span className="font-display text-xs font-bold text-theme-text">{surah.number}</span>
               </div>
 

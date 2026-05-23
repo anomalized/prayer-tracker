@@ -181,7 +181,7 @@ export default function HijriCalendar({
         {/* ── Header ─────────────────────────────────────────────── */}
         <div
           className="px-5 pt-5 pb-4 relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}
+          style={{ background: "var(--card-gradient)" }}
         >
           {/* Gregorian month context */}
           <p className="font-body text-[10px] tracking-widest text-theme-muted

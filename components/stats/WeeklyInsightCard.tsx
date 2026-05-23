@@ -86,7 +86,7 @@ export default function WeeklyInsightCard({ logs }: Props) {
       {/* Header */}
       <div
         className="px-5 py-4 border-b border-theme-border"
-        style={{ background: "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}
+        style={{ background: "var(--card-gradient)" }}
       >
         <div className="flex items-center gap-2 mb-0.5">
           <span className="text-base">✦</span>
@@ -112,7 +112,7 @@ export default function WeeklyInsightCard({ logs }: Props) {
         {/* Focus prayer */}
         <div
           className="rounded-2xl p-4 border border-theme-border"
-          style={{ background: "#fffaf7" }}
+          style={{ background: "var(--color-surface)" }}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xl">{icon}</span>
@@ -130,7 +130,7 @@ export default function WeeklyInsightCard({ logs }: Props) {
                 className="font-display text-lg font-bold"
                 style={{
                   color: insight.focusPrayer.ontimeRate >= 60
-                    ? "#d4786a"
+                    ? "var(--color-accent)"
                     : "#e87060",
                 }}
               >

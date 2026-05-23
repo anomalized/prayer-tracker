@@ -72,7 +72,7 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
         onClick={onClose}
         className="fixed inset-0 z-40 transition-all duration-300"
         style={{
-          background: "rgba(30,15,10,0.45)",
+          background: "rgba(122,64,53,0.15)",
           backdropFilter: open ? "blur(3px)" : "none",
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
@@ -88,17 +88,17 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
           background: "var(--color-bg-primary)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          boxShadow: open ? "8px 0 40px rgba(180,100,80,0.15)" : "none",
+          boxShadow: open ? "8px 0 40px rgba(212,120,106,0.15)" : "none",
         }}
       >
         {/* Header */}
         <div
           className="px-5 pt-12 pb-5 relative overflow-hidden flex-shrink-0"
-          style={{ background: "linear-gradient(160deg, #f5e6df 0%, #ecddd6 100%)" }}
+          style={{ background: "var(--card-gradient)" }}
         >
           {/* Decorative circle */}
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-30"
-            style={{ background: "#e8c4b8" }} />
+            style={{ background: "var(--nude-200)" }} />
 
           {/* Close button */}
           <button
@@ -113,7 +113,7 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
           <div className="flex items-center gap-3 relative z-10">
             <div
               className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-sm"
-              style={{ background: "linear-gradient(135deg, #c8705a, #d4786a)" }}
+              style={{ background: "var(--btn-gradient)" }}
             >
               {userName ? userName.charAt(0).toUpperCase() : "U"}
             </div>
@@ -161,9 +161,9 @@ export default function SideDrawer({ open, onClose, userName, userEmail }: Props
                           ${active ? "scale-105" : ""}`}
                         style={{
                           background: active
-                            ? "linear-gradient(135deg, #f0d8ce, #e8c4b8)"
+                            ? "var(--card-gradient)"
                             : "white",
-                          border: active ? "1.5px solid #e8c4b8" : "1.5px solid #f0e8e4",
+                          border: active ? `1.5px solid var(--color-border)` : "1.5px solid var(--nude-100)",
                         }}
                       >
                         {item.svgId

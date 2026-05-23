@@ -8,8 +8,8 @@ export default function DuasPage() {
 
       {/* Header */}
       <div className="px-5 pt-12 pb-6 relative overflow-hidden"
-        style={{ background: "linear-gradient(160deg, #f5e6df 0%, #f0d8ce 60%, #ecddd6 100%)" }}>
-        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-40" style={{ background: "#e8c4b8" }} />
+        style={{ background: "var(--card-gradient)" }}>
+        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-40" style={{ background: "var(--nude-200)" }} />
         <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
         <p className="font-body text-[10px] tracking-widest text-theme-muted uppercase mb-1 relative z-10">Daily Worship</p>
         <h1 className="font-display text-3xl font-bold text-theme-text mb-1 relative z-10">Dua Library 🤲</h1>

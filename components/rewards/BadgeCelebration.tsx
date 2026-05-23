@@ -27,7 +27,7 @@ export default function BadgeCelebration({ newBadgeIds, onDismiss }: Props) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center px-6"
-      style={{ background: "rgba(122,64,53,0.25)", backdropFilter: "blur(6px)" }}
+      style={{ background: "var(--glow-color)", backdropFilter: "blur(6px)" }}
     >
       <div className="bg-theme-surface rounded-3xl w-full max-w-sm p-8 text-center shadow-xl animate-fade-up">
         {/* Confetti-like dots */}

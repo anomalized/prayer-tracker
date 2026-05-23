@@ -43,14 +43,14 @@ export default function ChallengesSection({ initialChallenges, acceptedFriends, 
         className="w-full flex items-center gap-3 px-5 py-4 hover:bg-theme-bg transition-colors text-left"
         aria-expanded={!collapsed}
       >
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ background: "linear-gradient(135deg, #f0d8ce, #e8c4b8)" }}>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ background: "var(--card-gradient)" }}>
           ⚡
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <p className="font-body text-sm font-bold text-theme-text">Prayer Challenges</p>
             {activeChallengeCount > 0 && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#fdf0ea", color: "#d4786a", border: "1px solid #f0c8b0" }}>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "var(--color-surface)", color: "var(--color-accent)", border: "1px solid var(--color-border)" }}>
                 {activeChallengeCount} active
               </span>
             )}

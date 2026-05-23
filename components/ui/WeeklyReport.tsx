@@ -34,7 +34,7 @@ export default function WeeklyReport({ report, onDismiss }: Props) {
       <div className="bg-theme-bg rounded-t-[2.5rem] w-full max-w-md pb-10 overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
 
         <div className="relative overflow-hidden px-6 pt-8 pb-6 text-center"
-          style={{ background: "linear-gradient(160deg, #c8705a, #e8a090)" }}>
+          style={{ background: "var(--btn-gradient)" }}>
           <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-theme-surface/10" />
           <p className="font-body text-xs tracking-widest text-white/70 uppercase mb-1">Weekly Report</p>
           <p className="font-body text-xs text-white/60 mb-3">{fromLabel} – {toLabel}</p>

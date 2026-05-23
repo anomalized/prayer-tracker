@@ -159,7 +159,7 @@ function PrayerRow({
                 width: `${progress}%`,
                 background: done
                   ? "linear-gradient(90deg, #a8d5a2, #78c472)"
-                  : "linear-gradient(90deg, #e8a898, #d4786a)",
+                  : "var(--btn-gradient)",
               }}
             />
           </div>
@@ -260,7 +260,7 @@ export default function QadaTracker({ initialStats }: Props) {
       )}
 
       {totalDebt > 0 ? (
-        <div className="rounded-3xl border border-theme-border p-5" style={{ background: "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}>
+        <div className="rounded-3xl border border-theme-border p-5" style={{ background: "var(--card-gradient)" }}>
           <div className="flex items-end justify-between mb-3">
             <div>
               <p className="font-body text-[10px] font-bold tracking-widest text-theme-muted uppercase">
@@ -275,7 +275,7 @@ export default function QadaTracker({ initialStats }: Props) {
             </div>
             <div className="text-right">
               <p className="font-body text-xs text-theme-muted">Remaining</p>
-              <p className="font-display text-2xl font-bold" style={{ color: "#d4786a" }}>
+              <p className="font-display text-2xl font-bold" style={{ color: "var(--color-accent)" }}>
                 {totalRemaining}
               </p>
             </div>
@@ -286,7 +286,7 @@ export default function QadaTracker({ initialStats }: Props) {
               className="h-full rounded-full transition-all duration-700"
               style={{
                 width: `${overallPct}%`,
-                background: "linear-gradient(90deg, #e8a898, #d4786a)",
+                background: "var(--btn-gradient)",
               }}
             />
           </div>

@@ -203,7 +203,7 @@ export default function QiblaClient() {
 
       {/* Header */}
       <div className="px-5 pt-12  md:pt-6 pb-5 relative overflow-hidden text-white"
-        style={{ background: "linear-gradient(160deg,#c8705a,#d4786a 55%,#e8a090)" }}>
+        style={{ background: "var(--btn-gradient)" }}>
         <div className="flex flex-col gap-1">
           <p className="text-[10px] opacity-70 tracking-widest uppercase font-bold">Qibla Direction</p>
           <h1 className="text-2xl font-bold tracking-tight">Mecca Finder</h1>
@@ -260,7 +260,7 @@ export default function QiblaClient() {
             {showBtn && !dynamic && (
               <button onClick={handleIOSPermission}
                 className="w-full max-w-sm py-3.5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 active:scale-95 transition-transform"
-                style={{ background: "linear-gradient(to right,#c8705a,#d4786a)" }}>
+                style={{ background: "var(--btn-gradient)" }}>
                 🧭 Allow Compass to Enable Dynamic Mode
               </button>
             )}
@@ -279,7 +279,7 @@ export default function QiblaClient() {
                     : "radial-gradient(circle, #ffffff, #fef2ee)",
                   boxShadow: (aligned && dynamic)
                     ? "0 20px 50px -12px rgba(34,197,94,0.3)"
-                    : "0 20px 50px -12px rgba(200,112,90,0.15)",
+                    : "0 20px 50px -12px rgba(212,120,106,0.15)",
                 }}
               >
                 {/* Tick ring */}
@@ -310,7 +310,7 @@ export default function QiblaClient() {
                       style={{
                         background: (aligned && dynamic)
                           ? "linear-gradient(to bottom, #22c55e, transparent)"
-                          : "linear-gradient(to bottom, #c8705a, transparent)",
+                          : "linear-gradient(to bottom, var(--color-accent), transparent)",
                       }}
                     />
                   </div>

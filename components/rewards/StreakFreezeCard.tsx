@@ -120,13 +120,13 @@ export default function StreakFreezeCard({
     >
       <div
         className="px-5 py-4 border-b border-nude-50"
-        style={{ background: "linear-gradient(135deg, #fdf0ea, #f5e2d8)" }}
+        style={{ background: "var(--card-gradient)" }}
       >
         <div className="flex items-center gap-3">
           <div
             className="w-11 h-11 rounded-2xl flex items-center justify-center
               flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #e8c4b8, #d4786a)" }}
+            style={{ background: "var(--btn-gradient)" }}
           >
             <span className="text-white" style={{ color: "white" }}>
               <ShieldIcon filled size={22} />
@@ -274,7 +274,7 @@ export default function StreakFreezeCard({
             }`}
           style={
             !atMax && canAfford && !isPending
-              ? { background: "linear-gradient(to right, #e8a898, #d4786a)" }
+              ? { background: "var(--btn-gradient)" }
               : {}
           }
         >

@@ -47,7 +47,7 @@ export default function DuaCategoryPage({ params }: { params: { id: string } }) 
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-center gap-2">
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0`}
-                  style={{ background: "linear-gradient(135deg,#c8705a,#d4786a)" }}>
+                  style={{ background: "var(--btn-gradient)" }}>
                   {i + 1}
                 </span>
                 <p className="font-body text-sm font-bold text-theme-text">{dua.title}</p>
