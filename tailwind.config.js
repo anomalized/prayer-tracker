@@ -20,12 +20,6 @@ module.exports = {
           800: "var(--nude-800)",
           900: "var(--nude-900)",
         },
-      },
-      fontFamily: {
-        display: ["'Cormorant Garamond'", "serif"],
-        body:    ["'Lato'", "sans-serif"],
-      },
-      colors: {
         theme: {
           bg: "var(--color-bg-primary)",
           surface: "var(--color-surface)",
@@ -35,6 +29,10 @@ module.exports = {
           text: "var(--color-text-primary)",
           muted: "var(--color-text-muted)",
         },
+      },
+      fontFamily: {
+        display: ["'Cormorant Garamond'", "serif"],
+        body:    ["'Lato'", "sans-serif"],
       },
       borderRadius: {
         "2xl": "1rem",
