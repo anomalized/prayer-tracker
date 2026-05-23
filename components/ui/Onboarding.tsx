@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateProfile } from "@/lib/actions/settings";
+import { completeOnboarding } from "@/lib/actions/settings";
 
 interface Props {
   onComplete: () => void;
@@ -44,7 +44,7 @@ export default function Onboarding({ onComplete }: Props) {
   const handleNext = () => {
     if (isLast) {
       startTransition(async () => {
-        await updateProfile("", city); // save city preference
+        await completeOnboarding(city);
         onComplete();
       });
     } else {

@@ -77,6 +77,7 @@ interface Props {
     last_active_date?: string | null;
   } | null;
   notificationsEnabled: boolean;
+  onboardingComplete: boolean;  // ← NEW: from server
 }
 
 export default function TodayClient({
@@ -87,9 +88,10 @@ export default function TodayClient({
   todayLogs,
   stats,
   notificationsEnabled,
+  onboardingComplete,  // ← NEW: from server
 }: Props) {
   const [extraPoints, setExtraPoints] = useState(0);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(!onboardingComplete);  // ← Use server value
   const [duaExpanded, setDuaExpanded] = useState(false);
 
   useStreakCheck();
@@ -105,13 +107,10 @@ export default function TodayClient({
     notificationsEnabled,
   });
 
-  useEffect(() => {
-    const seen = localStorage.getItem("onboarding_complete");
-    if (!seen) setShowOnboarding(true);
-  }, []);
+  // ← REMOVED: localStorage.getItem check. Use server-side value instead.
 
   const handleOnboardingComplete = () => {
-    localStorage.setItem("onboarding_complete", "true");
+    // localStorage no longer needed - onboarding_complete is in database now
     setShowOnboarding(false);
   };
 

@@ -27,6 +27,8 @@ export default async function TodayPage() {
     getNotificationsEnabled(),
   ]);
 
+  const onboardingComplete = stats?.onboarding_complete ?? false;
+
   return (
     <TodayClient
       userName={userName}
@@ -36,6 +38,7 @@ export default async function TodayPage() {
       todayLogs={todayLogs}
       stats={stats}
       notificationsEnabled={notificationsEnabled}
+      onboardingComplete={onboardingComplete}
     />
   );
 }
