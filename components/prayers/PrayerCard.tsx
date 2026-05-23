@@ -7,8 +7,7 @@ import { checkAndAwardBadges } from "@/lib/actions/badges";
 import { isPrayerTimePassed } from "@/lib/prayerTimes";
 import { queuePrayerLog } from "@/lib/offlineQueue";
 import type { PrayerTime, PrayerStatus } from "@/types";
-import CanvasBackground from "@/components/ui/CanvasBackground";
-import { useTheme } from "@/hooks/useTheme";
+
 
 interface Props {
   prayer: PrayerTime;
@@ -24,7 +23,7 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
   const [toast, setToast] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const { theme } = useTheme();
+
 
   const timePassed = isPrayerTimePassed(prayer.time);
   const isDone = status === "ontime" || status === "late";
@@ -75,10 +74,6 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
   return (
     <>
       <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-theme-surface shadow-[0_20px_70px_rgba(0,0,0,0.06)]">
-        <div className="absolute inset-0 opacity-80">
-          <CanvasBackground theme={theme} />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/10" />
-        </div>
 
         <div className="relative p-5 space-y-4">
           <div className="flex items-start gap-4">
