@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { getRank, RANK_COLORS, getRankProgress } from "@/lib/utils";
 import MenuButton from "@/components/ui/MenuButton";
-import CanvasBackground from "@/components/ui/CanvasBackground";
 import { useTheme } from "@/hooks/useTheme";
 
 interface Props {
@@ -62,10 +61,6 @@ export default function TodayHeader({ userName, donePrayers, totalPoints, curren
 
   return (
     <div className="relative overflow-hidden px-5 pt-12 pb-6" style={{ background: 'var(--color-bg-secondary)' }}>
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <CanvasBackground theme={theme} />
-      </div>
-
       {/* Menu button */}
       <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
 
