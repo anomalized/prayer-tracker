@@ -60,7 +60,7 @@ export default function TodayHeader({ userName, donePrayers, totalPoints, curren
   const { theme } = useTheme();
 
   return (
-    <div className="relative overflow-hidden px-5 pt-12 pb-6" style={{ background: 'var(--color-bg-secondary)' }}>
+    <div className="relative px-5 pt-12 pb-6">
       {/* Menu button */}
       <MenuButton className="absolute top-12 md:top-6 right-5 z-10" dark={false} />
 
