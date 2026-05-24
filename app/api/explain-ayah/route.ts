@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "edge";
 
@@ -14,6 +15,12 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: CORS });
+    }
+
     const { arabic, translation, surahName, surahNumber, ayahNumber } = await req.json();
 
     const apiKey = process.env.GEMINI_API_KEY;

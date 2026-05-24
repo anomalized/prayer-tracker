@@ -5,11 +5,16 @@ import { revalidatePath } from "next/cache";
 
 // ── Unified profile creation/upsert ──────────────────────────
 async function ensureUserProfile(userId: string, fullName?: string, email?: string) {
-  const supabase = createClient();
+  // Use service role key to bypass RLS during profile creation (since user might not have a session yet if email unconfirmed)
+  const { createClient: createSupabaseClient } = await import("@supabase/supabase-js");
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   try {
     // Check if profile exists
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("*")
       .eq("id", userId)
@@ -20,7 +25,7 @@ async function ensureUserProfile(userId: string, fullName?: string, email?: stri
 
     // If PGRST116 (not found) error, create profile
     if (profileError && profileError.code === "PGRST116") {
-      const { error: insertError } = await supabase.from("profiles").insert({
+      const { error: insertError } = await supabaseAdmin.from("profiles").insert({
         id: userId,
         full_name: fullName || email?.split("@")[0] || "User",
         email: email || null,
@@ -55,7 +60,7 @@ export async function sendMagicLink(email: string) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/magiclink/callback`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/confirm`,
       },
     });
 
