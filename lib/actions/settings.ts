@@ -9,6 +9,12 @@ export async function updateProfile(fullName: string, city: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  // Validate input lengths
+  if (typeof fullName !== "string" || fullName.trim().length === 0 || fullName.length > 100)
+    return { error: "Full name must be between 1 and 100 characters" };
+  if (typeof city !== "string" || city.length > 100)
+    return { error: "City name must be under 100 characters" };
+
   // Validate city against Aladhan API before saving
   if (city.trim()) {
     try {
@@ -41,6 +47,10 @@ export async function completeOnboarding(city: string) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+
+  // Validate input length
+  if (typeof city !== "string" || city.length > 100)
+    return { error: "City name must be under 100 characters" };
 
   // Validate city
   if (city.trim()) {
@@ -80,6 +90,11 @@ export async function completeOnboarding(city: string) {
 
 export async function updatePassword(newPassword: string) {
   const supabase = createClient();
+  // Enforce minimum password strength
+  if (typeof newPassword !== "string" || newPassword.length < 8)
+    return { error: "Password must be at least 8 characters" };
+  if (newPassword.length > 128)
+    return { error: "Password too long (max 128 characters)" };
   const { error } = await supabase.auth.updateUser({ password: newPassword });
   if (error) return { error: error.message };
   return { success: true };

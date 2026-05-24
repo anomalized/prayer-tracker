@@ -7,6 +7,9 @@ import { revalidatePath } from "next/cache";
 
 const POINTS = { ontime: 20, late: 10, missed: 0 };
 
+const VALID_PRAYERS  = new Set(["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]);
+const VALID_STATUSES = new Set(["ontime", "late", "missed"]);
+
 // ─── Load today's logs ───────────────────────────────────────
 export async function getTodayLogs(): Promise<PrayerLog[]> {
   const supabase = createClient();
@@ -32,6 +35,11 @@ export async function markPrayer(
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+
+  // Validate enums — prevents NaN from corrupting total_points
+  if (!VALID_PRAYERS.has(prayerName)) return { error: "Invalid prayer name" };
+  if (!VALID_STATUSES.has(status))   return { error: "Invalid prayer status" };
+  if (previousStatus && !VALID_STATUSES.has(previousStatus)) return { error: "Invalid previous status" };
 
   const logDate = date ?? todayString();
 
@@ -103,6 +111,11 @@ export async function saveNote(prayerName: PrayerName, note: string) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+
+  // Validate inputs
+  if (!VALID_PRAYERS.has(prayerName)) return { error: "Invalid prayer name" };
+  if (typeof note !== "string")       return { error: "Note must be a string" };
+  if (note.length > 2000)            return { error: "Note too long (max 2000 characters)" };
 
   const { error } = await supabase
     .from("prayers")

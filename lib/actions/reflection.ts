@@ -18,6 +18,16 @@ export async function saveReflection({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  // Validate payload bounds
+  const VALID_PRAYERS = new Set(["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]);
+  if (!VALID_PRAYERS.has(prayerName)) return { error: "Invalid prayer name" };
+  if (typeof note !== "string" || note.length > 2000) return { error: "Note too long (max 2000 chars)" };
+  if (!Array.isArray(dhikr) || dhikr.length > 50) return { error: "Too many dhikr items (max 50)" };
+  if (!Array.isArray(duas)  || duas.length > 50)  return { error: "Too many dua items (max 50)" };
+  const MAX_STR = 500;
+  if (dhikr.some((s) => typeof s !== "string" || s.length > MAX_STR)) return { error: "Dhikr item too long" };
+  if (duas.some((s)  => typeof s !== "string" || s.length > MAX_STR)) return { error: "Dua item too long" };
+
   const today = new Date().toISOString().split("T")[0];
 
   // Upsert — update if exists, insert if not
