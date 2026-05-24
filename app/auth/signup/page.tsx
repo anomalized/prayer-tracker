@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { createUserProfile } from "@/lib/actions/auth";
 
 export default function SignupPage() {
   const supabase = createClient();
@@ -37,13 +38,9 @@ export default function SignupPage() {
         return;
       }
 
-      // Insert into profiles table
+      // Create profile using unified server action
       if (data.user) {
-        await supabase.from("profiles").insert({
-          id: data.user.id,
-          full_name: name,
-          email,
-        });
+        await createUserProfile(data.user.id, name, email);
       }
 
       // Check if email confirmation is required
