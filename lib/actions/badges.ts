@@ -70,7 +70,7 @@ export async function getBadges(userId?: string) {
     .eq("user_id", userId);
 
   const earnedMap = Object.fromEntries(
-    (earned ?? []).map(b => [b.badge_id, b.earned_at])
+    (earned ?? []).map((b: { badge_id: string; earned_at: string | null }) => [b.badge_id, b.earned_at])
   );
 
   // Strip the check function — never pass functions to client components
