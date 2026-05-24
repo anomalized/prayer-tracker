@@ -21,7 +21,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: CORS });
     }
 
-    const { arabic, translation, surahName, surahNumber, ayahNumber } = await req.json();
+    // Rate Limiting (Cookie-based Cooldown)
+    const lastCall = req.cookies.get("last_api_call")?.value;
+    const now = Date.now();
+    if (lastCall && now - parseInt(lastCall) < 5000) {
+      return NextResponse.json({ error: "Too Many Requests. Please wait a few seconds." }, { status: 429, headers: CORS });
+    }
+
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400, headers: CORS });
+    }
+
+    const { arabic, translation, surahName, surahNumber, ayahNumber } = body;
+
+    // Validate inputs
+    if (
+      typeof arabic !== 'string' || arabic.length > 2000 ||
+      typeof translation !== 'string' || translation.length > 2000 ||
+      typeof surahName !== 'string' || surahName.length > 100 ||
+      typeof surahNumber !== 'number' || surahNumber < 1 || surahNumber > 114 ||
+      typeof ayahNumber !== 'number' || ayahNumber < 1 || ayahNumber > 6236
+    ) {
+      return NextResponse.json({ error: "Invalid payload or parameters too large." }, { status: 400, headers: CORS });
+    }
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -69,7 +94,10 @@ Return only the Urdu translation, nothing else.`;
 
     const data = await geminiRes.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "Unable to generate explanation.";
-    return NextResponse.json({ text }, { headers: CORS });
+    
+    const res = NextResponse.json({ text }, { headers: CORS });
+    res.cookies.set("last_api_call", now.toString(), { path: "/", maxAge: 5 });
+    return res;
 
   } catch (e: any) {
     return NextResponse.json({ error: e.message ?? "Unknown error" }, { status: 500, headers: CORS });

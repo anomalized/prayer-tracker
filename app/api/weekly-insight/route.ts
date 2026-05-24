@@ -344,6 +344,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: CORS });
   }
 
+  // ── 0. Rate Limiting ────────────────────────────────────────────────────────
+  const lastCall = req.cookies.get("last_api_call")?.value;
+  const now = Date.now();
+  if (lastCall && now - parseInt(lastCall) < 5000) {
+    return NextResponse.json({ error: "Too Many Requests. Please wait a few seconds." }, { status: 429, headers: CORS });
+  }
+
   // ── 1. Parse & validate input ───────────────────────────────────────────────
   let body: unknown;
   try {
@@ -360,6 +367,11 @@ export async function POST(req: NextRequest) {
       { error: "Request must include a non-empty `logs` array with valid prayer_name, date (YYYY-MM-DD), and status fields." },
       { status: 422, headers: CORS }
     );
+  }
+
+  // Prevent arbitrarily large arrays from processing
+  if (body.logs.length > 300) {
+    return NextResponse.json({ error: "Payload Too Large: maximum 300 logs allowed." }, { status: 413, headers: CORS });
   }
 
   // ── 2. Cap at 30 days, sorted most-recent first ─────────────────────────────
@@ -475,5 +487,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return NextResponse.json(parsed, { headers: CORS });
+  const res = NextResponse.json(parsed, { headers: CORS });
+  res.cookies.set("last_api_call", now.toString(), { path: "/", maxAge: 5 });
+  return res;
 }
