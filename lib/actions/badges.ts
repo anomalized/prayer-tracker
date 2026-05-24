@@ -26,7 +26,7 @@ export async function checkAndAwardBadges() {
   const stats       = statsRes.data;
   const todayLogs   = todayLogsRes.data ?? [];
   const recentLogs  = recentLogsRes.data ?? [];
-  const alreadyEarned = new Set((earnedRes.data ?? []).map(b => b.badge_id));
+  const alreadyEarned = new Set((earnedRes.data ?? []).map((b: { badge_id: string }) => b.badge_id));
 
   const checkData = {
     totalPoints:   stats?.total_points   ?? 0,
