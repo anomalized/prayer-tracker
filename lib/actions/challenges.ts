@@ -76,7 +76,7 @@ export async function sendChallenge(opponentId: string): Promise<{ ok: boolean; 
     if (error.code === "23P01") {
       return { ok: false, error: "A challenge already exists between you" };
     }
-    console.error("[sendChallenge]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[sendChallenge]", error.message);
     return { ok: false, error: "Failed to send challenge" };
   }
 
@@ -103,7 +103,7 @@ export async function acceptChallenge(challengeId: string): Promise<{ ok: boolea
     .eq("status", "pending");
 
   if (error) {
-    console.error("[acceptChallenge]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[acceptChallenge]", error.message);
     return { ok: false, error: "Failed to accept challenge" };
   }
 
@@ -124,7 +124,7 @@ export async function declineChallenge(challengeId: string): Promise<{ ok: boole
     .eq("status", "pending");
 
   if (error) {
-    console.error("[declineChallenge]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[declineChallenge]", error.message);
     return { ok: false, error: "Failed to decline challenge" };
   }
 
@@ -157,7 +157,7 @@ export async function getActiveChallenges(): Promise<Challenge[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[getActiveChallenges]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[getActiveChallenges]", error.message);
     return [];
   }
 
@@ -186,7 +186,7 @@ export async function getChallengeLeaderboard(challengeId: string): Promise<Chal
   });
 
   if (error) {
-    console.error("[getChallengeLeaderboard]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[getChallengeLeaderboard]", error.message);
     return null;
   }
 

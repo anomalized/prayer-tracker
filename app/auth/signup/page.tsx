@@ -157,6 +157,21 @@ export default function SignupPage() {
           </button>
         </form>
 
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-nude-200"></div>
+          <span className="text-xs text-nude-400 font-bold">OR</span>
+          <div className="flex-1 h-px bg-nude-200"></div>
+        </div>
+
+        {/* Magic Link Option */}
+        <Link
+          href="/auth/magiclink"
+          className="block w-full border-2 border-nude-300 text-nude-700 font-bold text-sm tracking-wide py-3 rounded-2xl text-center hover:bg-nude-50 active:scale-95 transition-all"
+        >
+          Sign up with Magic Link 🔮
+        </Link>
+
         <p className="text-center text-sm text-nude-500 mt-5 font-body">
           Already have an account?{" "}
           <Link href="/auth/login" className="text-nude-700 font-bold underline underline-offset-2">

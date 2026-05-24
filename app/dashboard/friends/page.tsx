@@ -35,21 +35,21 @@ export default async function FriendsPage() {
     try {
       friendsData = await getFriendsData();
     } catch (e) {
-      console.error("getFriendsData error:", e);
+      if (process.env.NODE_ENV === "development") console.error("getFriendsData error:", e);
       friendsData = { accepted: [], pending: [] };
     }
 
     try {
       activityFeed = await getFriendActivity();
     } catch (e) {
-      console.error("getFriendActivity error:", e);
+      if (process.env.NODE_ENV === "development") console.error("getFriendActivity error:", e);
       activityFeed = [];
     }
 
     try {
       challenges = await getActiveChallenges();
     } catch (e) {
-      console.error("getActiveChallenges error:", e);
+      if (process.env.NODE_ENV === "development") console.error("getActiveChallenges error:", e);
       challenges = [];
     }
 
@@ -64,7 +64,7 @@ export default async function FriendsPage() {
       />
     );
   } catch (e) {
-    console.error("FriendsPage error:", e);
+    if (process.env.NODE_ENV === "development") console.error("FriendsPage error:", e);
     return (
       <FriendsClient myId="" myName="You" myStats={null} friendsData={{ accepted: [], pending: [] }} friendActivity={[]} challenges={[]} />
     );

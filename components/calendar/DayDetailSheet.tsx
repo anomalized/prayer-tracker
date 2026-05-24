@@ -11,10 +11,10 @@ const PRAYER_META: Record<string, { icon: string; label: string }> = {
   Isha:    { icon: "🌌", label: "Isha"    },
 };
 
-const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
+const STATUS_STYLE: Record<string, { bg: string; text: string; label: string; bgColor?: string; textColor?: string }> = {
   ontime: { bg: "bg-theme-surface",  text: "text-theme-text",  label: "On time" },
-  late:   { bg: "bg-amber-50",  text: "text-amber-700", label: "Late"    },
-  missed: { bg: "bg-red-50",    text: "text-red-400",   label: "Missed"  },
+  late:   { bg: "",  text: "", label: "Late", bgColor: "rgba(240,160,64,0.1)", textColor: "var(--color-accent)" },
+  missed: { bg: "",    text: "",   label: "Missed", bgColor: "rgba(212,120,106,0.08)", textColor: "var(--color-accent-dark)" },
 };
 
 interface Props {
@@ -69,7 +69,7 @@ export default function DayDetailSheet({ day, prayers, onClose }: Props) {
           className="px-5 pt-3 pb-5 relative overflow-hidden"
           style={{
             background: event?.isHoliday
-              ? "linear-gradient(135deg, #fef9e7, #fdf0d0)"
+              ? "linear-gradient(135deg, var(--nude-50), var(--nude-100))"
               : "var(--card-gradient)",
           }}
         >
@@ -89,10 +89,10 @@ export default function DayDetailSheet({ day, prayers, onClose }: Props) {
 
           {/* Event badge */}
           {event && (
-            <div className="inline-flex items-center gap-1.5 bg-theme-surface/70 border
-              border-amber-200 rounded-full px-3 py-1 mb-3">
+            <div className="inline-flex items-center gap-1.5 bg-theme-surface/70 border rounded-full px-3 py-1 mb-3"
+              style={{ borderColor: "var(--color-accent)" }}>
               <span className="text-sm" aria-hidden>{event.emoji}</span>
-              <span className="font-body text-xs font-bold text-amber-700">
+              <span className="font-body text-xs font-bold" style={{ color: "var(--color-accent)" }}>
                 {event.name}
               </span>
             </div>
@@ -144,7 +144,8 @@ export default function DayDetailSheet({ day, prayers, onClose }: Props) {
                   <div
                     key={name}
                     className={`flex items-center gap-3 px-4 py-3 rounded-2xl
-                      ${style ? style.bg : "bg-theme-bg"}`}
+                      ${style?.bg ? style.bg : ""}`}
+                    style={status && style?.bgColor ? { background: style.bgColor } : {}}
                   >
                     <span className="text-lg flex-shrink-0" aria-hidden>
                       {meta.icon}

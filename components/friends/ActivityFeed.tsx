@@ -9,10 +9,10 @@ const ACTIVITY_ICONS: Record<FriendActivity["activity_type"], string> = {
   badge: "🏅",
 };
 
-const ACTIVITY_STYLES: Record<FriendActivity["activity_type"], string> = {
-  prayer: "bg-blue-100 text-blue-700",
-  qada: "bg-amber-100 text-amber-700",
-  badge: "bg-emerald-100 text-emerald-700",
+const ACTIVITY_STYLES: Record<FriendActivity["activity_type"], { bgColor: string; textColor: string }> = {
+  prayer: { bgColor: "rgba(64,184,208,0.12)", textColor: "var(--color-accent)" },
+  qada: { bgColor: "rgba(240,160,64,0.12)", textColor: "var(--color-accent)" },
+  badge: { bgColor: "rgba(200,168,76,0.12)", textColor: "var(--color-accent)" },
 };
 
 function formatTime(value: string) {
@@ -65,14 +65,15 @@ export default function ActivityFeed({ items }: Props) {
         ) : (
           displayedItems.map(item => (
             <div key={item.id} className="flex items-center gap-3 px-5 py-4">
-              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg font-bold ${ACTIVITY_STYLES[item.activity_type]}`}>
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-lg font-bold" 
+                style={{ background: ACTIVITY_STYLES[item.activity_type].bgColor, color: ACTIVITY_STYLES[item.activity_type].textColor }}>
                 {ACTIVITY_ICONS[item.activity_type]}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-body text-sm font-bold text-theme-text truncate">{item.title}</p>
-                <p className="text-xs text-theme-muted mt-1 truncate">{item.subtitle}</p>
+                <p className="font-body text-sm font-bold truncate" style={{ color: "var(--color-text-primary)" }}>{item.title}</p>
+                <p className="text-xs mt-1 truncate" style={{ color: "var(--color-text-muted)" }}>{item.subtitle}</p>
               </div>
-              <span className="text-[11px] text-theme-muted/70 whitespace-nowrap">{formatTime(item.created_at)}</span>
+              <span className="text-[11px] whitespace-nowrap" style={{ color: "var(--color-text-muted)" }}>{formatTime(item.created_at)}</span>
             </div>
           ))
         )}

@@ -75,8 +75,8 @@ function DayCell({ day, completionMap, onSelect }: DayCellProps) {
           : "hover:bg-theme-surface/60"
         }
         ${completionBgStyle(count)}
-        ${isHoliday ? "bg-amber-50/80" : ""}
       `}
+      style={isHoliday ? { background: "rgba(200, 168, 76, 0.15)" } : {}}
     >
       {/* Event star badge */}
       {hasEvent && (
@@ -92,10 +92,10 @@ function DayCell({ day, completionMap, onSelect }: DayCellProps) {
       <span
         className={`font-body text-sm font-bold leading-none
           ${day.isToday   ? "text-theme-text"  :
-            isHoliday     ? "text-amber-700" :
             hasEvent      ? "text-theme-text"  :
                             "text-theme-text"  }
         `}
+        style={isHoliday ? { color: "var(--color-accent)" } : {}}
       >
         {day.hijri.day}
       </span>
@@ -343,8 +343,8 @@ export default function HijriCalendar({
                 {/* Event emoji */}
                 <div
                   className={`w-9 h-9 rounded-xl flex items-center justify-center
-                    text-lg flex-shrink-0
-                    ${day.event!.isHoliday ? "bg-amber-50" : "bg-theme-bg"}`}
+                    text-lg flex-shrink-0 bg-theme-bg`}
+                  style={day.event!.isHoliday ? { background: "rgba(200, 168, 76, 0.15)" } : {}}
                 >
                   {day.event!.emoji}
                 </div>

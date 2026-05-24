@@ -23,7 +23,7 @@ export default function WeeklyInsightCard({ logs }: Props) {
   // Fetch once on mount — memoised by the hook so safe to call here
   useEffect(() => {
     if (logs.length >= 15) fetch(logs); // don't call with too-sparse data
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [logs, fetch]);
 
   // ── Loading skeleton ──────────────────────────────────────────────────────
   if (loading) {
@@ -45,15 +45,18 @@ export default function WeeklyInsightCard({ logs }: Props) {
   // ── Error state ───────────────────────────────────────────────────────────
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-100 rounded-3xl p-5 shadow-sm">
-        <p className="font-body text-xs font-bold text-red-400 mb-1">
+      <div className="bg-theme-surface border border-theme-border rounded-3xl p-5 shadow-sm"
+        style={{ background: "rgba(212,120,106,0.08)", borderColor: "var(--color-accent)" }}>
+        <p className="font-body text-xs font-bold mb-1"
+          style={{ color: "var(--color-accent)" }}>
           Couldn't load insight
         </p>
-        <p className="font-body text-xs text-red-300">{error}</p>
+        <p className="font-body text-xs" style={{ color: "var(--color-text-muted)" }}>{error}</p>
         <button
           onClick={() => fetch(logs)}
-          className="mt-3 px-4 py-2 bg-theme-surface border border-red-100 rounded-2xl
-            text-xs font-bold text-red-400 hover:bg-red-50 transition-colors"
+          className="mt-3 px-4 py-2 bg-theme-surface border rounded-2xl
+            text-xs font-bold transition-colors hover:opacity-80"
+          style={{ borderColor: "var(--color-accent)", color: "var(--color-accent)" }}
         >
           Try again
         </button>
@@ -102,58 +105,58 @@ export default function WeeklyInsightCard({ logs }: Props) {
       <div className="px-5 py-4 space-y-4">
         {/* Summary */}
         <div>
-          <p className="font-body text-sm text-slate-700 leading-relaxed">
+          <p className="font-body text-sm leading-relaxed" style={{ color: "var(--color-text-primary)" }}>
             {insight.summary}
           </p>
         </div>
 
-        <div className="h-px bg-theme-surface" />
+        <div className="h-px" style={{ background: "var(--color-border)" }} />
 
         {/* Focus prayer */}
         <div
-          className="rounded-2xl p-4 border border-theme-border"
-          style={{ background: "var(--color-surface)" }}
+          className="rounded-2xl p-4 border"
+          style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xl">{icon}</span>
             <div>
-              <p className="font-body text-xs font-bold text-theme-muted uppercase tracking-widest">
+              <p className="font-body text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
                 Focus prayer
               </p>
-              <p className="font-body text-base font-bold text-theme-text">
+              <p className="font-body text-base font-bold" style={{ color: "var(--color-text-primary)" }}>
                 {insight.focusPrayer.name}
               </p>
             </div>
             <div className="ml-auto text-right">
-              <p className="font-body text-xs text-theme-muted">On-time rate</p>
+              <p className="font-body text-xs" style={{ color: "var(--color-text-muted)" }}>On-time rate</p>
               <p
                 className="font-display text-lg font-bold"
                 style={{
                   color: insight.focusPrayer.ontimeRate >= 60
                     ? "var(--color-accent)"
-                    : "#e87060",
+                    : "var(--color-accent-dark)",
                 }}
               >
                 {insight.focusPrayer.ontimeRate}%
               </p>
             </div>
           </div>
-          <p className="font-body text-xs text-slate-500 leading-relaxed">
+          <p className="font-body text-xs leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
             {insight.focusPrayer.pattern}
           </p>
         </div>
 
-        <div className="h-px bg-theme-surface" />
+        <div className="h-px" style={{ background: "var(--color-border)" }} />
 
         {/* Tip */}
         <div>
-          <p className="font-body text-[10px] font-bold tracking-widest text-theme-muted uppercase mb-2">
+          <p className="font-body text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: "var(--color-text-muted)" }}>
             🤲 Tip from our tradition
           </p>
-          <p className="font-body text-sm text-slate-700 leading-relaxed">
+          <p className="font-body text-sm leading-relaxed" style={{ color: "var(--color-text-primary)" }}>
             {insight.tip}
           </p>
-          <p className="font-body text-xs text-theme-muted mt-2 italic">
+          <p className="font-body text-xs mt-2 italic" style={{ color: "var(--color-text-muted)" }}>
             — {insight.tipSource}
           </p>
         </div>

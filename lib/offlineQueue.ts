@@ -54,7 +54,7 @@ function getDB(): Promise<IDBPDatabase> {
           store.createIndex("by_prayer_date", ["prayerName", "date"]);
         }
       },
-      blocked()  { console.warn("[offlineQueue] DB upgrade blocked"); },
+      blocked()  { if (process.env.NODE_ENV === "development") console.warn("[offlineQueue] DB upgrade blocked"); },
       blocking() { _db = null; /* reset so next call reopens */ },
     });
   }

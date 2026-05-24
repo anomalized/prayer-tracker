@@ -7,7 +7,9 @@ export function useServiceWorker() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")
-        .catch((err) => console.error("SW registration failed:", err));
+        .catch((err) => {
+          if (process.env.NODE_ENV === "development") console.error("SW registration failed:", err);
+        });
     }
   }, []);
 }

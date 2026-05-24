@@ -44,7 +44,7 @@ export async function getQadaStats(): Promise<QadaStats> {
     .eq("user_id", user.id);
 
   if (error) {
-    console.error("[getQadaStats]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[getQadaStats]", error.message);
     return emptyStats();
   }
 
@@ -97,7 +97,7 @@ export async function incrementMadeUp(prayerName: string): Promise<{ error?: str
     );
 
   if (error) {
-    console.error("[incrementMadeUp]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[incrementMadeUp]", error.message);
     return { error: error.message };
   }
 
@@ -132,7 +132,7 @@ export async function setRemaining(prayerName: string, count: number): Promise<{
     );
 
   if (error) {
-    console.error("[setRemaining]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[setRemaining]", error.message);
     return { error: error.message };
   }
 

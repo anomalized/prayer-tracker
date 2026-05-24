@@ -167,7 +167,7 @@ export async function getFriendActivity(limit = 20) {
 
   const { data, error } = await supabase.rpc("get_friend_activity", { p_limit: limit });
   if (error) {
-    console.error("getFriendActivity error:", error);
+    if (process.env.NODE_ENV === "development") console.error("getFriendActivity error:", error);
     return [];
   }
 

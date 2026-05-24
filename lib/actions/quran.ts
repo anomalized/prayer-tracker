@@ -46,7 +46,7 @@ async function upsertProgress(
     );
 
   if (error) {
-    console.error("[quran:upsertProgress]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[quran:upsertProgress]", error.message);
     return { error: error.message };
   }
 
@@ -70,7 +70,7 @@ export async function getProgress(
     .maybeSingle();
 
   if (error) {
-    console.error("[quran:getProgress]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[quran:getProgress]", error.message);
     return null;
   }
 
@@ -96,7 +96,7 @@ export async function getAllProgress(): Promise<QuranProgress[]> {
     .order("last_read_at", { ascending: false });
 
   if (error) {
-    console.error("[quran:getAllProgress]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[quran:getAllProgress]", error.message);
     return [];
   }
 
@@ -137,7 +137,7 @@ export async function saveBookmark(
   }
 
   if (error) {
-    console.error("[quran:saveBookmark]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[quran:saveBookmark]", error.message);
     return { error: error.message };
   }
 

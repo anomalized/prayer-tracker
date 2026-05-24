@@ -400,7 +400,7 @@ export async function purchaseStreakFreeze(): Promise<PurchaseFreezeResult> {
   });
 
   if (error) {
-    console.error("[purchaseStreakFreeze]", error.message);
+    if (process.env.NODE_ENV === "development") console.error("[purchaseStreakFreeze]", error.message);
     return { ok: false, error: "unknown" };
   }
 

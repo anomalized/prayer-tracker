@@ -55,7 +55,7 @@ export async function sendNudge(friendId: string) {
 
     return { success: true };
   } catch (e) {
-    console.error("sendNudge error:", e);
+    if (process.env.NODE_ENV === "development") console.error("sendNudge error:", e);
     return { error: "Something went wrong" };
   }
 }
