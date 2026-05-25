@@ -1,6 +1,9 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import type { PrayerLog } from "@/types";
+
+type WeeklyPrayerRow = Pick<PrayerLog, "date" | "prayer_name" | "status">;
 
 export async function getWeeklyReport() {
   const supabase = createClient();
@@ -27,7 +30,7 @@ export async function getWeeklyReport() {
     .eq("user_id", user.id)
     .single();
 
-  const logs = prayers ?? [];
+  const logs = (prayers ?? []) as WeeklyPrayerRow[];
 
   const total    = logs.length;
   const ontime   = logs.filter(p => p.status === "ontime").length;

@@ -3,6 +3,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
+import type { Friendship, PrayerLog, Profile, UserStats } from "@/types";
+
+type FriendshipRow = Pick<Friendship, "id" | "requester_id" | "addressee_id" | "status">;
+type PendingFriend = { friendshipId: string; id: string; name: string };
+type ProfileSummary = Pick<Profile, "id" | "full_name">;
+type FriendProfile = Pick<Profile, "id" | "full_name" | "city">;
+type TodayPrayer = Pick<PrayerLog, "user_id" | "prayer_name" | "status">;
+type UserBadgeRow = { user_id: string; badge_id: string };
 
 // ─── Send friend request ─────────────────────────────────────
 export async function sendFriendRequest(email: string) {
@@ -93,10 +101,11 @@ export async function getFriendsData() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { accepted: [], pending: [] };
 
-  const { data: friendships } = await supabase
+  const { data: friendshipsData } = await supabase
     .from("friendships")
     .select("id, requester_id, addressee_id, status")
     .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
+  const friendships = (friendshipsData ?? []) as FriendshipRow[];
 
   if (!friendships?.length) return { accepted: [], pending: [] };
 
@@ -105,14 +114,15 @@ export async function getFriendsData() {
 
   // ── Pending requests incoming to me ─────────────────────
   const incomingPending = pending.filter(f => f.addressee_id === user.id);
-  let pendingFriends: Array<{ friendshipId: string; id: string; name: string }> = [];
+  let pendingFriends: PendingFriend[] = [];
 
   if (incomingPending.length > 0) {
     const incomingIds = incomingPending.map(f => f.requester_id);
-    const { data: pendingProfiles } = await supabase
+    const { data: pendingProfilesData } = await supabase
       .from("profiles")
       .select("id, full_name")
       .in("id", incomingIds);
+    const pendingProfiles = (pendingProfilesData ?? []) as ProfileSummary[];
 
     pendingFriends = incomingPending.map(f => ({
       friendshipId: f.id,
@@ -139,10 +149,10 @@ export async function getFriendsData() {
     supabase.from("user_badges").select("user_id, badge_id").in("user_id", friendIds),
   ]);
 
-  const profiles     = profilesRes.data ?? [];
-  const stats        = statsRes.data ?? [];
-  const todayPrayers = todayPrayersRes.data ?? [];
-  const badges       = badgesRes.data ?? [];
+  const profiles     = (profilesRes.data ?? []) as FriendProfile[];
+  const stats        = (statsRes.data ?? []) as UserStats[];
+  const todayPrayers = (todayPrayersRes.data ?? []) as TodayPrayer[];
+  const badges       = (badgesRes.data ?? []) as UserBadgeRow[];
 
   const enrichedFriends = accepted.map(friendship => {
     const friendId = friendship.requester_id === user.id ? friendship.addressee_id : friendship.requester_id;

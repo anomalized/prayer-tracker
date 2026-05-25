@@ -9,6 +9,13 @@ export interface QuranProgress {
   lastReadAt:      string | null;
 }
 
+type QuranProgressRow = {
+  surah_number: number;
+  last_ayah: number;
+  bookmarked_ayahs: number[] | null;
+  last_read_at: string | null;
+};
+
 function assertSurah(n: number): void {
   if (!Number.isInteger(n) || n < 1 || n > 114) {
     throw new Error(`Invalid surah number: ${n}`);
@@ -100,7 +107,9 @@ export async function getAllProgress(): Promise<QuranProgress[]> {
     return [];
   }
 
-  return (data ?? []).map((row) => ({
+  const progressRows = (data ?? []) as QuranProgressRow[];
+
+  return progressRows.map((row) => ({
     surahNumber:     row.surah_number,
     lastAyah:        row.last_ayah,
     bookmarkedAyahs: row.bookmarked_ayahs ?? [],

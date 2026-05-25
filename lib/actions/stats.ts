@@ -3,6 +3,25 @@
 import { createClient } from "@/lib/supabase/server";
 import { todayString } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
+import type { PrayerLog, UserStats } from "@/types";
+
+type RecentPrayerRow = Pick<PrayerLog, "date" | "status">;
+type PrayerStatusRow = Pick<PrayerLog, "prayer_name" | "status">;
+type Last30PrayerRow = Pick<PrayerLog, "prayer_name" | "date" | "status">;
+type StreakStatsRow = Pick<
+  UserStats,
+  "current_streak" | "best_streak" | "last_active_date" | "streak_freeze_count"
+>;
+type StreakEventRow = {
+  event_type: string;
+  date: string;
+  streak_value_before: number;
+  streak_value_after: number;
+  freeze_count_before: number | null;
+  freeze_count_after: number | null;
+  points_spent: number;
+  created_at: string;
+};
 
 /**
  * Called once per day when the user opens the app.
@@ -43,24 +62,26 @@ export async function checkAndUpdateStreak(): Promise<void> {
     return;
   }
 
-  const lastActive        = stats.last_active_date as string | null;
-  const currentStreak     = stats.current_streak   as number;
-  const bestStreak        = stats.best_streak       as number;
-  const freezeCount       = (stats.streak_freeze_count as number) ?? 0;
+  const statsRow          = stats as StreakStatsRow;
+  const lastActive        = statsRow.last_active_date;
+  const currentStreak     = statsRow.current_streak;
+  const bestStreak        = statsRow.best_streak;
+  const freezeCount       = statsRow.streak_freeze_count ?? 0;
 
   // ── Case 1: already updated today — no-op
   if (lastActive === today) return;
 
   // ── Check if the user prayed at all yesterday or today
-  const { data: recentPrayers } = await supabase
+  const { data: recentPrayersData } = await supabase
     .from("prayers")
     .select("date, status")
     .eq("user_id", user.id)
     .in("date", [today, yesterday])
     .neq("status", "missed");
+  const recentPrayers = (recentPrayersData ?? []) as RecentPrayerRow[];
 
-  const prayedToday     = recentPrayers?.some((p) => p.date === today)     ?? false;
-  const prayedYesterday = recentPrayers?.some((p) => p.date === yesterday)  ?? false;
+  const prayedToday     = recentPrayers.some((p) => p.date === today);
+  const prayedYesterday = recentPrayers.some((p) => p.date === yesterday);
 
   // ── Case 2: prayed today — extend streak
   if (prayedToday) {
@@ -214,7 +235,7 @@ export async function completeOnboarding() {
 /**
  * Returns the last `days` days of prayer logs for heatmap
  */
-export async function getRecentLogs(days: number = 35, userId?: string) {
+export async function getRecentLogs(days: number = 35, userId?: string): Promise<RecentPrayerRow[]> {
   const supabase = createClient();
 
   if (!userId) {
@@ -234,7 +255,7 @@ export async function getRecentLogs(days: number = 35, userId?: string) {
     .gte("date", fromStr)
     .order("date", { ascending: true });
 
-  return data ?? [];
+  return (data ?? []) as RecentPrayerRow[];
 }
 
 /**
@@ -259,11 +280,11 @@ export async function getPrayerBreakdown(userId?: string) {
     .eq("user_id", userId)
     .gte("date", fromStr);
 
-  if (!data) return [];
+  const prayerRows = (data ?? []) as PrayerStatusRow[];
 
   const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
   return prayers.map(name => {
-    const logs = data.filter(l => l.prayer_name === name);
+    const logs = prayerRows.filter(l => l.prayer_name === name);
     const total   = logs.length;
     const ontime  = logs.filter(l => l.status === "ontime").length;
     const late    = logs.filter(l => l.status === "late").length;
@@ -349,15 +370,16 @@ export async function getMonthStats(userId?: string) {
 
   const daysInMonth = now.getDate();
   const possible    = daysInMonth * 5;
-  const done        = data.filter(l => l.status !== "missed").length;
-  const ontime      = data.filter(l => l.status === "ontime").length;
+  const monthRows = data as PrayerStatusRow[];
+  const done        = monthRows.filter(l => l.status !== "missed").length;
+  const ontime      = monthRows.filter(l => l.status === "ontime").length;
 
   const pct        = Math.round((done / possible) * 100);
   const onTimeRate = done > 0 ? Math.round((ontime / done) * 100) : 0;
 
   // Most missed prayer
   const missedCounts: Record<string, number> = {};
-  data.filter(l => l.status === "missed").forEach(l => {
+  monthRows.filter(l => l.status === "missed").forEach(l => {
     missedCounts[l.prayer_name] = (missedCounts[l.prayer_name] ?? 0) + 1;
   });
 
@@ -378,7 +400,7 @@ export async function getLast30DaysLogs(userId: string) {
     .gte("date", from.toISOString().split("T")[0])
     .order("date", { ascending: false });
 
-  return data ?? [];
+  return (data ?? []) as Last30PrayerRow[];
 }
 
 // ─── purchaseStreakFreeze ─────────────────────────────────────────────────----
@@ -465,7 +487,7 @@ export async function getStreakEvents(limit = 10): Promise<StreakEvent[]> {
 
   if (error || !data) return [];
 
-  return (data as any[]).map((row) => ({
+  return (data as StreakEventRow[]).map((row) => ({
     eventType:         row.event_type,
     date:              row.date,
     streakValueBefore: row.streak_value_before,
