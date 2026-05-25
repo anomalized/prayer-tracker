@@ -89,23 +89,17 @@ export async function acceptChallenge(challengeId: string): Promise<{ ok: boolea
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  const today = getTodayStr();
-
-  const { error } = await supabase
-    .from("challenges")
-    .update({
-      status:     "active",
-      start_date: today,
-      end_date:   addDays(today, 6),
-    })
-    .eq("id", challengeId)
-    .eq("opponent_id", user.id)
-    .eq("status", "pending");
+  const { data, error } = await supabase.rpc("accept_challenge", {
+    p_challenge_id: challengeId,
+  });
 
   if (error) {
     if (process.env.NODE_ENV === "development") console.error("[acceptChallenge]", error.message);
     return { ok: false, error: "Failed to accept challenge" };
   }
+
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) return { ok: false, error: "Failed to accept challenge" };
 
   revalidatePath("/dashboard/friends");
   return { ok: true };
@@ -116,17 +110,17 @@ export async function declineChallenge(challengeId: string): Promise<{ ok: boole
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  const { error } = await supabase
-    .from("challenges")
-    .update({ status: "declined" })
-    .eq("id", challengeId)
-    .eq("opponent_id", user.id)
-    .eq("status", "pending");
+  const { data, error } = await supabase.rpc("decline_challenge", {
+    p_challenge_id: challengeId,
+  });
 
   if (error) {
     if (process.env.NODE_ENV === "development") console.error("[declineChallenge]", error.message);
     return { ok: false, error: "Failed to decline challenge" };
   }
+
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) return { ok: false, error: "Failed to decline challenge" };
 
   revalidatePath("/dashboard/friends");
   return { ok: true };

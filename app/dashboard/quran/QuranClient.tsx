@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BookOpen, ChevronRight, Search } from "lucide-react";
 import { SURAHS, searchSurahs } from "@/lib/quran";
 import MenuButton from "@/components/ui/MenuButton";
+import { createClient } from "@/lib/supabase/client";
 
 const JUZ_STARTS = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
 
@@ -14,8 +15,18 @@ export default function QuranClient() {
   const [lastRead,   setLastRead]   = useState<number | null>(null);
 
   useEffect(() => {
-    const lr = localStorage.getItem("quran_last_read");
-    if (lr) setLastRead(parseInt(lr));
+    const supabase = createClient();
+    let cancelled = false;
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (cancelled || !user) return;
+      const lr = localStorage.getItem(`quran:${user.id}:last_read`);
+      if (lr) setLastRead(parseInt(lr, 10));
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const results = useMemo(() => {

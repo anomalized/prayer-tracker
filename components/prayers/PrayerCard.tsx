@@ -10,6 +10,7 @@ import type { PrayerTime, PrayerStatus } from "@/types";
 
 
 interface Props {
+  userId: string;
   prayer: PrayerTime;
   currentStatus: PrayerStatus | null;
   currentNote: string | null;
@@ -17,7 +18,7 @@ interface Props {
   onPointsEarned: (points: number) => void;
 }
 
-export default function PrayerCard({ prayer, currentStatus, currentNote, index, onPointsEarned }: Props) {
+export default function PrayerCard({ userId, prayer, currentStatus, currentNote, index, onPointsEarned }: Props) {
   const [status, setStatus] = useState<PrayerStatus | null>(currentStatus);
   const [note, setNote] = useState(currentNote ?? "");
   const [toast, setToast] = useState<string | null>(null);
@@ -55,7 +56,13 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
 
     if (typeof navigator === "undefined" || navigator.onLine) {
       startTransition(async () => {
-        await markPrayer(prayer.name, newStatus, previousStatus);
+        const result = await markPrayer(prayer.name, newStatus, previousStatus);
+        if (result?.error) {
+          setStatus(previousStatus);
+          if (diff > 0) onPointsEarned(-diff);
+          showToast(result.error, 1800);
+          return;
+        }
         await checkAndAwardBadges();
         router.refresh();
       });
@@ -64,8 +71,14 @@ export default function PrayerCard({ prayer, currentStatus, currentNote, index, 
 
     const today = new Date().toISOString().split("T")[0];
     startTransition(async () => {
-      await queuePrayerLog(prayer.name, newStatus, previousStatus, today);
-      showToast("Saved offline 🌙");
+      try {
+        await queuePrayerLog(userId, prayer.name, newStatus, previousStatus, today);
+        showToast("Saved offline 🌙");
+      } catch {
+        setStatus(previousStatus);
+        if (diff > 0) onPointsEarned(-diff);
+        showToast("Could not save offline", 1800);
+      }
     });
   };
 

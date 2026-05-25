@@ -178,7 +178,6 @@ export default function SurahReader({ surahNumber }: Props) {
         };
       });
       setAyahs(combined);
-      localStorage.setItem("quran_last_read", String(surahNumber));
     }).catch(() => setError("Network error. Please try again."))
       .finally(() => setLoading(false));
   }, [surahNumber, surah]);

@@ -31,6 +31,7 @@ export default async function TodayPage() {
 
   return (
     <TodayClient
+      userId={user!.id}
       userName={userName}
       prayerTimes={prayerMeta.prayers}
       prayerTimezone={prayerMeta.timezone}

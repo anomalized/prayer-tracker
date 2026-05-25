@@ -7,10 +7,11 @@ import {
   removeBookmark,
   saveScrollPosition,
 } from "@/lib/actions/quran";
+import { createClient } from "@/lib/supabase/client";
 
-const lsBookmarkKey = (n: number) => `quran_bookmarks_${n}`;
-const lsScrollKey   = (n: number) => `quran_pos_${n}`;
-const lsLastReadKey = () => "quran_last_read";
+const lsBookmarkKey = (userId: string, n: number) => `quran:${userId}:bookmarks:${n}`;
+const lsScrollKey   = (userId: string, n: number) => `quran:${userId}:pos:${n}`;
+const lsLastReadKey = (userId: string) => `quran:${userId}:last_read`;
 
 interface UseQuranProgressOptions {
   surahNumber: number;
@@ -40,35 +41,42 @@ function useDebounceCallback<T extends AnyFn>(fn: T, delayMs: number): T {
 }
 
 export function useQuranProgress({ surahNumber }: UseQuranProgressOptions): UseQuranProgressReturn {
-  const [bookmarks, setBookmarks] = useState<number[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const raw = localStorage.getItem(lsBookmarkKey(surahNumber));
-      return raw ? (JSON.parse(raw) as number[]) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [lastAyah, setLastAyah] = useState<number | null>(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = localStorage.getItem(lsScrollKey(surahNumber));
-      const parsed = raw ? parseInt(raw, 10) : NaN;
-      return Number.isInteger(parsed) ? parsed : null;
-    } catch {
-      return null;
-    }
-  });
+  const [userId, setUserId] = useState<string | null>(null);
+  const [bookmarks, setBookmarks] = useState<number[]>([]);
+  const [lastAyah, setLastAyah] = useState<number | null>(null);
 
   const [syncing, setSyncing] = useState(true);
   const hasFetched = useRef(false);
 
   useEffect(() => {
-    hasFetched.current = false;
-  }, [surahNumber]);
+    const supabase = createClient();
+    let cancelled = false;
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!cancelled) setUserId(user?.id ?? null);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+
+    return () => {
+      cancelled = true;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
+    hasFetched.current = false;
+    setBookmarks([]);
+    setLastAyah(null);
+  }, [surahNumber, userId]);
+
+  useEffect(() => {
+    if (!userId) {
+      setSyncing(false);
+      return;
+    }
     if (hasFetched.current) return;
     hasFetched.current = true;
 
@@ -80,12 +88,13 @@ export function useQuranProgress({ surahNumber }: UseQuranProgressOptions): UseQ
         const progress = await getProgress(surahNumber);
         if (cancelled) return;
 
-        if (progress) {
-          const lsBookmarkRaw = localStorage.getItem(lsBookmarkKey(surahNumber));
-          const lsBookmarks = lsBookmarkRaw ? (JSON.parse(lsBookmarkRaw) as number[]) : [];
+        const lsBookmarkRaw = localStorage.getItem(lsBookmarkKey(userId, surahNumber));
+        const lsBookmarks = lsBookmarkRaw ? (JSON.parse(lsBookmarkRaw) as number[]) : [];
 
-          const lsScrollRaw = localStorage.getItem(lsScrollKey(surahNumber));
-          const lsLastAyah = lsScrollRaw ? parseInt(lsScrollRaw, 10) : 1;
+        const lsScrollRaw = localStorage.getItem(lsScrollKey(userId, surahNumber));
+        const lsLastAyah = lsScrollRaw ? parseInt(lsScrollRaw, 10) : 1;
+
+        if (progress) {
 
           const merged = Array.from(new Set(progress.bookmarkedAyahs.concat(lsBookmarks))).sort((a, b) => a - b);
           const resolvedAyah = Math.max(progress.lastAyah, Number.isInteger(lsLastAyah) ? lsLastAyah : 1);
@@ -93,9 +102,9 @@ export function useQuranProgress({ surahNumber }: UseQuranProgressOptions): UseQ
           setBookmarks(merged);
           setLastAyah(resolvedAyah);
 
-          localStorage.setItem(lsBookmarkKey(surahNumber), JSON.stringify(merged));
-          localStorage.setItem(lsScrollKey(surahNumber), String(resolvedAyah));
-          localStorage.setItem(lsLastReadKey(), String(surahNumber));
+          localStorage.setItem(lsBookmarkKey(userId, surahNumber), JSON.stringify(merged));
+          localStorage.setItem(lsScrollKey(userId, surahNumber), String(resolvedAyah));
+          localStorage.setItem(lsLastReadKey(userId), String(surahNumber));
 
           const hasNewLocalBookmarks = lsBookmarks.some((b) => !progress.bookmarkedAyahs.includes(b));
           if (hasNewLocalBookmarks) {
@@ -106,7 +115,8 @@ export function useQuranProgress({ surahNumber }: UseQuranProgressOptions): UseQ
             }
           }
         } else {
-          setSyncing(false);
+          setBookmarks(lsBookmarks);
+          setLastAyah(Number.isInteger(lsLastAyah) ? lsLastAyah : null);
         }
       } catch {
         // Network error; keep localStorage state as the optimistic source.
@@ -117,16 +127,18 @@ export function useQuranProgress({ surahNumber }: UseQuranProgressOptions): UseQ
 
     hydrate();
     return () => { cancelled = true; };
-  }, [surahNumber]);
+  }, [surahNumber, userId]);
 
   const toggleBookmark = useCallback((ayahNumber: number) => {
+    if (!userId) return;
+
     setBookmarks((prev) => {
       const isBookmarked = prev.includes(ayahNumber);
       const next = isBookmarked
         ? prev.filter((n) => n !== ayahNumber)
         : [...prev, ayahNumber].sort((a, b) => a - b);
 
-      localStorage.setItem(lsBookmarkKey(surahNumber), JSON.stringify(next));
+      localStorage.setItem(lsBookmarkKey(userId, surahNumber), JSON.stringify(next));
 
       if (isBookmarked) {
         removeBookmark(surahNumber, ayahNumber).catch(() => {});
@@ -136,7 +148,7 @@ export function useQuranProgress({ surahNumber }: UseQuranProgressOptions): UseQ
 
       return next;
     });
-  }, [surahNumber]);
+  }, [surahNumber, userId]);
 
   const syncScrollToServer = useDebounceCallback(
     useCallback((ayahNumber: number) => {
@@ -146,11 +158,13 @@ export function useQuranProgress({ surahNumber }: UseQuranProgressOptions): UseQ
   );
 
   const recordScrolledTo = useCallback((ayahNumber: number) => {
-    localStorage.setItem(lsScrollKey(surahNumber), String(ayahNumber));
-    localStorage.setItem(lsLastReadKey(), String(surahNumber));
+    if (!userId) return;
+
+    localStorage.setItem(lsScrollKey(userId, surahNumber), String(ayahNumber));
+    localStorage.setItem(lsLastReadKey(userId), String(surahNumber));
     setLastAyah(ayahNumber);
     syncScrollToServer(ayahNumber);
-  }, [surahNumber, syncScrollToServer]);
+  }, [surahNumber, syncScrollToServer, userId]);
 
   return { bookmarks, lastAyah, syncing, toggleBookmark, recordScrolledTo };
 }

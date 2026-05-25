@@ -65,6 +65,7 @@ function getDuaOfDay(): typeof DUAS[0] {
 
 // ── Props ──────────────────────────────────────────────────────
 interface Props {
+  userId: string;
   userName: string;
   prayerTimes: PrayerTime[];
   prayerTimezone: string;
@@ -81,6 +82,7 @@ interface Props {
 }
 
 export default function TodayClient({
+  userId,
   userName,
   prayerTimes,
   prayerTimezone,
@@ -219,6 +221,7 @@ export default function TodayClient({
           {prayerTimes.map((prayer, i) => (
             <PrayerCard
               key={prayer.name}
+              userId={userId}
               prayer={prayer}
               currentStatus={logMap[prayer.name]?.status ?? null}
               currentNote={logMap[prayer.name]?.note ?? null}

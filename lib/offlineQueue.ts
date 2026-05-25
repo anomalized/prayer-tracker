@@ -19,6 +19,7 @@ import type { PrayerName, PrayerStatus } from "@/types";
 
 export interface QueuedPrayer {
   id:             string;           // nanoid
+  userId:         string;           // account that created this offline item
   prayerName:     PrayerName;
   status:         PrayerStatus;
   previousStatus: PrayerStatus | null;  // needed for correct points delta on sync
@@ -32,7 +33,7 @@ export interface QueuedPrayer {
 
 const DB_NAME    = "salah-tracker-offline";
 const STORE_NAME = "prayer-queue";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 // Singleton — opened once, reused for the lifetime of the page
 let _db: Promise<IDBPDatabase> | null = null;
@@ -43,7 +44,7 @@ function getDB(): Promise<IDBPDatabase> {
   }
   if (!_db) {
     _db = openDB(DB_NAME, DB_VERSION, {
-      upgrade(db) {
+      upgrade(db, oldVersion, _newVersion, transaction) {
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
           // Efficient pending-item queries
@@ -52,6 +53,19 @@ function getDB(): Promise<IDBPDatabase> {
           store.createIndex("by_date",      "date");
           // Compound: detect duplicate prayer+date entries
           store.createIndex("by_prayer_date", ["prayerName", "date"]);
+          store.createIndex("by_user_synced", ["userId", "synced"]);
+          store.createIndex("by_user_prayer_date", ["userId", "prayerName", "date"]);
+        } else if (oldVersion < 2) {
+          const store = transaction.objectStore(STORE_NAME);
+          if (!store.indexNames.contains("by_user_synced")) {
+            store.createIndex("by_user_synced", ["userId", "synced"]);
+          }
+          if (!store.indexNames.contains("by_user_prayer_date")) {
+            store.createIndex("by_user_prayer_date", ["userId", "prayerName", "date"]);
+          }
+          // Version 1 rows had no account owner. Dropping them avoids replaying
+          // one signed-in user's offline prayers into another account.
+          store.clear();
         }
       },
       blocked()  { if (process.env.NODE_ENV === "development") console.warn("[offlineQueue] DB upgrade blocked"); },
@@ -75,6 +89,7 @@ export function dispatchQueueChanged() {
 // it is replaced — the user changed their mind while offline.
 
 export async function queuePrayerLog(
+  userId:         string,
   prayerName:     PrayerName,
   status:         PrayerStatus,
   previousStatus: PrayerStatus | null,
@@ -84,6 +99,7 @@ export async function queuePrayerLog(
 
   const item: QueuedPrayer = {
     id:             nanoid(),
+    userId,
     prayerName,
     status,
     previousStatus,
@@ -97,8 +113,8 @@ export async function queuePrayerLog(
 
   // Remove any existing unsynced entry for this prayer on this date
   const existing = await store
-    .index("by_prayer_date")
-    .get([prayerName, date]);
+    .index("by_user_prayer_date")
+    .get([userId, prayerName, date]);
 
   if (existing && !existing.synced) {
     await store.delete(existing.id);
@@ -115,13 +131,13 @@ export async function queuePrayerLog(
 // Returns all unsynced items, ordered by date ascending
 // (oldest dates synced first — important for streak continuity).
 
-export async function getPendingQueue(): Promise<QueuedPrayer[]> {
+export async function getPendingQueue(userId: string): Promise<QueuedPrayer[]> {
   try {
     const db  = await getDB();
     const all = (await db.getAll(STORE_NAME)) as QueuedPrayer[];
     return all
-      .filter((q) => !q.synced)
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .filter((q) => q.userId === userId && !q.synced)
+      .sort((a, b) => a.date.localeCompare(b.date) || a.createdAt.localeCompare(b.createdAt));
   } catch {
     return [];
   }
@@ -129,11 +145,11 @@ export async function getPendingQueue(): Promise<QueuedPrayer[]> {
 
 // ─── getPendingCount ──────────────────────────────────────────────────────────
 
-export async function getPendingCount(): Promise<number> {
+export async function getPendingCount(userId: string): Promise<number> {
   try {
     const db  = await getDB();
     const all = (await db.getAll(STORE_NAME)) as QueuedPrayer[];
-    return all.filter((q) => !q.synced).length;
+    return all.filter((q) => q.userId === userId && !q.synced).length;
   } catch {
     return 0;
   }
@@ -141,12 +157,12 @@ export async function getPendingCount(): Promise<number> {
 
 // ─── markItemSynced ───────────────────────────────────────────────────────────
 
-export async function markItemSynced(id: string): Promise<void> {
+export async function markItemSynced(id: string, userId: string): Promise<void> {
   try {
     const db   = await getDB();
     const tx   = db.transaction(STORE_NAME, "readwrite");
     const item = await tx.objectStore(STORE_NAME).get(id) as QueuedPrayer | undefined;
-    if (item) {
+    if (item && item.userId === userId) {
       await tx.objectStore(STORE_NAME).put({ ...item, synced: true });
     }
     await tx.done;
@@ -157,12 +173,12 @@ export async function markItemSynced(id: string): Promise<void> {
 // ─── markItemFailed ───────────────────────────────────────────────────────────
 // Preserves the item but records the error for debugging.
 
-export async function markItemFailed(id: string, error: string): Promise<void> {
+export async function markItemFailed(id: string, userId: string, error: string): Promise<void> {
   try {
     const db   = await getDB();
     const tx   = db.transaction(STORE_NAME, "readwrite");
     const item = await tx.objectStore(STORE_NAME).get(id) as QueuedPrayer | undefined;
-    if (item) {
+    if (item && item.userId === userId) {
       await tx.objectStore(STORE_NAME).put({ ...item, syncError: error });
     }
     await tx.done;
@@ -182,12 +198,12 @@ export async function clearQueueItem(id: string): Promise<void> {
 // ─── clearSyncedItems ─────────────────────────────────────────────────────────
 // Housekeeping — removes all synced rows. Called after each sync run.
 
-export async function clearSyncedItems(): Promise<void> {
+export async function clearSyncedItems(userId: string): Promise<void> {
   try {
     const db    = await getDB();
     const all   = (await db.getAll(STORE_NAME)) as QueuedPrayer[];
     const tx    = db.transaction(STORE_NAME, "readwrite");
-    for (const item of all.filter((q) => q.synced)) {
+    for (const item of all.filter((q) => q.userId === userId && q.synced)) {
       await tx.objectStore(STORE_NAME).delete(item.id);
     }
     await tx.done;

@@ -10,6 +10,7 @@ import {
 } from "@/lib/offlineQueue";
 import { markPrayer }          from "@/lib/actions/prayers";
 import { checkAndAwardBadges } from "@/lib/actions/badges";
+import { createClient }        from "@/lib/supabase/client";
 
 // ─── Return type ──────────────────────────────────────────────────────────────
 
@@ -32,14 +33,26 @@ export function useSyncQueue(): SyncQueueState {
   const syncLock = useRef(false);
   // Track whether the component is still mounted (avoids state updates after unmount)
   const mounted  = useRef(true);
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+
+  const getSupabase = useCallback(() => {
+    if (!supabaseRef.current) supabaseRef.current = createClient();
+    return supabaseRef.current;
+  }, []);
+
+  const getCurrentUserId = useCallback(async () => {
+    const { data: { user } } = await getSupabase().auth.getUser();
+    return user?.id ?? null;
+  }, [getSupabase]);
 
   // ── refreshCount ────────────────────────────────────────────────────────────
   const refreshCount = useCallback(async () => {
     try {
-      const count = await getPendingCount();
+      const userId = await getCurrentUserId();
+      const count = userId ? await getPendingCount(userId) : 0;
       if (mounted.current) setPendingCount(count);
     } catch { /* IndexedDB may not be ready yet */ }
-  }, []);
+  }, [getCurrentUserId]);
 
   // ── showToast ───────────────────────────────────────────────────────────────
   const showToast = useCallback((msg: string, durationMs = 3500) => {
@@ -54,7 +67,13 @@ export function useSyncQueue(): SyncQueueState {
   const syncQueue = useCallback(async () => {
     if (syncLock.current) return;
 
-    const pending = await getPendingQueue();
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      if (mounted.current) setPendingCount(0);
+      return;
+    }
+
+    const pending = await getPendingQueue(userId);
     if (pending.length === 0) return;
 
     syncLock.current = true;
@@ -66,17 +85,18 @@ export function useSyncQueue(): SyncQueueState {
     // Process items oldest-first (getPendingQueue returns sorted by date asc)
     for (const item of pending) {
       try {
-        await markPrayer(
+        const result = await markPrayer(
           item.prayerName,
           item.status,
           item.previousStatus,
           item.date            // ← pass the original date
         );
-        await markItemSynced(item.id);
+        if (result?.error) throw new Error(result.error);
+        await markItemSynced(item.id, userId);
         syncedCount++;
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "Unknown error";
-        await markItemFailed(item.id, msg);
+        await markItemFailed(item.id, userId, msg);
         failedCount++;
         // Don't abort — sync the rest even if one fails
       }
@@ -88,7 +108,7 @@ export function useSyncQueue(): SyncQueueState {
     }
 
     // Remove synced items from the store
-    await clearSyncedItems();
+    await clearSyncedItems(userId);
 
     syncLock.current = false;
     if (mounted.current) setSyncing(false);
@@ -130,13 +150,17 @@ export function useSyncQueue(): SyncQueueState {
 
     window.addEventListener("online",                 handleOnline);
     window.addEventListener("offline-queue-changed",  handleChanged);
+    const { data: authListener } = getSupabase().auth.onAuthStateChange(() => {
+      refreshCount();
+    });
 
     return () => {
       mounted.current = false;
       window.removeEventListener("online",                handleOnline);
       window.removeEventListener("offline-queue-changed", handleChanged);
+      authListener.subscription.unsubscribe();
     };
-  }, [syncQueue, refreshCount]);
+  }, [syncQueue, refreshCount, getSupabase]);
 
   return { pendingCount, syncing, syncToast, refreshCount };
 }
