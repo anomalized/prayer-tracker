@@ -3,8 +3,7 @@
 A beautiful, secure, mobile-first prayer tracking web app built with Next.js + Supabase.
 
 ---
-<img width="836" height="900" alt="image" src="https://github.com/user-attachments/assets/7d7b7bb6-9ec7-45ac-a7f3-9debc7521ee4" />
-<img width="912" height="839" alt="image" src="https://github.com/user-attachments/assets/0a56c130-e340-436e-ada9-548ce5afbf3d" />
+
 
 
 ## 🚀 Sprint 1 — Getting Started
